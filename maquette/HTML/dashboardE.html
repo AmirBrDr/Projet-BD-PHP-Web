@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Dashboard</title>
+    <link rel="stylesheet" href="../CSS/dashboardE.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <img src="6e02a875-ca5d-44de-ab24-6334fd15816c.JPG" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardE.html" class="active">Dashboard</a>
+            <a href="defis.html">Défis</a>
+            <a href="classement.html">Classement</a>
+            <a href="compteE.html">Mon Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="notif-bell">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="dashboard-grid">
+        <div class="main-content">
+            <section class="welcome-banner">
+                <h1>Bonjour Jean ! 🌿</h1>
+                <p>Ton équipe <strong>Les Éco-Héros</strong> est actuellement 3ème du classement.</p>
+            </section>
+
+            <section class="impact-section">
+                <h2><i class="fas fa-chart-line"></i> Mon Impact Carbone Mensuel</h2>
+                <div class="chart-container">
+                    <canvas id="impactChart"></canvas>
+                </div>
+            </section>
+
+            <section class="active-challenges">
+                <h2><i class="fas fa-tasks"></i> Défis en cours</h2>
+                <div class="challenge-mini-card">
+                    <div class="challenge-info">
+                        <i class="fas fa-bicycle"></i>
+                        <div>
+                            <h4>Vélotaf de printemps</h4>
+                            <p>8/10 trajets réalisés</p>
+                        </div>
+                    </div>
+                    <div class="progress-bar"><div class="progress" style="width: 80%;"></div></div>
+                </div>
+            </section>
+        </div>
+
+        <aside class="sidebar">
+            <section class="side-card ranking-card">
+                <h3><i class="fas fa-users"></i> Top 5 Équipes</h3>
+                <ul class="ranking-list">
+                    <li class="top-3"><span>1</span> Les Solar-Punks <small>4500 pts</small></li>
+                    <li class="top-3"><span>2</span> Green Warriors <small>4200 pts</small></li>
+                    <li class="my-team"><span>3</span> Les Éco-Héros <small>3900 pts</small></li>
+                    <li><span>4</span> Cyber-Recycle <small>3100 pts</small></li>
+                    <li><span>5</span> Bio-Logistics <small>2850 pts</small></li>
+                </ul>
+                <a href="classement.html" class="view-all">Voir tout le classement</a>
+            </section>
+
+            <section class="side-card notif-card">
+                <h3><i class="fas fa-envelope-open-text"></i> Alertes récentes</h3>
+                <div class="notif-item">
+                    <p><strong>Action Validée !</strong> +50 pts pour "Recyclage papier".</p>
+                    <small>Il y a 2h</small>
+                </div>
+                <div class="notif-item">
+                    <p><strong>Nouveau Badge :</strong> Vous avez débloqué "Cycliste Pro" !</p>
+                    <small>Hier</small>
+                </div>
+            </section>
+        </aside>
+    </main>
+
+    <script>
+        const ctx = document.getElementById('impactChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Sept', 'Oct', 'Nov', 'Déc', 'Jan', 'Fév'],
+                datasets: [{
+                    label: 'kg CO2 évités',
+                    data: [12, 19, 15, 25, 32, 42],
+                    borderColor: '#94BB39',
+                    backgroundColor: 'rgba(148, 187, 57, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a0b1b5' } },
+                    x: { grid: { display: false }, ticks: { color: '#a0b1b5' } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

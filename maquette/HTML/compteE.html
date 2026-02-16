@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Mon Profil</title>
+    <link rel="stylesheet" href="../CSS/compteE.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <img src="6e02a875-ca5d-44de-ab24-6334fd15816c.JPG" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardE.html">Dashboard</a>
+            <a href="defis.html">Défis</a>
+            <a href="classement.html">Classement</a>
+            <a href="compteE.html" class="active">Mon Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="notif-bell">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="profile-container">
+        <section class="profile-header">
+            <div class="avatar-container">
+                <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2015%2F10%2F05%2F22%2F37%2Fblank-profile-picture-973460_960_720.png&f=1&nofb=1&ipt=05067034b93f3030870e5a373ea06cbd82aec2a00329d48959f81e6d81640973" alt="Photo de profil" class="profile-pic">
+                <button class="edit-pic"><i class="fas fa-camera"></i></button>
+            </div>
+            <div class="user-info">
+                <h1>Jean Dupont</h1>
+                <p class="user-meta">Département : <span>Marketing</span></p>
+                <p class="user-meta">Équipe : <span class="team-tag">Les Éco-Héros</span></p>
+            </div>
+        </section>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-star"></i>
+                <div class="stat-content">
+                    <h3>1 250</h3>
+                    <p>Total de points</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-leaf"></i>
+                <div class="stat-content">
+                    <h3>42 kg</h3>
+                    <p>CO₂ évités</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-trophy"></i>
+                <div class="stat-content">
+                    <h3>12ème</h3>
+                    <p>Classement personnel</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="details-grid">
+            <section class="content-box">
+                <h2><i class="fas fa-medal"></i> Mes Badges</h2>
+                <div class="badges-list">
+                    <div class="badge-item">
+                        <i class="fas fa-bicycle"></i>
+                        <span class="badge-name">Cycliste Pro</span>
+                        <span class="badge-date">12/02/2026</span>
+                    </div>
+                    <div class="badge-item">
+                        <i class="fas fa-tint-slash"></i>
+                        <span class="badge-name">Zéro Goutte</span>
+                        <span class="badge-date">05/01/2026</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content-box">
+                <h2><i class="fas fa-history"></i> Défis Terminés</h2>
+                <ul class="history-list">
+                    <li>
+                        <span class="history-title">Zéro Déchet au bureau</span>
+                        <span class="history-date">Fév 2026</span>
+                    </li>
+                    <li>
+                        <span class="history-title">Transports Doux</span>
+                        <span class="history-date">Jan 2026</span>
+                    </li>
+                </ul>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

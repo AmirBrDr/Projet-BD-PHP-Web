@@ -1,0 +1,133 @@
+:root {
+    --bg-color: #1B2D31;
+    --green-light: #94BB39;
+    --green-main: #2A997F;
+    --white: #ffffff;
+    --text-muted: #a0b1b5;
+    --card-bg: rgba(255, 255, 255, 0.05);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--white);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+.navbar {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+.nav-logo { height: 35px; }
+.nav-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-weight: 500; }
+.nav-links a.active { color: var(--green-light); }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.notif-bell { position: relative; cursor: pointer; }
+.notif-bell .badge { position: absolute; top: -5px; right: -8px; background: red; font-size: 0.7rem; padding: 2px 5px; border-radius: 50%; }
+
+
+/* Header & Thématique */
+.page-header { text-align: center; padding: 40px 5%; }
+.theme-label { 
+    color: var(--green-light); 
+    background: rgba(148, 187, 57, 0.1); 
+    display: inline-block; 
+    padding: 8px 20px; 
+    border-radius: 30px;
+    margin-bottom: 15px;
+}
+
+/* Timeline Layout */
+.timeline-container {
+    max-width: 800px;
+    margin: 0 auto 100px auto;
+    position: relative;
+    padding: 0 20px;
+}
+
+/* Ligne verticale de progression */
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    left: 45px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.challenge-step {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    background: #34495e;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    z-index: 2;
+    border: 3px solid var(--bg-color);
+    flex-shrink: 0;
+}
+
+/* Styles selon l'état */
+.completed .step-number { background: var(--green-main); color: white; }
+.active .step-number { background: var(--green-light); color: var(--bg-color); box-shadow: 0 0 15px var(--green-light); }
+.locked .step-number { opacity: 0.5; }
+
+.challenge-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: 0.3s;
+}
+
+.card-icon {
+    width: 100px;
+    background: rgba(255,255,255,0.02);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: var(--green-light);
+}
+
+.card-content { padding: 20px; flex-grow: 1; }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.pts { color: var(--green-light); font-weight: bold; }
+
+.team-progress {
+    margin: 15px 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+.team-progress i { color: var(--green-main); margin-right: 5px; }
+
+/* Boutons */
+.btn-main, .btn-status {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+.btn-main { background: var(--green-main); color: white; }
+.btn-status { border: 1px solid rgba(255,255,255,0.2); color: var(--text-muted); }
+.btn-disabled { background: transparent; border: 1px dashed rgba(255,255,255,0.2); color: rgba(255,255,255,0.2); cursor: not-allowed; padding: 10px 20px; border-radius: 8px; }
+
+.locked .challenge-card { opacity: 0.5; filter: grayscale(1); }

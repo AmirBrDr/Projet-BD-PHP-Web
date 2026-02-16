@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Détail du Défi</title>
+    <link rel="stylesheet" href="../CSS/detailDefi.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <img src="6e02a875-ca5d-44de-ab24-6334fd15816c.JPG" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardE.html">Dashboard</a>
+            <a href="defis.html" class="active">Défis</a>
+            <a href="classement.html">Classement</a>
+            <a href="compteE.html">Mon Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="notif-bell">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="detail-container">
+        <header class="challenge-header">
+            <div class="theme-badge">Thématique du mois : Mobilité</div>
+            <h1>Défi : Zéro Voiture 🚗🚫</h1>
+            <p class="description">Réduisez votre empreinte carbone en évitant l'usage de la voiture individuelle pour vos trajets domicile-travail.</p>
+        </header>
+
+        <div class="content-layout">
+            <section class="action-section">
+                <h2><i class="fas fa-paper-plane"></i> Valider une action</h2>
+                <form class="submission-form">
+                    <label>Quelle action avez-vous réalisée ? </label>
+                    <div class="action-options">
+                        <label class="option-card">
+                            <input type="radio" name="action" value="velo" checked>
+                            <span class="card-content">
+                                <i class="fas fa-bicycle"></i>
+                                <b>Venir à vélo</b>
+                                <small>+20 pts</small>
+                            </span>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="action" value="pied">
+                            <span class="card-content">
+                                <i class="fas fa-walking"></i>
+                                <b>Venir à pied</b>
+                                <small>+25 pts</small>
+                            </span>
+                        </label>
+                        <label class="option-card">
+                            <input type="radio" name="action" value="transport">
+                            <span class="card-content">
+                                <i class="fas fa-bus"></i>
+                                <b>Transports</b>
+                                <small>+15 pts</small>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Preuve de l'action (Photo ou commentaire)</label>
+                        <textarea placeholder="Expliquez brièvement votre trajet..."></textarea>
+                        <input type="file" class="file-input">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Soumettre pour validation</button>
+                </form>
+
+                <div class="my-submissions">
+                    <h3>Mes dernières tentatives</h3>
+                    <div class="status-item validated">
+                        <span>Venir à vélo - 15/02</span>
+                        <span class="badge">Validé</span>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="forum-section">
+                <h2><i class="fas fa-comments"></i> Forum du défi</h2>
+                <div class="forum-messages">
+                    <div class="message pinned">
+                        <i class="fas fa-thumbtack"></i>
+                        <strong>Animateur DD :</strong> "N'oubliez pas de bien attacher vos vélos au parking sécurisé !"
+                    </div>
+                    <div class="message">
+                        <strong>Léa (Team Green) :</strong> "Quelqu'un connaît un itinéraire sympa depuis la gare ?"
+                    </div>
+                </div>
+                <div class="forum-input">
+                    <input type="text" placeholder="Posez une question...">
+                    <button><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>

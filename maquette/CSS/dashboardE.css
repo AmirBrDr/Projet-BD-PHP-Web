@@ -1,0 +1,91 @@
+:root {
+    --bg-color: #1B2D31;
+    --green-light: #94BB39;
+    --green-main: #2A997F;
+    --white: #ffffff;
+    --text-muted: #a0b1b5;
+    --card-bg: rgba(255, 255, 255, 0.05);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--white);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+/* Navbar (Réutilisée) */
+.navbar {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+.nav-logo { height: 35px; }
+.nav-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-weight: 500; }
+.nav-links a.active { color: var(--green-light); }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.notif-bell { position: relative; cursor: pointer; }
+.notif-bell .badge { position: absolute; top: -5px; right: -8px; background: red; font-size: 0.7rem; padding: 2px 5px; border-radius: 50%; }
+
+/* Grid Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+    padding: 40px 5%;
+    max-width: 1400px;
+    margin: auto;
+}
+
+/* Main Content Styles */
+.welcome-banner h1 { font-size: 2.2rem; margin-bottom: 10px; }
+.welcome-banner strong { color: var(--green-light); }
+
+.impact-section, .active-challenges {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 20px;
+    margin-top: 30px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.chart-container { height: 300px; margin-top: 20px; }
+
+.challenge-mini-card {
+    background: rgba(255,255,255,0.03);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 15px;
+}
+.challenge-info { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+.challenge-info i { font-size: 1.5rem; color: var(--green-main); }
+.progress-bar { background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden; }
+.progress { background: var(--green-light); height: 100%; }
+
+/* Sidebar Styles */
+.side-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.ranking-list { list-style: none; padding: 0; margin: 20px 0; }
+.ranking-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.9rem;
+}
+.ranking-list li span { font-weight: bold; margin-right: 10px; }
+.top-3 span { color: var(--green-light); }
+.my-team { background: rgba(148, 187, 57, 0.1); border-radius: 8px; border-bottom: none !important; }
+
+.notif-item { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.notif-item small { color: var(--text-muted); }
+.view-all { color: var(--green-main); font-size: 0.8rem; text-decoration: none; display: block; text-align: center; }

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Parcours du Mois</title>
+    <link rel="stylesheet" href="../CSS/defis.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <img src="6e02a875-ca5d-44de-ab24-6334fd15816c.JPG" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardE.html">Dashboard</a>
+            <a href="defis.html" class="active">Défis</a>
+            <a href="classement.html">Classement</a>
+            <a href="compteE.html">Mon Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="notif-bell">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <div class="theme-label">Thématique de Février : <strong>Mobilité Douce</strong></div>
+        <h1>Le Parcours Éco-Responsable</h1>
+        <p>Progressez étape par étape. Si vous validez un défi, votre équipe entière avance !</p>
+    </header>
+
+    <main class="timeline-container">
+        <div class="challenge-step completed">
+            <div class="step-number"><i class="fas fa-check"></i></div>
+            <div class="challenge-card">
+                <div class="card-icon"><i class="fas fa-shoe-prints"></i></div>
+                <div class="card-content">
+                    <div class="card-header">
+                        <h3>L'Éveil du Piéton</h3>
+                        <span class="pts">+50 pts</span>
+                    </div>
+                    <p>Délaissez l'ascenseur pour les escaliers ou marchez 15 min pour venir.</p>
+                    <div class="team-progress">
+                        <i class="fas fa-users"></i> <strong>12/15 équipes</strong> ont relevé ce défi
+                    </div>
+                    <a href="detailDefi.html" class="btn-status">Voir ma réussite</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="challenge-step active">
+            <div class="step-number">2</div>
+            <div class="challenge-card">
+                <div class="card-icon"><i class="fas fa-bicycle"></i></div>
+                <div class="card-content">
+                    <div class="card-header">
+                        <h3>Zéro Voiture</h3>
+                        <span class="pts">+100 pts</span>
+                    </div>
+                    <p>Venez au travail en utilisant un mode de transport doux (vélo, pied, transports en commun).</p>
+                    <div class="team-progress">
+                        <i class="fas fa-users"></i> <strong>5/15 équipes</strong> on relevé ce défi
+                    </div>
+                    <a href="detailDefi.html" class="btn-main">Contribuer pour mon équipe</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="challenge-step locked">
+            <div class="step-number">3</div>
+            <div class="challenge-card">
+                <div class="card-icon"><i class="fas fa-caravan"></i></div>
+                <div class="card-content">
+                    <div class="card-header">
+                        <h3>Le Covoit' Party</h3>
+                        <span class="pts">+200 pts</span>
+                    </div>
+                    <p>Organisez un trajet à plusieurs collègues. Ludique et convivial !</p>
+                    <div class="team-progress">
+                        <i class="fas fa-lock"></i> En attente du défi précédent
+                    </div>
+                    <button class="btn-disabled" disabled>Bientôt disponible</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

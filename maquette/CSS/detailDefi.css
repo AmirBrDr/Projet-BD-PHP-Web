@@ -1,0 +1,61 @@
+:root {
+    --bg-color: #1B2D31;
+    --green-light: #94BB39;
+    --green-main: #2A997F;
+    --white: #ffffff;
+    --text-muted: #a0b1b5;
+    --card-bg: rgba(255, 255, 255, 0.05);
+}
+
+body { background-color: var(--bg-color); color: var(--white); font-family: 'Segoe UI', sans-serif; margin: 0; }
+
+.navbar {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+.nav-logo { height: 35px; }
+.nav-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-weight: 500; }
+.nav-links a.active { color: var(--green-light); }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.notif-bell { position: relative; cursor: pointer; }
+.notif-bell .badge { position: absolute; top: -5px; right: -8px; background: red; font-size: 0.7rem; padding: 2px 5px; border-radius: 50%; }
+
+
+.detail-container { max-width: 1200px; margin: 40px auto; padding: 0 5%; }
+
+.theme-badge { background: var(--green-main); display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; margin-bottom: 15px; }
+
+.content-layout { display: grid; grid-template-columns: 1fr 350px; gap: 40px; margin-top: 30px; }
+
+/* Styles des options d'actions */
+.action-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }
+.option-card { cursor: pointer; position: relative; }
+.option-card input { position: absolute; opacity: 0; }
+.card-content { 
+    display: flex; flex-direction: column; align-items: center; padding: 15px; 
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; transition: 0.3s;
+}
+.option-card input:checked + .card-content { border-color: var(--green-light); background: rgba(148, 187, 57, 0.1); }
+.card-content i { font-size: 1.5rem; color: var(--green-light); margin-bottom: 8px; }
+
+.input-group { margin-top: 25px; display: flex; flex-direction: column; gap: 10px; }
+.input-group textarea { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 15px; border-radius: 8px; resize: none; height: 100px; }
+
+.btn-primary { background: var(--green-main); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px; }
+
+/* Forum Styles */
+.forum-section { background: var(--card-bg); padding: 20px; border-radius: 15px; display: flex; flex-direction: column; height: 600px; }
+.forum-messages { flex-grow: 1; overflow-y: auto; margin: 20px 0; }
+.message { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9rem; }
+.message.pinned { border-left: 4px solid var(--green-light); background: rgba(148, 187, 57, 0.05); }
+.forum-input { display: flex; gap: 10px; }
+.forum-input input { flex-grow: 1; background: var(--bg-color); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px; border-radius: 5px; }
+.forum-input button { background: var(--green-main); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+
+/* Submissions Status */
+.status-item { display: flex; justify-content: space-between; padding: 10px; border-radius: 5px; margin-top: 10px; background: rgba(255,255,255,0.02); }
+.validated .badge { color: var(--green-light); font-weight: bold; }

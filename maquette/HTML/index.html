@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Connexion</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="logo-section">
+                <img src="6e02a875-ca5d-44de-ab24-6334fd15816c.JPG" alt="GreenPulse Logo" class="logo">
+            </div>
+
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">Connexion</button>
+                <button class="tab-btn" onclick="switchTab('register')">Inscription</button>
+            </div>
+
+            <form id="login-form" class="auth-form active">
+                <div class="input-group">
+                    <label for="login-email">Email professionnel</label>
+                    <input type="email" id="login-email" placeholder="nom@entreprise.fr" required>
+                </div>
+                <div class="input-group">
+                    <label for="login-password">Mot de passe</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary">Se connecter</button>
+                <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+            </form>
+
+            <form id="register-form" class="auth-form">
+                <div class="input-group">
+                    <label for="reg-nom">Nom complet</label>
+                    <input type="text" id="reg-nom" placeholder="Jean Dupont" required>
+                </div>
+                <div class="input-group">
+                    <label for="reg-email">Email professionnel</label>
+                    <input type="email" id="reg-email" placeholder="nom@entreprise.fr" required>
+                </div>
+                <div class="input-group">
+                    <label for="reg-password">Mot de passe</label>
+                    <input type="password" id="reg-password" placeholder="Min. 12 caractères" required>
+                </div>
+                <button type="submit" class="btn-primary">Créer mon compte</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            if(tab === 'login') {
+                document.getElementById('login-form').classList.add('active');
+                document.getElementsByClassName('tab-btn')[0].classList.add('active');
+            } else {
+                document.getElementById('register-form').classList.add('active');
+                document.getElementsByClassName('tab-btn')[1].classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
