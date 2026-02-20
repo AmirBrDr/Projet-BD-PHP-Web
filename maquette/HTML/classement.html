@@ -26,76 +26,106 @@
     </nav>
 
     <main class="ranking-main">
-        <div class="content-wrapper">
-            <section class="podium-section">
-                <header class="section-header">
-                    <h1><i class="fas fa-globe"></i> Classement Global <span class="badge-status">Depuis le début</span></h1>
-                    <p class="subtitle">Performance historique des équipes</p>
-                </header>
+        <header class="section-header">
+            <h1><i class="fas fa-globe"></i> Classement Global <span class="badge-status">Depuis le début</span></h1>
+            <p class="subtitle">Performance historique des équipes</p>
+        </header>
 
-                <div class="filter-tabs">
-                    <button class="filter-opt">Défi en cours</button>
-                    <button class="filter-opt">Saison / Mois</button>
-                    <button class="filter-opt active">Global</button>
-                </div>
-
-                <div class="visual-podium">
-                    <div class="podium-column-wrapper">
-                        <div class="team-info">
-                            <i class="fas fa-medal silver-icon"></i>
-                            <span class="team-name">Green Warriors</span>
-                            <span class="team-score">133,280 pts</span>
-                            <span class="team-members">10 membres</span>
-                        </div>
-                        <div class="column silver-col">2</div>
-                    </div>
-
-                    <div class="podium-column-wrapper">
-                        <div class="team-info">
-                            <i class="fas fa-trophy gold-icon"></i>
-                            <span class="team-name">Les Solar-Punks</span>
-                            <span class="team-score">156,800 pts</span>
-                            <span class="team-members">20 membres</span>
-                        </div>
-                        <div class="column gold-col">1</div>
-                    </div>
-
-                    <div class="podium-column-wrapper">
-                        <div class="team-info">
-                            <i class="fas fa-award bronze-icon"></i>
-                            <span class="team-name">Les Éco-Héros</span>
-                            <span class="team-score">112,896 pts</span>
-                            <span class="team-members">24 membres</span>
-                        </div>
-                        <div class="column bronze-col">3</div>
-                    </div>
-                </div>
-            </section>
-
-            <aside class="sidebar-ranking">
-                <div class="ranking-card">
-                    <h3><i class="fas fa-medal"></i> Top 5 Équipes</h3>
-                    <ul class="side-list">
-                        <li class="list-item">
-                            <span class="item-rank">1</span>
-                            <span class="item-name">Solar-Punks</span>
-                            <span class="item-pts">156k</span>
-                        </li>
-                        <li class="list-item">
-                            <span class="item-rank">2</span>
-                            <span class="item-name">Green Warriors</span>
-                            <span class="item-pts">133k</span>
-                        </li>
-                        <li class="list-item my-team-row">
-                            <span class="item-rank">3</span>
-                            <span class="item-name">Éco-Héros</span>
-                            <span class="item-pts">112k</span>
-                        </li>
-                    </ul>
-                    <button class="btn-more">Voir détails</button>
-                </div>
-            </aside>
+        <div class="filter-tabs">
+            <button class="filter-opt">Défi en cours</button>
+            <button class="filter-opt">Saison / Mois</button>
+            <button class="filter-opt active">Global</button>
         </div>
+
+        <div class="visual-podium">
+            <div class="podium-column-wrapper">
+                <div class="team-info">
+                    <i class="fas fa-medal silver-icon"></i>
+                    <span class="team-name">Green Warriors</span>
+                    <span class="team-score">133,280 pts</span>
+                    <span class="team-members">10 membres</span>
+                </div>
+                <div class="column silver-col">2</div>
+            </div>
+
+            <div class="podium-column-wrapper">
+                <div class="team-info">
+                    <i class="fas fa-trophy gold-icon"></i>
+                    <span class="team-name">Les Solar-Punks</span>
+                    <span class="team-score">156,800 pts</span>
+                    <span class="team-members">20 membres</span>
+                </div>
+                <div class="column gold-col">1</div>
+            </div>
+
+            <div class="podium-column-wrapper">
+                <div class="team-info">
+                    <i class="fas fa-award bronze-icon"></i>
+                    <span class="team-name">Les Éco-Héros</span>
+                    <span class="team-score">112,896 pts</span>
+                    <span class="team-members">24 membres</span>
+                </div>
+                <div class="column bronze-col">3</div>
+            </div>
+        </div>
+
+        <section class="full-ranking-section">
+            <div class="ranking-list-header">
+                <h2>Classement complet</h2>
+                <span class="teams-count">15 équipes participent</span>
+            </div>
+            
+            <div class="scrollable-list">
+                <a href="detailEquipe.html" class="team-row">
+                    <span class="row-rank gold-text">1</span>
+                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2015%2F10%2F05%2F22%2F37%2Fblank-profile-picture-973460_960_720.png&f=1&nofb=1&ipt=05067034b93f3030870e5a373ea06cbd82aec2a00329d48959f81e6d81640973" alt="Logo" class="row-avatar">
+                    <span class="row-name">Les Solar-Punks</span>
+                    <span class="row-score">156,800 pts</span>
+                    <i class="fas fa-chevron-right row-arrow"></i>
+                </a>
+
+                <a href="detailEquipe.html" class="team-row">
+                    <span class="row-rank silver-text">2</span>
+                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2015%2F10%2F05%2F22%2F37%2Fblank-profile-picture-973460_960_720.png&f=1&nofb=1&ipt=05067034b93f3030870e5a373ea06cbd82aec2a00329d48959f81e6d81640973" alt="Logo" class="row-avatar">
+                    <span class="row-name">Green Warriors</span>
+                    <span class="row-score">133,280 pts</span>
+                    <i class="fas fa-chevron-right row-arrow"></i>
+                </a>
+
+                <a href="detailEquipe.html" class="team-row my-team-row">
+                    <span class="row-rank bronze-text">3</span>
+                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2015%2F10%2F05%2F22%2F37%2Fblank-profile-picture-973460_960_720.png&f=1&nofb=1&ipt=05067034b93f3030870e5a373ea06cbd82aec2a00329d48959f81e6d81640973" alt="Logo" class="row-avatar">
+                    <span class="row-name">Les Éco-Héros (Votre équipe)</span>
+                    <span class="row-score">112,896 pts</span>
+                    <i class="fas fa-chevron-right row-arrow"></i>
+                </a>
+
+                <a href="detailEquipe.html" class="team-row">
+                    <span class="row-rank">4</span>
+                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2015%2F10%2F05%2F22%2F37%2Fblank-profile-picture-973460_960_720.png&f=1&nofb=1&ipt=05067034b93f3030870e5a373ea06cbd82aec2a00329d48959f81e6d81640973" alt="Logo" class="row-avatar">
+                    <span class="row-name">Cyber-Recycle</span>
+                    <span class="row-score">98,784 pts</span>
+                    <i class="fas fa-chevron-right row-arrow"></i>
+                </a>
+
+                <a href="detailEquipe.html" class="team-row">
+                    <span class="row-rank">5</span>
+                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2015%2F10%2F05%2F22%2F37%2Fblank-profile-picture-973460_960_720.png&f=1&nofb=1&ipt=05067034b93f3030870e5a373ea06cbd82aec2a00329d48959f81e6d81640973" alt="Logo" class="row-avatar">
+                    <span class="row-name">Bio-Logistics</span>
+                    <span class="row-score">86,240 pts</span>
+                    <i class="fas fa-chevron-right row-arrow"></i>
+                </a>
+                
+                <a href="detailEquipe.html" class="team-row">
+                    <span class="row-rank">6</span>
+                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2015%2F10%2F05%2F22%2F37%2Fblank-profile-picture-973460_960_720.png&f=1&nofb=1&ipt=05067034b93f3030870e5a373ea06cbd82aec2a00329d48959f81e6d81640973" alt="Logo" class="row-avatar">
+                    <span class="row-name">Tech-Nature</span>
+                    <span class="row-score">75,100 pts</span>
+                    <i class="fas fa-chevron-right row-arrow"></i>
+                </a>
+
+                </div>
+        </section>
     </main>
 </body>
 </html>

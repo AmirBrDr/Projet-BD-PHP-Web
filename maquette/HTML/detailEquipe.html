@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Détail de l'équipe</title>
+    <link rel="stylesheet" href="../CSS/detailEquipe.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <img src="../Images/logo.png" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardE.html">Dashboard</a>
+            <a href="defis.html">Défis</a>
+            <a href="classement.html" class="active">Classement</a>
+            <a href="compteE.html">Mon Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="notif-bell">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="team-detail-main">
+        <a href="classement.html" class="back-link"><i class="fas fa-arrow-left"></i> Retour au classement</a>
+
+        <header class="team-header">
+            <div class="header-content">
+                <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2015%2F10%2F05%2F22%2F37%2Fblank-profile-picture-973460_960_720.png&f=1&nofb=1&ipt=05067034b93f3030870e5a373ea06cbd82aec2a00329d48959f81e6d81640973" alt="Logo Equipe" class="team-avatar">
+                <div class="team-title-area">
+                    <div class="rank-badge gold"><i class="fas fa-trophy"></i> 1er du classement</div>
+                    <h1>Les Solar-Punks</h1>
+                    <p class="team-motto">"L'énergie de demain, aujourd'hui !"</p>
+                </div>
+            </div>
+            <div class="team-score-big">
+                <span class="score-value">156,800</span>
+                <span class="score-label">Points totaux</span>
+            </div>
+        </header>
+
+        <section class="team-stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <div class="stat-info">
+                    <span class="stat-num">20</span>
+                    <span class="stat-text">Membres actifs</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-leaf"></i>
+                <div class="stat-info">
+                    <span class="stat-num">450 kg</span>
+                    <span class="stat-text">CO₂ évités</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-check-circle"></i>
+                <div class="stat-info">
+                    <span class="stat-num">42</span>
+                    <span class="stat-text">Défis d'équipe réussis</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="content-split">
+            <section class="members-section">
+                <h2><i class="fas fa-id-badge"></i> Membres de l'équipe (20)</h2>
+                <div class="members-list">
+                    <div class="member-row top-contributor">
+                        <div class="member-rank">1</div>
+                        <img src="https://via.placeholder.com/40" alt="Avatar" class="member-avatar">
+                        <div class="member-info">
+                            <strong>Sophie Martin</strong>
+                            <span>Département IT</span>
+                        </div>
+                        <div class="member-score"><i class="fas fa-star"></i> 12,500 pts</div>
+                    </div>
+
+                    <div class="member-row">
+                        <div class="member-rank">2</div>
+                        <img src="https://via.placeholder.com/40" alt="Avatar" class="member-avatar">
+                        <div class="member-info">
+                            <strong>Lucas Dubois</strong>
+                            <span>Marketing</span>
+                        </div>
+                        <div class="member-score">10,200 pts</div>
+                    </div>
+
+                    <div class="member-row">
+                        <div class="member-rank">3</div>
+                        <img src="https://via.placeholder.com/40" alt="Avatar" class="member-avatar">
+                        <div class="member-info">
+                            <strong>Emma Leroy</strong>
+                            <span>RH</span>
+                        </div>
+                        <div class="member-score">9,800 pts</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="history-section">
+                <h2><i class="fas fa-history"></i> Derniers succès</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-bicycle"></i></div>
+                        <div class="timeline-content">
+                            <strong>Vélotaf de printemps</strong>
+                            <small>Validé par Lucas • Il y a 2 jours</small>
+                            <span class="pts-gain">+200 pts</span>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-plug"></i></div>
+                        <div class="timeline-content">
+                            <strong>Bureau Zéro Veille</strong>
+                            <small>Validé par Sophie • Il y a 5 jours</small>
+                            <span class="pts-gain">+150 pts</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

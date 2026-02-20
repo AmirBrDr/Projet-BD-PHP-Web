@@ -1,8 +1,8 @@
 :root {
-    --bg-color: #1B2D31; /* Fond de ton image */
-    --green-light: #94BB39; /* Vert clair */
-    --green-main: #2A997F; /* Vert principal */
-    --green-secondary: #298E77; /* Vert secondaire */
+    --bg-color: #1B2D31;
+    --green-light: #94BB39;
+    --green-main: #2A997F;
+    --green-secondary: #298E77;
     --white: #ffffff;
     --text-muted: #a0b1b5;
     --card-bg: rgba(255, 255, 255, 0.05);
@@ -15,7 +15,6 @@ body {
     margin: 0;
 }
 
-/* --- NAVBAR STANDARD --- */
 /* Navbar (Réutilisée) */
 .nav-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-weight: 500; }
 .nav-links a.active { color: var(--green-light); }
@@ -54,29 +53,35 @@ body {
     font-weight: 500; 
 }
 
-/* --- PODIUM SECTION --- */
-.ranking-main { padding: 40px 5%; max-width: 1300px; margin: 0 auto; }
-.content-wrapper { display: grid; grid-template-columns: 1fr 300px; gap: 40px; }
+/* --- HEADER & FILTRES --- */
+.ranking-main { padding: 40px 5%; max-width: 1000px; margin: 0 auto; } /* Centré et max-width réduit pour l'esthétique */
+.section-header { text-align: center; margin-bottom: 20px; }
+.section-header h1 { font-size: 2rem; margin: 0 0 10px 0; }
+.badge-status { font-size: 0.75rem; background: rgba(148, 187, 57, 0.2); color: var(--green-light); padding: 4px 12px; border-radius: 20px; vertical-align: middle; margin-left: 10px; }
+.subtitle { color: var(--text-muted); margin: 0; }
 
+.filter-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 50px; }
+.filter-opt { background: #e1e1e1; border: none; color: #1B2D31; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: 0.2s; }
+.filter-opt.active { background: var(--green-main); color: white; }
+.filter-opt:hover:not(.active) { background: #f0f0f0; }
+
+/* --- PODIUM VISUEL --- */
 .visual-podium { 
     display: flex; justify-content: center; align-items: flex-end; 
-    gap: 20px; margin-top: 80px; height: 400px;
+    gap: 20px; height: 350px; margin-bottom: 60px;
 }
 
 .podium-column-wrapper { display: flex; flex-direction: column; align-items: center; width: 180px; }
 
-/* Infos au-dessus des colonnes */
 .team-info { text-align: center; margin-bottom: 15px; display: flex; flex-direction: column; gap: 4px; }
 .team-name { font-weight: bold; font-size: 1.1rem; }
 .team-score { color: var(--green-light); font-weight: bold; font-size: 1.2rem; }
 .team-members { color: var(--white); font-size: 0.85rem; opacity: 0.9; }
 
-/* Icônes de rang */
 .gold-icon { color: #FFD700; font-size: 1.5rem; margin-bottom: 5px; }
 .silver-icon { color: #C0C0C0; font-size: 1.3rem; margin-bottom: 5px; }
 .bronze-icon { color: #CD7F32; font-size: 1.2rem; margin-bottom: 5px; }
 
-/* Colonnes pleines */
 .column { 
     width: 100%; border-radius: 15px 15px 0 0; 
     display: flex; justify-content: center; align-items: flex-start;
@@ -86,71 +91,63 @@ body {
 .silver-col { height: 190px; background: var(--green-main); opacity: 0.8; }
 .bronze-col { height: 140px; background: var(--green-secondary); opacity: 0.7; }
 
-/* Sidebar */
-.ranking-card { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
-.side-list { list-style: none; padding: 0; margin: 20px 0; }
-.list-item { display: flex; align-items: center; padding: 10px; margin-bottom: 5px; border-radius: 8px; }
-.my-team-row { background: rgba(148, 187, 57, 0.1); border: 1px solid var(--green-light); }
-.item-rank { width: 30px; font-weight: bold; color: var(--green-light); }
-.item-name { flex-grow: 1; font-size: 0.9rem; }
-.item-pts { font-weight: bold; font-size: 0.9rem; }
-
-/* --- STYLE DES BOUTONS DE FILTRE (Onglets) --- */
-.filter-tabs {
-    display: flex;
-    gap: 10px;
-    margin: 30px 0;
-}
-
-.filter-opt {
-    background: #e1e1e1; /* Fond gris clair comme sur l'image */
-    border: none;
-    color: #1B2D31; /* Texte sombre pour le contraste */
-    padding: 6px 14px;
-    border-radius: 6px; /* Coins légèrement arrondis */
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 0.85rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.filter-opt:hover {
-    background: #f0f0f0;
-}
-
-.filter-opt.active {
-    background: var(--green-main); /* Le bouton actif passe en vert */
-    color: white;
-}
-
-/* --- STYLE DU BOUTON "VOIR DÉTAILS" (Sidebar) --- */
-.btn-more {
-    width: auto; /* Ne prend plus toute la largeur */
-    margin-top: 20px;
-    background: #e1e1e1; /* Même gris que les filtres */
-    border: none;
-    color: #1B2D31;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: 500;
-    transition: 0.2s;
-}
-
-.btn-more:hover {
-    background: #f0f0f0;
-    transform: translateY(-1px);
-}
-
-/* --- AJUSTEMENT DE LA SIDEBAR POUR LE BOUTON --- */
-.ranking-card {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* Aligne le bouton à gauche comme sur l'image */
+/* --- LISTE COMPLÈTE SCROLLABLE --- */
+.full-ranking-section {
     background: var(--card-bg);
+    border-radius: 15px;
     padding: 25px;
-    border-radius: 20px;
     border: 1px solid rgba(255,255,255,0.05);
 }
+
+.ranking-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+.ranking-list-header h2 { margin: 0; font-size: 1.2rem; color: var(--white); }
+.teams-count { color: var(--text-muted); font-size: 0.9rem; }
+
+/* Conteneur avec Scroll */
+.scrollable-list {
+    max-height: 400px; /* Limite la hauteur pour forcer le scroll */
+    overflow-y: auto;
+    padding-right: 10px; /* Évite que la scrollbar ne touche le texte */
+}
+
+/* Scrollbar personnalisée pour le style sombre */
+.scrollable-list::-webkit-scrollbar { width: 8px; }
+.scrollable-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+.scrollable-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+.scrollable-list::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+/* Ligne d'équipe (Cliquable) */
+.team-row {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 10px;
+    text-decoration: none; /* Enlève le souligné du lien */
+    color: var(--white);
+    transition: 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.team-row:hover {
+    background: rgba(255,255,255,0.05);
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.1);
+}
+
+.my-team-row { background: rgba(148, 187, 57, 0.1); border: 1px solid var(--green-light); }
+.my-team-row:hover { background: rgba(148, 187, 57, 0.15); border-color: var(--green-light); }
+
+/* Eléments de la ligne */
+.row-rank { font-size: 1.2rem; font-weight: bold; width: 40px; text-align: center; color: var(--text-muted); }
+.gold-text { color: #FFD700; }
+.silver-text { color: #C0C0C0; }
+.bronze-text { color: #CD7F32; }
+
+.row-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 15px; border: 2px solid var(--green-main); }
+.row-name { flex-grow: 1; font-weight: 600; font-size: 1.05rem; }
+.row-score { font-weight: bold; color: var(--green-light); font-size: 1.1rem; margin-right: 20px; }
+.row-arrow { color: var(--text-muted); font-size: 0.9rem; transition: 0.2s; }
+
+.team-row:hover .row-arrow { color: var(--green-light); transform: translateX(5px); }
