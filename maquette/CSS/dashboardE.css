@@ -15,20 +15,45 @@ body {
 }
 
 /* Navbar (Réutilisée) */
-.navbar {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 1rem 5%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    backdrop-filter: blur(10px);
-}
-.nav-logo { height: 35px; }
 .nav-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-weight: 500; }
 .nav-links a.active { color: var(--green-light); }
 .nav-right { display: flex; align-items: center; gap: 20px; }
 .notif-bell { position: relative; cursor: pointer; }
 .notif-bell .badge { position: absolute; top: -5px; right: -8px; background: red; font-size: 0.7rem; padding: 2px 5px; border-radius: 50%; }
+
+.navbar {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 5%; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    height: 70px; 
+}
+
+.nav-logo { 
+    /* On augmente la hauteur sensiblement */
+    height: 90px; 
+    width: auto;
+    /* Optionnel : si le logo est très large, on peut le décaler un peu */
+    object-fit: contain;
+}
+
+.nav-links {
+    /* On s'assure que les liens restent centrés verticalement */
+    display: flex;
+    align-items: center;
+}
+
+.nav-links a { 
+    color: var(--text-muted); 
+    text-decoration: none; 
+    margin: 0 15px; 
+    font-weight: 500; 
+}
+
+
+
 
 /* Grid Layout */
 .dashboard-grid {

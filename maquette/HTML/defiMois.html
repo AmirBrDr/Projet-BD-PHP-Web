@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Planification du Mois</title>
+    <link rel="stylesheet" href="../CSS/defiMois.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <img src="../Images/logo.png" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardA.html">Statistiques</a>
+            <a href="gestionDefis.html">Gestion Catalogue</a>
+            <a href="defiMois.html" class="active">Défis du Mois</a>
+            <a href="moderation.html">Modération</a>
+            <a href="compteA.html">Mon Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge">Animateur</div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="month-container">
+        <section class="admin-section current-month">
+            <header class="section-header">
+                <h2><i class="fas fa-calendar-check"></i> Mois en cours : Février</h2>
+                <span class="theme-tag">Thématique : Mobilité</span>
+            </header>
+            
+            <div class="progress-grid">
+                <div class="progress-card">
+                    <span class="label">L'Éveil du Piéton</span>
+                    <div class="bar-container"><div class="bar" style="width: 80%;"></div></div>
+                    <small>12/15 équipes ont fini</small>
+                </div>
+                <div class="progress-card">
+                    <span class="label">Le Maillon Vert</span>
+                    <div class="bar-container"><div class="bar" style="width: 33%;"></div></div>
+                    <small>5/15 équipes ont fini</small>
+                </div>
+            </div>
+        </section>
+
+        <section class="admin-section next-month">
+            <header class="section-header">
+                <h2><i class="fas fa-calendar-plus"></i> Préparation du mois prochain</h2>
+                <p>Sélectionnez la thématique et les défis (min. 2).</p>
+            </header>
+
+            <div class="planning-layout">
+                <div class="setup-box">
+                    <label>1. Choisir la thématique</label>
+                    <select id="themeSelector" onchange="updateChallengeList()">
+                        <option value="">-- Sélectionner --</option>
+                        <option value="energie" selected>Énergie (Exemple)</option>
+                        <option value="dechets">Gestion des Déchets</option>
+                        <option value="alimentation">Alimentation Durable</option>
+                    </select>
+                </div>
+
+                <div class="setup-box">
+                    <label>2. Sélectionner les défis (Ordre de déblocage)</label>
+                    <div id="challengeChecklist" class="challenge-checklist">
+                        <label class="check-item">
+                            <input type="checkbox" checked> <span>Bureau Zéro Veille (Facile)</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" checked> <span>Lumières Automatisées (Facile)</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" checked> <span>Chauffage Responsable (Moyen)</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" checked> <span>Audit Énergétique d'Équipe (Expert)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setup-box summary">
+                    <p><i class="fas fa-info-circle"></i> <strong>4 défis</strong> sélectionnés pour le mois prochain.</p>
+                    <button class="btn-confirm-month" onclick="alert('Mois prochain programmé !')">Valider le planning</button>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

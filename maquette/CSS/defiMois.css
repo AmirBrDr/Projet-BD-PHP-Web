@@ -1,0 +1,81 @@
+:root {
+    --bg-color: #1B2D31;
+    --green-light: #94BB39;
+    --green-main: #2A997F;
+    --white: #ffffff;
+    --text-muted: #a0b1b5;
+    --card-bg: rgba(255, 255, 255, 0.05);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--white);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+/* Navbar (Réutilisée) */
+.nav-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-weight: 500; }
+.nav-links a.active { color: var(--green-light); }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.notif-bell { position: relative; cursor: pointer; }
+.notif-bell .badge { position: absolute; top: -5px; right: -8px; background: red; font-size: 0.7rem; padding: 2px 5px; border-radius: 50%; }
+
+.navbar {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 5%; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    height: 70px; 
+}
+
+.nav-logo { 
+    /* On augmente la hauteur sensiblement */
+    height: 90px; 
+    width: auto;
+    /* Optionnel : si le logo est très large, on peut le décaler un peu */
+    object-fit: contain;
+}
+
+.nav-links {
+    /* On s'assure que les liens restent centrés verticalement */
+    display: flex;
+    align-items: center;
+}
+
+.nav-links a { 
+    color: var(--text-muted); 
+    text-decoration: none; 
+    margin: 0 15px; 
+    font-weight: 500; 
+}
+
+/* --- LAYOUT --- */
+.month-container { max-width: 1100px; margin: 40px auto; padding: 0 5%; }
+.admin-section { background: var(--card-bg); border-radius: 15px; padding: 25px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.05); }
+
+.section-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 25px; }
+.section-header h2 { margin: 0; font-size: 1.3rem; }
+.theme-tag { background: var(--green-main); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+
+/* Progress Bars */
+.progress-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.progress-card { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; }
+.bar-container { background: rgba(255,255,255,0.1); height: 10px; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+.bar { height: 100%; background: var(--green-light); }
+.progress-card small { color: var(--text-muted); }
+
+/* Planning Area */
+.planning-layout { display: grid; grid-template-columns: 1fr; gap: 25px; }
+.setup-box label { display: block; margin-bottom: 10px; font-weight: bold; color: var(--green-light); }
+
+select { background: #233a3f; color: white; border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; width: 100%; }
+
+.challenge-checklist { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 15px; display: grid; gap: 10px; }
+.check-item { display: flex; align-items: center; gap: 12px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px; cursor: pointer; }
+.check-item input { width: 18px; height: 18px; accent-color: var(--green-main); }
+
+.btn-confirm-month { background: #e1e1e1; color: #1B2D31; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; width: 100%; }
+.btn-confirm-month:hover { background: var(--white); }

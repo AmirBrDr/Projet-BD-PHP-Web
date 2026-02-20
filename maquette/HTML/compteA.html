@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Espace Animateur</title>
+    <link rel="stylesheet" href="../CSS/compteA.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+   <nav class="navbar">
+        <img src="../Images/logo.png" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardA.html">Statistiques</a>
+            <a href="gestionDefis.html">Gestion Catalogue</a>
+            <a href="defiMois.html">Défis du Mois</a>
+            <a href="moderation.html">Modération</a>
+            <a href="compteA.html" class="active">Mon Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge">Animateur</div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="profile-container">
+        <section class="profile-header">
+            <div class="avatar-container">
+                <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2015%2F10%2F05%2F22%2F37%2Fblank-profile-picture-973460_960_720.png&f=1&nofb=1&ipt=05067034b93f3030870e5a373ea06cbd82aec2a00329d48959f81e6d816409730" alt="Animateur" class="profile-pic">
+            </div>
+            <div class="user-info">
+                <h1>Marc Lavoine</h1>
+                <p class="user-meta">Rôle : <span>Animateur Développement Durable</span> </p>
+                <p class="user-meta">E-mail : <span>m.lavoine@entreprise.fr</span></p>
+            </div>
+        </section>
+
+        <div class="admin-grid">
+            <section class="content-box">
+                <h2><i class="fas fa-user-edit"></i> Modifier mes informations</h2>
+                <form class="admin-form">
+                    <div class="input-group">
+                        <label>Nom d'affichage</label>
+                        <input type="text" value="Marc Lavoine">
+                    </div>
+                    <div class="input-group">
+                        <label>Changer le mot de passe</label>
+                        <input type="password" placeholder="Nouveau mot de passe">
+                    </div>
+                    <button type="button" class="btn-save">Enregistrer les modifications</button>
+                </form>
+            </section>
+
+            <section class="content-box">
+                <h2><i class="fas fa-briefcase"></i> Mon activité de gestion</h2>
+                <div class="activity-stats">
+                    <div class="act-item">
+                        <span class="act-label">Défis créés</span> 
+                        <span class="act-value">12</span>
+                    </div>
+                    <div class="act-item">
+                        <span class="act-label">Actions validées</span>
+                        <span class="act-value">458</span>
+                    </div>
+                    <div class="act-item">
+                        <span class="act-label">Messages modérés</span> 
+                        <span class="act-value">24</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

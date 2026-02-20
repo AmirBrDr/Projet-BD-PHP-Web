@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Dashboard Animateur</title>
+    <link rel="stylesheet" href="../CSS/dashboardA.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <img src="../Images/logo.png" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardA.html" class="active">Statistiques</a>
+            <a href="gestionDefis.html">Gestion Catalogue</a>
+            <a href="defiMois.html">Défis du Mois</a>
+            <a href="validation.html">Modération</a>
+            <a href="compteA.html">Mon Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge">Animateur</div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Tableau de Bord Animateur</h1>
+            <p>Analyse de la participation et de l'impact global de l'entreprise.</p>
+        </header>
+
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <i class="fas fa-users"></i>
+                <div class="kpi-info">
+                    <span class="kpi-value">85%</span>
+                    <span class="kpi-label">Taux de participation</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <i class="fas fa-check-circle"></i>
+                <div class="kpi-info">
+                    <span class="kpi-value">92%</span>
+                    <span class="kpi-label">Taux de validation</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <i class="fas fa-fire"></i>
+                <div class="kpi-info">
+                    <span class="kpi-value">Mobilité</span>
+                    <span class="kpi-label">Top Thématique</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="charts-row">
+            <section class="chart-box">
+                <h3><i class="fas fa-pie-chart"></i> Répartition par Thématique</h3>
+                <canvas id="themeChart"></canvas>
+            </section>
+
+            <section class="chart-box">
+                <h3><i class="fas fa-list-ol"></i> Top Défis (Participation)</h3>
+                <ul class="top-list">
+                    <li>
+                        <span>1. Vélotaf de printemps</span>
+                        <span class="badge-pts">145 participants</span>
+                    </li>
+                    <li>
+                        <span>2. Zéro Déchet Bureau</span>
+                        <span class="badge-pts">112 participants</span>
+                    </li>
+                    <li>
+                        <span>3. Covoit' Party</span>
+                        <span class="badge-pts">89 participants</span>
+                    </li>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        const ctxTheme = document.getElementById('themeChart').getContext('2d');
+        new Chart(ctxTheme, {
+            type: 'doughnut',
+            data: {
+                labels: ['Mobilité', 'Énergie', 'Déchets', 'Alimentation'],
+                datasets: [{
+                    data: [45, 25, 20, 10],
+                    backgroundColor: ['#94BB39', '#2A997F', '#298E77', '#1B2D31'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom', labels: { color: '#ffffff' } } }
+            }
+        });
+    </script>
+</body>
+</html>

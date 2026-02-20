@@ -1,0 +1,79 @@
+:root {
+    --bg-color: #1B2D31;
+    --green-light: #94BB39;
+    --green-main: #2A997F;
+    --white: #ffffff;
+    --text-muted: #a0b1b5;
+    --card-bg: rgba(255, 255, 255, 0.05);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--white);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+/* Navbar (Réutilisée) */
+.nav-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-weight: 500; }
+.nav-links a.active { color: var(--green-light); }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.notif-bell { position: relative; cursor: pointer; }
+.notif-bell .badge { position: absolute; top: -5px; right: -8px; background: red; font-size: 0.7rem; padding: 2px 5px; border-radius: 50%; }
+
+.navbar {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 5%; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    height: 70px; 
+}
+
+.nav-logo { 
+    /* On augmente la hauteur sensiblement */
+    height: 90px; 
+    width: auto;
+    /* Optionnel : si le logo est très large, on peut le décaler un peu */
+    object-fit: contain;
+}
+
+.nav-links {
+    /* On s'assure que les liens restent centrés verticalement */
+    display: flex;
+    align-items: center;
+}
+
+.nav-links a { 
+    color: var(--text-muted); 
+    text-decoration: none; 
+    margin: 0 15px; 
+    font-weight: 500; 
+}
+/* Profile Layout */
+.profile-container { max-width: 1000px; margin: 40px auto; padding: 0 5%; }
+.profile-header { display: flex; align-items: center; gap: 30px; margin-bottom: 40px; }
+.profile-pic { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--green-main); }
+
+.user-info h1 { margin: 0; font-size: 1.8rem; }
+.user-meta { color: var(--text-muted); margin-top: 5px; }
+.user-meta span { color: var(--white); font-weight: 500; }
+
+/* Grid */
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+.content-box { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
+.content-box h2 { font-size: 1.1rem; margin-bottom: 20px; color: var(--green-light); }
+
+/* Formulaire */
+.admin-form { display: flex; flex-direction: column; gap: 15px; }
+.input-group { display: flex; flex-direction: column; gap: 5px; }
+.input-group label { font-size: 0.85rem; color: var(--text-muted); }
+.input-group input { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 5px; color: white; }
+.btn-save { background: #e1e1e1; border: none; color: #1B2D31; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+
+/* Stats Activity */
+.activity-stats { display: flex; flex-direction: column; gap: 15px; }
+.act-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.act-label { color: var(--text-muted); font-size: 0.9rem; }
+.act-value { color: var(--green-light); font-weight: bold; font-size: 1.2rem; }
