@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Admin RH | Paramètres Globaux</title>
+    <link rel="stylesheet" href="../CSS/parametresRH.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <img src="../Images/logo.png" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardRH.html">Dashboard RSE</a>
+            <a href="gestionUtilisateurs.html">Utilisateurs & Équipes</a>
+            <a href="parametresRH.html" class="active">Paramètres Globaux</a>
+            <a href="compteRH.html">Mon Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge admin">Admin RH</div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="param-main">
+        <header class="admin-header">
+            <div>
+                <h1>Paramètres Globaux & Gamification</h1>
+                <p>Définissez les règles du jeu, les catégories et la communication automatisée.</p>
+            </div>
+            <button class="btn-primary"><i class="fas fa-save"></i> Sauvegarder tout</button>
+        </header>
+
+        <div class="param-grid">
+            <div class="param-col">
+                <section class="param-box">
+                    <h2><i class="fas fa-tags"></i> Catégories Globales</h2>
+                    <p class="box-desc">Ces thématiques seront disponibles pour les Animateurs DD.</p>
+                    
+                    <ul class="item-list">
+                        <li>
+                            <input type="text" value="Mobilité Douce" class="inline-edit">
+                            <button class="btn-icon delete"><i class="fas fa-trash"></i></button>
+                        </li>
+                        <li>
+                            <input type="text" value="Économie d'Énergie" class="inline-edit">
+                            <button class="btn-icon delete"><i class="fas fa-trash"></i></button>
+                        </li>
+                    </ul>
+                    <button class="btn-add-dashed">+ Ajouter une catégorie</button>
+                </section>
+
+                <section class="param-box">
+                    <h2><i class="fas fa-bullhorn"></i> Règles de Communication</h2>
+                    <p class="box-desc">Gérez la pression e-mail envoyée aux collaborateurs.</p>
+
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <strong>Rappels de participation</strong>
+                            <small>Si inactif depuis X jours</small>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-group mt-15">
+                        <label>Fréquence des relances</label>
+                        <select>
+                            <option>1 fois par semaine</option>
+                            <option selected>1 fois toutes les deux semaines</option>
+                        </select>
+                    </div>
+                </section>
+            </div>
+
+            <div class="param-col">
+                <section class="param-box">
+                    <div class="box-header-flex">
+                        <h2><i class="fas fa-medal"></i> Catalogue des Badges</h2>
+                        <button class="btn-small" onclick="openModal('modalBadge')"><i class="fas fa-plus"></i> Nouveau Badge</button>
+                    </div>
+                    <p class="box-desc">Gérez les icônes et définissez les conditions d'obtention.</p>
+
+                    <div class="badge-list">
+                        <div class="badge-config-item">
+                            <div class="badge-icon preview-green" title="Modifier l'icône" onclick="openModal('modalBadge')">
+                                <img src="https://cdn-icons-png.flaticon.com/512/2972/2972185.png" alt="Vélo" style="width: 30px;">
+                            </div>
+                            <div class="badge-details">
+                                <input type="text" value="Cycliste Pro" class="inline-edit bold">
+                                <div class="badge-conditions">
+                                    <span>Condition :</span>
+                                    <select class="cond-select">
+                                        <option selected>Défis "Mobilité"</option>
+                                        <option>Points Totaux</option>
+                                    </select>
+                                    <span>>=</span>
+                                    <input type="number" value="10" class="cond-num">
+                                    <span>validés</span>
+                                </div>
+                            </div>
+                            <button class="btn-icon delete"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div id="modalBadge" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-award"></i> Configurer un Badge</h3>
+            <p class="modal-desc">Définissez la récompense et téléchargez son icône.</p>
+            
+            <div class="form-group">
+                <label>Nom du badge</label>
+                <input type="text" placeholder="Ex: Maître Composteur">
+            </div>
+
+            <div class="form-group">
+                <label>Icône personnalisée (PNG/SVG)</label>
+                <div class="icon-upload-zone">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Cliquez ou glissez une image ici</p>
+                    <input type="file" accept="image/png, image/svg+xml" class="file-hidden">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Conditions d'obtention</label>
+                <div class="condition-row-modal">
+                    <select>
+                        <option>Défis "Mobilité"</option>
+                        <option>Défis "Énergie"</option>
+                        <option>Défis "Déchets"</option>
+                        <option>Points Totaux (Global)</option>
+                    </select>
+                    <span>>=</span>
+                    <input type="number" value="5" placeholder="Qté">
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('modalBadge')">Annuler</button>
+                <button class="btn-confirm" onclick="closeModal('modalBadge')">Enregistrer le badge</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    </script>
+</body>
+</html>

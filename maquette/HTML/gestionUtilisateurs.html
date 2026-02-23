@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Admin RH | Utilisateurs</title>
+    <link rel="stylesheet" href="../CSS/gestionUtilisateurs.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <img src="../Images/logo.png" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardRH.html">Dashboard RSE</a>
+            <a href="gestionUtilisateurs.html" class="active">Utilisateurs & Équipes</a>
+            <a href="parametresRH.html">Paramètres Globaux</a>
+            <a href="compteRH.html">Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge admin">Admin RH</div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="admin-main">
+        <header class="admin-header">
+            <div>
+                <h1>Ressources Humaines & Structure</h1>
+                <p>Gérez les accès, les rôles et la répartition des équipes.</p>
+            </div>
+            <div class="header-btns">
+                <button class="btn-secondary" onclick="openModal('modalImport')"><i class="fas fa-file-csv"></i> Import CSV</button>
+                <button class="btn-primary" onclick="openModal('modalTeam')"><i class="fas fa-users"></i> Nouvelle Équipe</button>
+                <button class="btn-primary" onclick="openModal('modalUser')"><i class="fas fa-user-plus"></i> Nouvel Utilisateur</button>
+            </div>
+        </header>
+
+        <div class="filter-bar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Rechercher un collaborateur (Nom, Email)...">
+            </div>
+            <select>
+                <option value="all">Tous les rôles</option>
+                <option value="employe">Employé</option>
+                <option value="animateur">Animateur DD</option>
+                <option value="admin">Admin RH</option>
+            </select>
+            <select>
+                <option value="all">Toutes les équipes</option>
+                <option value="solar">Les Solar-Punks</option>
+                <option value="green">Green Warriors</option>
+                <option value="sans">Sans équipe</option>
+            </select>
+        </div>
+
+        <section class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nom Complet</th>
+                        <th>Email Professionnel</th>
+                        <th>Rôle</th>
+                        <th>Équipe affectée</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                 <div class="mini-avatar default">JD</div>
+                                <strong>Jean Dupont</strong>
+                            </div>
+                        </td>
+                        <td>j.dupont@entreprise.fr</td>
+                        <td><span class="badge-role employe">Employé</span></td>
+                        <td>Les Éco-Héros</td>
+                        <td class="action-cells">
+                            <button class="btn-icon edit" title="Modifier"><i class="fas fa-pen"></i></button>
+                            <button class="btn-icon delete" title="Supprimer"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <div class="mini-avatar default">ML</div>
+                                <strong>Marc Lavoine</strong>
+                            </div>
+                        </td>
+                        <td>m.lavoine@entreprise.fr</td>
+                        <td><span class="badge-role animateur">Animateur DD</span></td>
+                        <td class="text-muted">N/A (Gestionnaire)</td>
+                        <td class="action-cells">
+                            <button class="btn-icon edit" title="Modifier"><i class="fas fa-pen"></i></button>
+                            <button class="btn-icon delete" title="Supprimer"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="pagination">
+                <span>1 - 50 sur 245 utilisateurs</span>
+                <div class="page-controls">
+                    <button disabled><i class="fas fa-chevron-left"></i></button>
+                    <button><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="modalUser" class="modal">
+        <div class="modal-content">
+            <h3>Créer un Utilisateur</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nom Complet</label>
+                    <input type="text" placeholder="Ex: Alice Durand">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" placeholder="a.durand@entreprise.fr">
+                </div>
+                <div class="form-group">
+                    <label>Rôle</label>
+                    <select>
+                        <option value="employe">Employé</option>
+                        <option value="animateur">Animateur DD</option>
+                        <option value="admin">Admin RH</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Affectation Équipe (Optionnel)</label>
+                    <select>
+                        <option value="">-- Sans équipe --</option>
+                        <option value="1">Les Solar-Punks</option>
+                        <option value="2">Green Warriors</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('modalUser')">Annuler</button>
+                <button class="btn-confirm">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalImport" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-file-csv"></i> Importation de Masse</h3>
+            <p class="modal-desc">Téléversez un fichier CSV contenant : Nom, Email, Rôle, ID Équipe.</p>
+            
+            <div class="upload-zone">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Glissez-déposez votre fichier ici ou <strong>cliquez pour parcourir</strong></p>
+                <input type="file" accept=".csv" class="file-hidden">
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('modalImport')">Annuler</button>
+                <button class="btn-confirm">Lancer l'import</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    </script>
+</body>
+</html>
