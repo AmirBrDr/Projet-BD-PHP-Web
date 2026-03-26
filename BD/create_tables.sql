@@ -192,24 +192,655 @@ CREATE TABLE Recevoir (
 );
 
 -- ============================================================
--- COMMENTAIRES SUR LES CONTRAINTES MÉTIER NON IMPOSABLES EN DDL
+-- Triggers & Procédures - Application Gamification RSE (GreenPulse)
+-- Base : PostgreSQL | Cours SQL - Université Toulouse III
 -- ============================================================
--- 1. Exclusivité des rôles (Employé / Admin / Animateur) :
---    À enforcer via un trigger ou la logique applicative.
---    Un utilisateur ne doit apparaître que dans une seule table de spécialisation.
+-- TABLE DES MATIÈRES
+-- T1.  Exclusivité des rôles (Employé / Animateur / Admin)
+-- T2.  Un employé ne peut appartenir qu'à une seule équipe
+-- T3.  Validation séquentielle des défis (ordre N-1 requis avant N)
+-- T4.  Points & CO₂ de l'employé après validation d'une action
+-- T5.  Points & CO₂ de l'équipe = agrégation des membres
+-- T6.  Recalcul du classement après chaque validation
+-- T7.  Attribution automatique des badges (employé)
+-- T8.  Attribution automatique des badges (équipe)
+-- T9.  Consécutivité des ordres dans une thématique
+-- T10. Suppression du forum et des messages en fin de mois
+-- T11. Cohérence unicité ordre dans thématique au UPDATE
+-- T12. Notification à l'employé après validation/rejet d'action
+-- T13. Notification lors du déblocage d'un badge
+-- ============================================================
+
+
+-- ============================================================
+-- T1. EXCLUSIVITÉ DES RÔLES
+-- Un utilisateur ne peut apparaître que dans UNE SEULE table
+-- de spécialisation (Employe, Animateur, Admin).
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_check_role_exclusivity()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Vérifie qu'aucun autre rôle n'existe déjà pour cet utilisateur
+    IF TG_TABLE_NAME = 'employe' THEN
+        IF EXISTS (SELECT 1 FROM Admin      WHERE Id_Admin    = NEW.Id_Employe)
+        OR EXISTS (SELECT 1 FROM Animateur  WHERE Id_Animateur = NEW.Id_Employe) THEN
+            RAISE EXCEPTION
+                'L''utilisateur % possède déjà un rôle (Admin ou Animateur). Un utilisateur ne peut avoir qu''un seul rôle.',
+                NEW.Id_Employe;
+        END IF;
+
+    ELSIF TG_TABLE_NAME = 'admin' THEN
+        IF EXISTS (SELECT 1 FROM Employe   WHERE Id_Employe   = NEW.Id_Admin)
+        OR EXISTS (SELECT 1 FROM Animateur WHERE Id_Animateur = NEW.Id_Admin) THEN
+            RAISE EXCEPTION
+                'L''utilisateur % possède déjà un rôle (Employé ou Animateur). Un utilisateur ne peut avoir qu''un seul rôle.',
+                NEW.Id_Admin;
+        END IF;
+
+    ELSIF TG_TABLE_NAME = 'animateur' THEN
+        IF EXISTS (SELECT 1 FROM Employe WHERE Id_Employe = NEW.Id_Animateur)
+        OR EXISTS (SELECT 1 FROM Admin   WHERE Id_Admin   = NEW.Id_Animateur) THEN
+            RAISE EXCEPTION
+                'L''utilisateur % possède déjà un rôle (Employé ou Admin). Un utilisateur ne peut avoir qu''un seul rôle.',
+                NEW.Id_Animateur;
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_role_exclusivity_employe
+    BEFORE INSERT ON Employe
+    FOR EACH ROW EXECUTE FUNCTION fn_check_role_exclusivity();
+
+CREATE TRIGGER trg_role_exclusivity_admin
+    BEFORE INSERT ON Admin
+    FOR EACH ROW EXECUTE FUNCTION fn_check_role_exclusivity();
+
+CREATE TRIGGER trg_role_exclusivity_animateur
+    BEFORE INSERT ON Animateur
+    FOR EACH ROW EXECUTE FUNCTION fn_check_role_exclusivity();
+
+
+-- ============================================================
+-- T2. UN EMPLOYÉ N'APPARTIENT QU'À UNE SEULE ÉQUIPE
+-- (Contrainte déjà couverte par le modèle, mais on bloque aussi
+--  toute tentative d'UPDATE qui affecterait l'équipe sans
+--  désaffecter l'ancienne.)
+-- Note : la colonne Id_equipe dans Employe étant une FK simple,
+-- le changement est autorisé par le DDL. On ajoute ici une
+-- vérification métier : un employé ne peut changer d'équipe
+-- qu'après avoir terminé les défis en cours de son équipe.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_check_single_team()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Bloque le changement d'équipe si l'employé a des actions en cours
+    -- (soumises mais non encore validées/rejetées) dans l'équipe courante.
+    -- "En cours" = lignes dans Valider dont l'action appartient à un défi actif du mois.
+    IF OLD.Id_equipe IS NOT NULL
+       AND NEW.Id_equipe IS DISTINCT FROM OLD.Id_equipe THEN
+        IF EXISTS (
+            SELECT 1
+            FROM   Valider v
+            JOIN   Regroupe r ON r.Id_defi = v.Id_defi
+            WHERE  v.Id_Employe = NEW.Id_Employe
+              AND  date_trunc('month', r.mois) = date_trunc('month', CURRENT_DATE)
+        ) THEN
+            RAISE EXCEPTION
+                'L''employé % a des participations actives ce mois-ci. Changement d''équipe impossible.',
+                NEW.Id_Employe;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_single_team
+    BEFORE UPDATE OF Id_equipe ON Employe
+    FOR EACH ROW EXECUTE FUNCTION fn_check_single_team();
+
+
+-- ============================================================
+-- T3. VALIDATION SÉQUENTIELLE DES DÉFIS
+-- Le défi d'ordre N ne peut être soumis que si le défi
+-- d'ordre N-1 (dans la même thématique) est déjà validé
+-- par l'employé concerné.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_check_defi_order()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_ordre         INT;
+    v_thematique    INT;
+    v_defi_prec     INT;
+BEGIN
+    -- Récupère l'ordre et la thématique du défi en cours de validation
+    SELECT r.ordre, r.Id_thematique
+    INTO   v_ordre, v_thematique
+    FROM   Regroupe r
+    WHERE  r.Id_defi = NEW.Id_defi
+    LIMIT 1;   -- Un défi appartient à une thématique
+
+    -- Si ordre = 1, aucun prérequis
+    IF v_ordre IS NULL OR v_ordre <= 1 THEN
+        RETURN NEW;
+    END IF;
+
+    -- Trouve le défi de l'ordre précédent dans la même thématique
+    SELECT r2.Id_defi
+    INTO   v_defi_prec
+    FROM   Regroupe r2
+    WHERE  r2.Id_thematique = v_thematique
+      AND  r2.ordre = v_ordre - 1;
+
+    IF NOT FOUND THEN
+        RETURN NEW;  -- Pas de prédécesseur trouvé (ne devrait pas arriver grâce à T9)
+    END IF;
+
+    -- Vérifie que l'employé a validé AU MOINS UNE action du défi précédent
+    IF NOT EXISTS (
+        SELECT 1
+        FROM   Valider v
+        WHERE  v.Id_Employe = NEW.Id_Employe
+          AND  v.Id_defi    = v_defi_prec
+    ) THEN
+        RAISE EXCEPTION
+            'Le défi d''ordre % (thématique %) doit être validé avant de pouvoir soumettre le défi d''ordre %.',
+            v_ordre - 1, v_thematique, v_ordre;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_defi_sequential_order
+    BEFORE INSERT ON Valider
+    FOR EACH ROW EXECUTE FUNCTION fn_check_defi_order();
+
+
+-- ============================================================
+-- T4. MISE À JOUR DES POINTS & CO₂ DE L'EMPLOYÉ
+-- Après l'insertion d'une ligne dans Valider, on crédite
+-- l'employé des points et du CO₂ du défi correspondant.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_update_employe_points()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_pts   INT;
+    v_co2   INT;
+BEGIN
+    SELECT nbPointsDefi, nbCO2Defi
+    INTO   v_pts, v_co2
+    FROM   Defi
+    WHERE  Id_defi = NEW.Id_defi;
+
+    UPDATE Employe
+    SET    nbPointsEmploye = nbPointsEmploye + v_pts,
+           nbCO2           = nbCO2           + v_co2
+    WHERE  Id_Employe = NEW.Id_Employe;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_employe_points_after_validation
+    AFTER INSERT ON Valider
+    FOR EACH ROW EXECUTE FUNCTION fn_update_employe_points();
+
+
+-- ============================================================
+-- T5. MISE À JOUR DES POINTS & CO₂ DE L'ÉQUIPE
+-- Les points d'une équipe = somme des points de ses membres.
+-- On recalcule après chaque INSERT sur Valider.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_update_equipe_points()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_equipe INT;
+BEGIN
+    -- Récupère l'équipe de l'employé
+    SELECT Id_equipe INTO v_equipe
+    FROM   Employe
+    WHERE  Id_Employe = NEW.Id_Employe;
+
+    IF v_equipe IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    -- Recalcule les totaux de l'équipe en agrégeant les membres
+    UPDATE Equipe
+    SET    nbPointsEquipe = (
+               SELECT COALESCE(SUM(e.nbPointsEmploye), 0)
+               FROM   Employe e
+               WHERE  e.Id_equipe = v_equipe
+           ),
+           nbCO2Equipe = (
+               SELECT COALESCE(SUM(e.nbCO2), 0)
+               FROM   Employe e
+               WHERE  e.Id_equipe = v_equipe
+           )
+    WHERE  Id_equipe = v_equipe;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_equipe_points_after_validation
+    AFTER INSERT ON Valider
+    FOR EACH ROW EXECUTE FUNCTION fn_update_equipe_points();
+
+
+-- ============================================================
+-- T6. VÉRIFICATION : TOUS LES MEMBRES D'UNE ÉQUIPE ONT
+--     VALIDÉ AU MOINS UNE ACTION DU DÉFI POUR QUE L'ÉQUIPE
+--     SOIT CONSIDÉRÉE COMME AYANT RELEVÉ LE DÉFI
+-- Fonction utilitaire (appelée par l'applicatif ou T7/T8).
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_equipe_a_valide_defi(
+    p_equipe INT,
+    p_defi   INT
+) RETURNS BOOLEAN AS $$
+DECLARE
+    v_nb_membres  INT;
+    v_nb_valides  INT;
+BEGIN
+    -- Nombre de membres actifs dans l'équipe
+    SELECT COUNT(*)
+    INTO   v_nb_membres
+    FROM   Employe e
+    JOIN   Utilisateur u ON u.Id_User = e.Id_Employe
+    WHERE  e.Id_equipe  = p_equipe
+      AND  u.statutUser = 'actif';
+
+    IF v_nb_membres = 0 THEN
+        RETURN FALSE;
+    END IF;
+
+    -- Nombre de membres ayant validé au moins une action du défi
+    SELECT COUNT(DISTINCT v.Id_Employe)
+    INTO   v_nb_valides
+    FROM   Valider v
+    JOIN   Employe e ON e.Id_Employe = v.Id_Employe
+    WHERE  e.Id_equipe = p_equipe
+      AND  v.Id_defi   = p_defi;
+
+    RETURN v_nb_valides >= v_nb_membres;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- ============================================================
+-- T7. ATTRIBUTION AUTOMATIQUE DES BADGES (EMPLOYÉ)
+-- Après chaque validation d'action, on vérifie les conditions
+-- d'obtention des badges non encore débloqués.
 --
--- 2. Défi d'ordre N non validable si N-1 non validé :
---    À enforcer via un trigger BEFORE INSERT sur Valider.
+-- Règles de badge implémentées :
+--   - "Premier Pas"      : 1ère action validée (tous défis confondus)
+--   - "Engagé"           : 5 actions validées
+--   - "Champion RSE"     : 20 actions validées
+--   - "Éco-Mobilité"     : 3 défis de thématique "Mobilité" validés
+--   - "Zéro Déchet"      : 3 défis de thématique "Déchets" validés
+--   - "Éco-Énergie"      : 3 défis de thématique "Énergie" validés
 --
--- 3. Suppression du forum/messages en fin de mois :
---    À enforcer via un job planifié (pg_cron ou applicatif).
+-- REMARQUE : Les noms de badges et thématiques doivent correspondre
+-- exactement aux données insérées en base. Ajustez selon vos données.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_award_employe_badges()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_total_actions     INT;
+    v_badge_id          INT;
+
+    -- Compteurs thématiques
+    v_mobilite_count    INT;
+    v_dechets_count     INT;
+    v_energie_count     INT;
+BEGIN
+    -- Compte total des actions validées par cet employé
+    SELECT COUNT(*)
+    INTO   v_total_actions
+    FROM   Valider
+    WHERE  Id_Employe = NEW.Id_Employe;
+
+    -- ---- Badge "Premier Pas" (1 action) ----
+    IF v_total_actions >= 1 THEN
+        SELECT Id_Badge INTO v_badge_id FROM Badge WHERE nomBadge = 'Premier Pas' LIMIT 1;
+        IF FOUND AND NOT EXISTS (
+            SELECT 1 FROM Obtenir_Em
+            WHERE Id_Badge = v_badge_id AND Id_Employe = NEW.Id_Employe
+        ) THEN
+            INSERT INTO Obtenir_Em (Id_Badge, Id_Employe) VALUES (v_badge_id, NEW.Id_Employe);
+        END IF;
+    END IF;
+
+    -- ---- Badge "Engagé" (5 actions) ----
+    IF v_total_actions >= 5 THEN
+        SELECT Id_Badge INTO v_badge_id FROM Badge WHERE nomBadge = 'Engagé' LIMIT 1;
+        IF FOUND AND NOT EXISTS (
+            SELECT 1 FROM Obtenir_Em
+            WHERE Id_Badge = v_badge_id AND Id_Employe = NEW.Id_Employe
+        ) THEN
+            INSERT INTO Obtenir_Em (Id_Badge, Id_Employe) VALUES (v_badge_id, NEW.Id_Employe);
+        END IF;
+    END IF;
+
+    -- ---- Badge "Champion RSE" (20 actions) ----
+    IF v_total_actions >= 20 THEN
+        SELECT Id_Badge INTO v_badge_id FROM Badge WHERE nomBadge = 'Champion RSE' LIMIT 1;
+        IF FOUND AND NOT EXISTS (
+            SELECT 1 FROM Obtenir_Em
+            WHERE Id_Badge = v_badge_id AND Id_Employe = NEW.Id_Employe
+        ) THEN
+            INSERT INTO Obtenir_Em (Id_Badge, Id_Employe) VALUES (v_badge_id, NEW.Id_Employe);
+        END IF;
+    END IF;
+
+    -- ---- Badge thématique "Éco-Mobilité" (3 défis Mobilité) ----
+    SELECT COUNT(DISTINCT v.Id_defi)
+    INTO   v_mobilite_count
+    FROM   Valider v
+    JOIN   Regroupe r  ON r.Id_defi       = v.Id_defi
+    JOIN   Thematique t ON t.Id_thematique = r.Id_thematique
+    WHERE  v.Id_Employe = NEW.Id_Employe
+      AND  t.nomTheme   = 'Mobilité';
+
+    IF v_mobilite_count >= 3 THEN
+        SELECT Id_Badge INTO v_badge_id FROM Badge WHERE nomBadge = 'Éco-Mobilité' LIMIT 1;
+        IF FOUND AND NOT EXISTS (
+            SELECT 1 FROM Obtenir_Em
+            WHERE Id_Badge = v_badge_id AND Id_Employe = NEW.Id_Employe
+        ) THEN
+            INSERT INTO Obtenir_Em (Id_Badge, Id_Employe) VALUES (v_badge_id, NEW.Id_Employe);
+        END IF;
+    END IF;
+
+    -- ---- Badge thématique "Zéro Déchet" (3 défis Déchets) ----
+    SELECT COUNT(DISTINCT v.Id_defi)
+    INTO   v_dechets_count
+    FROM   Valider v
+    JOIN   Regroupe r  ON r.Id_defi       = v.Id_defi
+    JOIN   Thematique t ON t.Id_thematique = r.Id_thematique
+    WHERE  v.Id_Employe = NEW.Id_Employe
+      AND  t.nomTheme   = 'Déchets';
+
+    IF v_dechets_count >= 3 THEN
+        SELECT Id_Badge INTO v_badge_id FROM Badge WHERE nomBadge = 'Zéro Déchet' LIMIT 1;
+        IF FOUND AND NOT EXISTS (
+            SELECT 1 FROM Obtenir_Em
+            WHERE Id_Badge = v_badge_id AND Id_Employe = NEW.Id_Employe
+        ) THEN
+            INSERT INTO Obtenir_Em (Id_Badge, Id_Employe) VALUES (v_badge_id, NEW.Id_Employe);
+        END IF;
+    END IF;
+
+    -- ---- Badge thématique "Éco-Énergie" (3 défis Énergie) ----
+    SELECT COUNT(DISTINCT v.Id_defi)
+    INTO   v_energie_count
+    FROM   Valider v
+    JOIN   Regroupe r  ON r.Id_defi       = v.Id_defi
+    JOIN   Thematique t ON t.Id_thematique = r.Id_thematique
+    WHERE  v.Id_Employe = NEW.Id_Employe
+      AND  t.nomTheme   = 'Énergie';
+
+    IF v_energie_count >= 3 THEN
+        SELECT Id_Badge INTO v_badge_id FROM Badge WHERE nomBadge = 'Éco-Énergie' LIMIT 1;
+        IF FOUND AND NOT EXISTS (
+            SELECT 1 FROM Obtenir_Em
+            WHERE Id_Badge = v_badge_id AND Id_Employe = NEW.Id_Employe
+        ) THEN
+            INSERT INTO Obtenir_Em (Id_Badge, Id_Employe) VALUES (v_badge_id, NEW.Id_Employe);
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_award_employe_badges
+    AFTER INSERT ON Valider
+    FOR EACH ROW EXECUTE FUNCTION fn_award_employe_badges();
+
+
+-- ============================================================
+-- T8. ATTRIBUTION AUTOMATIQUE DES BADGES (ÉQUIPE)
+-- Déclenché après INSERT sur Valider.
+-- Badge "Équipe Unie" : tous les membres ont validé ce défi.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_award_equipe_badges()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_equipe    INT;
+    v_badge_id  INT;
+BEGIN
+    SELECT Id_equipe INTO v_equipe
+    FROM   Employe
+    WHERE  Id_Employe = NEW.Id_Employe;
+
+    IF v_equipe IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    -- Badge "Équipe Unie" : toute l'équipe a validé ce défi
+    IF fn_equipe_a_valide_defi(v_equipe, NEW.Id_defi) THEN
+        SELECT Id_Badge INTO v_badge_id FROM Badge WHERE nomBadge = 'Équipe Unie' LIMIT 1;
+        IF FOUND AND NOT EXISTS (
+            SELECT 1 FROM Obtenir_Eq
+            WHERE Id_equipe = v_equipe AND Id_Badge = v_badge_id
+        ) THEN
+            INSERT INTO Obtenir_Eq (Id_equipe, Id_Badge) VALUES (v_equipe, v_badge_id);
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_award_equipe_badges
+    AFTER INSERT ON Valider
+    FOR EACH ROW EXECUTE FUNCTION fn_award_equipe_badges();
+
+
+-- ============================================================
+-- T9. CONSÉCUTIVITÉ DES ORDRES DANS UNE THÉMATIQUE
+-- Lors d'un INSERT dans Regroupe, l'ordre du nouveau défi doit
+-- être exactement max(ordre)+1 pour la thématique concernée,
+-- ou bien 1 s'il n'existe encore aucun défi dans cette thématique.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_check_ordre_consecutif()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_max_ordre INT;
+BEGIN
+    SELECT COALESCE(MAX(ordre), 0)
+    INTO   v_max_ordre
+    FROM   Regroupe
+    WHERE  Id_thematique = NEW.Id_thematique;
+
+    IF NEW.ordre <> v_max_ordre + 1 THEN
+        RAISE EXCEPTION
+            'L''ordre % est invalide pour la thématique %. L''ordre attendu est %.',
+            NEW.ordre, NEW.Id_thematique, v_max_ordre + 1;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_ordre_consecutif
+    BEFORE INSERT ON Regroupe
+    FOR EACH ROW EXECUTE FUNCTION fn_check_ordre_consecutif();
+
+
+-- ============================================================
+-- T10. SUPPRESSION DU FORUM ET DES MESSAGES EN FIN DE MOIS
+-- Cette fonction est destinée à être appelée par un job planifié
+-- (pg_cron, cron système + psql, ou tâche applicative) chaque
+-- 1er du mois.
+-- Elle supprime les forums et messages associés aux défis dont
+-- le mois est révolu.
+-- ============================================================
+
+CREATE OR REPLACE PROCEDURE sp_cleanup_expired_forums()
+LANGUAGE plpgsql AS $$
+BEGIN
+    -- Supprime les messages liés aux forums des défis du mois précédent
+    DELETE FROM Message
+    WHERE Id_forum IN (
+        SELECT f.Id_forum
+        FROM   Forum f
+        JOIN   Regroupe r ON r.Id_defi = f.Id_defi
+        WHERE  date_trunc('month', r.mois) < date_trunc('month', CURRENT_DATE)
+    );
+
+    -- Supprime les forums des défis dont le mois est révolu
+    DELETE FROM Forum
+    WHERE Id_defi IN (
+        SELECT r.Id_defi
+        FROM   Regroupe r
+        WHERE  date_trunc('month', r.mois) < date_trunc('month', CURRENT_DATE)
+    );
+END;
+$$;
+
+-- Exemple d'appel manuel :
+-- CALL sp_cleanup_expired_forums();
+
+-- Si pg_cron est disponible, planifier ainsi :
+-- SELECT cron.schedule('cleanup-forums', '0 0 1 * *', 'CALL sp_cleanup_expired_forums();');
+
+
+-- ============================================================
+-- T11. COHÉRENCE DE L'UNICITÉ DE L'ORDRE EN CAS D'UPDATE
+-- Empêche un UPDATE sur Regroupe de créer un doublon d'ordre
+-- dans une même thématique (la contrainte UNIQUE couvre l'INSERT,
+-- mais on ajoute un message explicite pour l'UPDATE).
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_check_ordre_update()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.ordre <> OLD.ordre OR NEW.Id_thematique <> OLD.Id_thematique THEN
+        IF EXISTS (
+            SELECT 1 FROM Regroupe
+            WHERE  Id_thematique = NEW.Id_thematique
+              AND  ordre         = NEW.ordre
+              AND  NOT (Id_defi = OLD.Id_defi AND Id_thematique = OLD.Id_thematique)
+        ) THEN
+            RAISE EXCEPTION
+                'L''ordre % est déjà utilisé dans la thématique %. Modification impossible.',
+                NEW.ordre, NEW.Id_thematique;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_ordre_update_check
+    BEFORE UPDATE ON Regroupe
+    FOR EACH ROW EXECUTE FUNCTION fn_check_ordre_update();
+
+
+-- ============================================================
+-- T12. NOTIFICATION APRÈS VALIDATION D'UNE ACTION
+-- Crée une notification dans la table Notification et l'associe
+-- à l'employé via Recevoir, dès qu'une ligne est insérée
+-- dans Valider.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_notif_action_validee()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_notif_id  INT;
+    v_nom_defi  VARCHAR(150);
+BEGIN
+    SELECT nomDefi INTO v_nom_defi FROM Defi WHERE Id_defi = NEW.Id_defi;
+
+    INSERT INTO Notification (nomNotif, dateNotif, lienRedirection)
+    VALUES (
+        'Action validée pour le défi : ' || COALESCE(v_nom_defi, 'inconnu'),
+        CURRENT_DATE,
+        '/defis/' || NEW.Id_defi
+    )
+    RETURNING id_notif INTO v_notif_id;
+
+    INSERT INTO Recevoir (Id_User, id_notif)
+    VALUES (NEW.Id_Employe, v_notif_id);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_notif_action_validee
+    AFTER INSERT ON Valider
+    FOR EACH ROW EXECUTE FUNCTION fn_notif_action_validee();
+
+
+-- ============================================================
+-- T13. NOTIFICATION LORS DU DÉBLOCAGE D'UN BADGE (EMPLOYÉ)
+-- Crée une notification dès qu'un badge est attribué à un employé.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION fn_notif_badge_employe()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_notif_id   INT;
+    v_nom_badge  VARCHAR(100);
+BEGIN
+    SELECT nomBadge INTO v_nom_badge FROM Badge WHERE Id_Badge = NEW.Id_Badge;
+
+    INSERT INTO Notification (nomNotif, dateNotif, lienRedirection)
+    VALUES (
+        'Nouveau badge débloqué : ' || COALESCE(v_nom_badge, 'Badge'),
+        CURRENT_DATE,
+        '/profil/badges'
+    )
+    RETURNING id_notif INTO v_notif_id;
+
+    INSERT INTO Recevoir (Id_User, id_notif)
+    VALUES (NEW.Id_Employe, v_notif_id);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_notif_badge_employe
+    AFTER INSERT ON Obtenir_Em
+    FOR EACH ROW EXECUTE FUNCTION fn_notif_badge_employe();
+
+
+-- ============================================================
+-- RÉCAPITULATIF DES CONTRAINTES MÉTIER NON COUVERTES PAR DDL
+-- (et leur solution dans ce fichier)
+-- ============================================================
 --
--- 4. Consécutivité des ordres dans une thématique (sans trous) :
---    À enforcer via un trigger BEFORE INSERT/UPDATE sur Regroupe.
+-- Contrainte                                  | Solution
+-- --------------------------------------------|----------------------------
+-- Exclusivité des rôles                        | T1  trg_role_exclusivity_*
+-- Employé dans une seule équipe               | T2  trg_single_team
+-- Ordre N-1 validé avant N                    | T3  trg_defi_sequential_order
+-- Points employé = cumul actions validées     | T4  trg_employe_points_*
+-- Points équipe = agrégation membres          | T5  trg_equipe_points_*
+-- Badge conditionnel (employé)                | T7  trg_award_employe_badges
+-- Badge conditionnel (équipe)                 | T8  trg_award_equipe_badges
+-- Ordres consécutifs dans une thématique      | T9  trg_ordre_consecutif
+-- Suppression forum/messages fin de mois      | T10 sp_cleanup_expired_forums (job)
+-- Unicité ordre au UPDATE                     | T11 trg_ordre_update_check
+-- Notification validation action              | T12 trg_notif_action_validee
+-- Notification déblocage badge                | T13 trg_notif_badge_employe
 --
--- 5. Badge attribué uniquement si conditions satisfaites :
---    À enforcer via un trigger BEFORE INSERT sur Obtenir_Em et Obtenir_Eq.
---
--- 6. Points d'équipe = agrégation des points des membres :
---    À enforcer via un trigger AFTER INSERT sur Valider.
+-- Contraintes couvertes directement par DDL (create_tables.sql) :
+--   - Une action validée une seule fois par utilisateur et par défi (PK Valider)
+--   - L'action doit appartenir au défi (FK vers Faire_partie)
+--   - Unicité de l'ordre dans une thématique (UNIQUE sur Regroupe)
+--   - Points >= 0, CO2 >= 0 (CHECK constraints)
 -- ============================================================
