@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GreenPulse - Authentification</title>
+    <link rel="stylesheet" href="./assets/css/auth.css" />
+  </head>
+  <body>
+    <main class="page">
+      <div class="brand">
+        <div class="brand__logo" aria-hidden="true">
+          <img
+            src="./assets/logo.png"
+            alt="Logo GreenPulse"
+          />
+        </div>
+        <div class="brand__tagline">Plateforme de durabilité gamifiée</div>
+      </div>
+
+      <section class="card" aria-label="Authentification">
+        <div class="tabs" role="tablist" aria-label="Authentification">
+          <button class="tab is-active" type="button" role="tab" aria-selected="true" data-tab="login">Connexion</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-tab="register">Inscription</button>
+        </div>
+
+        <div class="panel is-active" role="tabpanel" data-panel="login">
+          <form id="loginForm" class="form" novalidate>
+            <div class="field">
+              <label class="label" for="loginEmail">Email professionnel</label>
+              <div class="control">
+                <span class="icon" aria-hidden="true">@</span>
+                <input id="loginEmail" name="email" type="email" placeholder="nom@entreprise.fr" autocomplete="email" required />
+              </div>
+              <div class="hint" data-hint-for="loginEmail"></div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="loginPassword">Mot de passe</label>
+              <div class="control">
+                <span class="icon" aria-hidden="true">🔒</span>
+                <input id="loginPassword" name="mdp" type="password" placeholder="••••••••" autocomplete="current-password" required />
+              </div>
+              <div class="hint" data-hint-for="loginPassword"></div>
+            </div>
+
+            <button class="btn" type="submit">Se connecter</button>
+
+            <div class="linkrow">
+              <a href="#" class="link" id="forgotLink">Mot de passe oublié ?</a>
+            </div>
+
+            <div class="alert" id="loginAlert" role="status" aria-live="polite"></div>
+          </form>
+        </div>
+
+        <div class="panel" role="tabpanel" data-panel="register">
+          <div class="titleblock">
+            <div class="title">Créer un compte</div>
+            <div class="subtitle">Inscrivez-vous pour commencer votre parcours écologique</div>
+          </div>
+
+          <form id="registerForm" class="form" novalidate>
+            <div class="field">
+              <label class="label" for="regFullName">Nom complet</label>
+              <div class="control">
+                <input id="regFullName" name="fullName" type="text" placeholder="Jean Dupont" autocomplete="name" required />
+              </div>
+              <div class="hint" data-hint-for="regFullName"></div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="regEmail">Email professionnel</label>
+              <div class="control">
+                <input id="regEmail" name="email" type="email" placeholder="nom@entreprise.fr" autocomplete="email" required />
+              </div>
+              <div class="hint" data-hint-for="regEmail"></div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="regEntreprise">Entreprise</label>
+              <div class="control">
+                <input id="regEntreprise" name="entreprise" type="text" placeholder="GreenPulse SAS" autocomplete="organization" required />
+              </div>
+              <div class="hint" data-hint-for="regEntreprise"></div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="regPassword">Mot de passe</label>
+              <div class="control">
+                <span class="icon" aria-hidden="true">🔒</span>
+                <input id="regPassword" name="mdp" type="password" placeholder="••••••••" autocomplete="new-password" required />
+              </div>
+              <div class="hint" data-hint-for="regPassword"></div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="regPassword2">Confirmer le mot de passe</label>
+              <div class="control">
+                <span class="icon" aria-hidden="true">🔒</span>
+                <input id="regPassword2" name="mdp2" type="password" placeholder="••••••••" autocomplete="new-password" required />
+              </div>
+              <div class="hint" data-hint-for="regPassword2"></div>
+            </div>
+
+            <button class="btn" type="submit">S'inscrire</button>
+
+            <div class="alert" id="registerAlert" role="status" aria-live="polite"></div>
+
+            <div class="footnote">
+              Vous avez déjà un compte ?
+              <button class="link as-button" type="button" data-switch="login">Se connecter</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <footer class="footer">© 2026 GreenPulse. Tous droits réservés.</footer>
+    </main>
+
+    <script src="./assets/js/auth.js" defer></script>
+  </body>
+</html>
