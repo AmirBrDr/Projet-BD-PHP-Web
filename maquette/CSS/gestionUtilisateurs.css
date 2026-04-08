@@ -1,0 +1,110 @@
+:root {
+    --bg-color: #1B2D31;
+    --green-light: #94BB39;
+    --green-main: #2A997F;
+    --white: #ffffff;
+    --text-muted: #a0b1b5;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --btn-gray: #e1e1e1;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--white);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+/* --- NAVBAR --- */
+.navbar {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    height: 70px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.nav-logo { 
+    /* On augmente la hauteur sensiblement */
+    height: 90px; 
+    width: auto;
+    /* Optionnel : si le logo est très large, on peut le décaler un peu */
+    object-fit: contain;
+}
+.nav-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-weight: 500; transition: 0.2s; }
+.nav-links a.active, .nav-links a:hover { color: var(--green-light); }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.role-badge.admin { background: #e74c3c; color: white; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+.logout-btn { color: var(--text-muted); text-decoration: none; font-size: 1.1rem; }
+
+/* --- HEADER --- */
+.admin-main { padding: 40px 5%; max-width: 1300px; margin: 0 auto; }
+.admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.admin-header h1 { margin: 0; font-size: 2rem; }
+.admin-header p { color: var(--text-muted); margin-top: 5px; }
+
+.header-btns { display: flex; gap: 15px; }
+.btn-primary { background: var(--green-main); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-secondary { background: var(--btn-gray); color: #1B2D31; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+
+/* --- FILTRES --- */
+.filter-bar { display: flex; gap: 15px; margin-bottom: 20px; }
+.search-box { flex-grow: 1; position: relative; }
+.search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+.search-box input { width: 100%; padding: 12px 12px 12px 40px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; box-sizing: border-box; }
+select { background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; outline: none; }
+
+/* --- TABLEAU CRUD --- */
+.table-container { background: var(--card-bg); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; }
+.data-table { width: 100%; border-collapse: collapse; text-align: left; }
+.data-table th { background: rgba(0,0,0,0.3); padding: 15px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.data-table td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95rem; vertical-align: middle; }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+.user-cell { display: flex; align-items: center; gap: 12px; }
+.mini-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+.mini-avatar.default { background: var(--green-main); display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; }
+
+/* Badges Rôles */
+.badge-role { padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: bold; }
+.badge-role.employe { background: rgba(148, 187, 57, 0.2); color: var(--green-light); border: 1px solid var(--green-light); }
+.badge-role.animateur { background: rgba(243, 156, 18, 0.2); color: #f39c12; border: 1px solid #f39c12; }
+.text-muted { color: var(--text-muted); font-style: italic; }
+
+/* Actions */
+.action-cells { display: flex; gap: 10px; }
+.btn-icon { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 5px; border-radius: 4px; transition: 0.2s; }
+.btn-icon.edit { color: var(--text-muted); }
+.btn-icon.edit:hover { color: var(--white); background: rgba(255,255,255,0.1); }
+.btn-icon.delete { color: #e74c3c; }
+.btn-icon.delete:hover { background: rgba(231, 76, 60, 0.1); }
+
+/* Pagination */
+.pagination { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(0,0,0,0.1); font-size: 0.9rem; color: var(--text-muted); }
+.page-controls button { background: none; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
+.page-controls button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* --- MODALS --- */
+.modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: #233a3f; padding: 30px; border-radius: 12px; width: 500px; border: 1px solid var(--green-main); }
+.modal-content h3 { margin-top: 0; margin-bottom: 20px; color: var(--green-light); }
+.modal-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group.full-width { grid-column: span 2; }
+.form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+.form-group input, .form-group select { width: 100%; box-sizing: border-box; }
+
+/* Zone Import CSV */
+.upload-zone { border: 2px dashed rgba(255,255,255,0.2); padding: 40px 20px; text-align: center; border-radius: 8px; position: relative; cursor: pointer; transition: 0.3s; background: rgba(0,0,0,0.1); }
+.upload-zone:hover { border-color: var(--green-light); background: rgba(148, 187, 57, 0.05); }
+.upload-zone i { font-size: 3rem; color: var(--green-main); margin-bottom: 15px; }
+.upload-zone p { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
+.file-hidden { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+.modal-footer { display: flex; justify-content: flex-end; gap: 15px; margin-top: 25px; }
+.btn-cancel { background: none; border: none; color: var(--text-muted); cursor: pointer; font-weight: 600; }
+.btn-confirm { background: var(--green-main); border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }

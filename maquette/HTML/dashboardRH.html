@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Admin RH | Dashboard RSE</title>
+    <link rel="stylesheet" href="../CSS/dashboardRH.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <img src="../Images/logo.png" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardRH.html" class="active">Dashboard RSE</a>
+            <a href="gestionUtilisateurs.html">Utilisateurs & Équipes</a>
+            <a href="parametresRH.html">Paramètres Globaux</a>
+            <a href="compteRH.html">Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge admin">Admin RH</div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="dashboard-main">
+        <header class="admin-header">
+            <div>
+                <h1>Bilan Carbone & Engagement RSE</h1>
+                <p>Analyse globale des performances environnementales de l'entreprise.</p>
+            </div>
+            <div class="header-btns">
+                <button class="btn-secondary" onclick="alert('Génération du rapport PDF en cours...')"><i class="fas fa-file-pdf"></i> Rapport PDF</button>
+                <button class="btn-secondary" onclick="alert('Export des données brutes...')"><i class="fas fa-file-csv"></i> Export CSV</button>
+            </div>
+        </header>
+
+        <section class="kpi-grid">
+            <div class="kpi-card highlight">
+                <div class="kpi-icon"><i class="fas fa-globe-europe"></i></div>
+                <div class="kpi-data">
+                    <span class="kpi-value">12,450 <small>kg</small></span>
+                    <span class="kpi-label">CO₂ Total Évité</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                <div class="kpi-data">
+                    <span class="kpi-value">78%</span>
+                    <span class="kpi-label">Taux de Participation Global</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon"><i class="fas fa-check-double"></i></div>
+                <div class="kpi-data">
+                    <span class="kpi-value">3,420</span>
+                    <span class="kpi-label">Actions Validées</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="charts-layout">
+            <section class="chart-section">
+                <h2><i class="fas fa-chart-pie"></i> Répartition des réductions CO₂</h2>
+                <div class="chart-container">
+                    <canvas id="co2Chart"></canvas>
+                </div>
+            </section>
+
+            <section class="chart-section">
+                <h2><i class="fas fa-chart-bar"></i> Taux d'engagement par Département</h2>
+                <div class="chart-container">
+                    <canvas id="engagementChart"></canvas>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Graphique 1 : Répartition CO2 (Doughnut)
+        const ctxCo2 = document.getElementById('co2Chart').getContext('2d');
+        new Chart(ctxCo2, {
+            type: 'doughnut',
+            data: {
+                labels: ['Mobilité (55%)', 'Énergie (25%)', 'Déchets (15%)', 'Alimentation (5%)'],
+                datasets: [{
+                    data: [6847, 3112, 1867, 624],
+                    backgroundColor: ['#94BB39', '#2A997F', '#298E77', '#1B2D31'],
+                    borderColor: '#1B2D31',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { color: '#ffffff', font: { size: 13 } } }
+                }
+            }
+        });
+
+        // Graphique 2 : Engagement par département (Bar)
+        const ctxEngagement = document.getElementById('engagementChart').getContext('2d');
+        new Chart(ctxEngagement, {
+            type: 'bar',
+            data: {
+                labels: ['IT', 'Marketing', 'RH', 'Compta', 'Logistique'],
+                datasets: [{
+                    label: 'Taux de participation (%)',
+                    data: [92, 85, 78, 65, 55],
+                    backgroundColor: 'rgba(148, 187, 57, 0.8)',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        max: 100,
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { color: '#a0b1b5' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#a0b1b5' }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+</body>
+</html>

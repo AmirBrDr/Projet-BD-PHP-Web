@@ -1,0 +1,111 @@
+:root {
+    --bg-color: #1B2D31;
+    --green-light: #94BB39;
+    --green-main: #2A997F;
+    --white: #ffffff;
+    --text-muted: #a0b1b5;
+    --card-bg: rgba(255, 255, 255, 0.05);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--white);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+/* Navbar (Réutilisée) */
+.nav-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-weight: 500; }
+.nav-links a.active { color: var(--green-light); }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.notif-bell { position: relative; cursor: pointer; }
+.notif-bell .badge { position: absolute; top: -5px; right: -8px; background: red; font-size: 0.7rem; padding: 2px 5px; border-radius: 50%; }
+
+.navbar {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 5%; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    height: 70px; 
+}
+
+.nav-logo { 
+    /* On augmente la hauteur sensiblement */
+    height: 90px; 
+    width: auto;
+    /* Optionnel : si le logo est très large, on peut le décaler un peu */
+    object-fit: contain;
+}
+
+.nav-links {
+    /* On s'assure que les liens restent centrés verticalement */
+    display: flex;
+    align-items: center;
+}
+
+.nav-links a { 
+    color: var(--text-muted); 
+    text-decoration: none; 
+    margin: 0 15px; 
+    font-weight: 500; 
+}
+
+/* --- CONTENT --- */
+.moderation-container { max-width: 1200px; margin: 40px auto; padding: 0 5%; }
+.mod-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+.filter-controls { display: flex; align-items: center; gap: 15px; }
+select { background: #233a3f; color: white; border: 1px solid rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 6px; }
+
+/* --- AUDIT GRID --- */
+.audit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.audit-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: 0.3s;
+}
+
+.user-info { display: flex; align-items: center; gap: 12px; }
+.mini-avatar { width: 40px; height: 40px; border-radius: 50%; background: #34495e; }
+.user-info strong { display: block; font-size: 0.95rem; }
+.user-info small { color: var(--text-muted); font-size: 0.8rem; }
+
+.challenge-name { font-size: 0.75rem; color: var(--green-light); font-weight: bold; text-transform: uppercase; }
+.photo-wrapper { width: 100%; height: 180px; border-radius: 10px; overflow: hidden; margin-top: 10px; }
+.photo-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+.proof-desc { font-size: 0.9rem; font-style: italic; color: var(--text-muted); margin: 0; }
+
+.card-actions {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.status-valid { color: var(--green-light); font-size: 0.85rem; font-weight: bold; }
+
+.btn-revoke {
+    background: #e1e1e1;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    color: #1B2D31;
+    font-weight: bold;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.btn-revoke:hover { background: #ff4757; color: white; }

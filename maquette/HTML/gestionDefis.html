@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Gestion du Catalogue</title>
+    <link rel="stylesheet" href="../CSS/gestionDefis.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <img src="../Images/logo.png" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardA.html">Statistiques</a>
+            <a href="gestionDefis.html" class="active">Gestion Catalogue</a>
+            <a href="defiMois.html">Défis du Mois</a>
+            <a href="moderation.html">Modération</a>
+            <a href="compteA.html">Mon Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge">Animateur</div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="admin-main">
+        <header class="admin-header">
+            <div>
+                <h1>Gestion du Catalogue</h1>
+                <p>Configurez les thématiques et les défis disponibles pour l'entreprise.</p>
+            </div>
+            <div class="header-btns">
+                <button class="btn-action" onclick="openModal('modalTheme')"><i class="fas fa-folder-plus"></i> Nouvelle Thématique</button>
+                <button class="btn-action green" onclick="openModal('modalDefi')"><i class="fas fa-plus-circle"></i> Nouveau Défi</button>
+            </div>
+        </header>
+
+        <div class="management-grid">
+            <section class="admin-section">
+                <h2><i class="fas fa-tags"></i> Thématiques</h2>
+                <div id="themesList" class="themes-container">
+                    <div class="theme-card">
+                        <span>Mobilité</span>
+                        <div class="card-btns">
+                            <button onclick="deleteElement(this)"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="admin-section">
+                <h2><i class="fas fa-list-check"></i> Défis créés</h2>
+                <div id="defisList" class="defis-container">
+                    <p class="empty-msg">Aucun défi créé pour le moment.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="modalTheme" class="modal">
+        <div class="modal-content">
+            <h3>Créer une Thématique</h3>
+            <input type="text" id="themeInput" placeholder="Nom (ex: Énergie, Déchets...)">
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('modalTheme')">Annuler</button>
+                <button class="btn-confirm" onclick="createTheme()">Créer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalDefi" class="modal">
+        <div class="modal-content">
+            <h3>Nouveau Défi</h3>
+            <div class="form-group">
+                <label>Thématique associée</label>
+                <select id="selectThemeDefi">
+                    <option value="Mobilité">Mobilité</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Titre du défi</label>
+                <input type="text" id="defiTitle" placeholder="Ex: Zéro Voiture">
+            </div>
+            <div class="form-group">
+                <label>Description du défi</label>
+                <textarea id="defiDesc" placeholder="Expliquez l'objectif de manière ludique..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Actions de réussite</label>
+                <div id="actionsContainer">
+                    <input type="text" class="action-input" placeholder="Action 1 (ex: Venir à vélo)">
+                </div>
+                <button class="btn-add-action" onclick="addActionInput()">+ Ajouter une action</button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal('modalDefi')">Annuler</button>
+                <button class="btn-confirm" onclick="createDefi()">Enregistrer le défi</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function addActionInput() {
+            const input = document.createElement('input');
+            input.className = 'action-input';
+            input.placeholder = "Autre action possible...";
+            document.getElementById('actionsContainer').appendChild(input);
+        }
+
+        function createTheme() {
+            const val = document.getElementById('themeInput').value;
+            if(!val) return;
+            
+            const div = document.createElement('div');
+            div.className = 'theme-card';
+            div.innerHTML = `<span>${val}</span><div class="card-btns"><button onclick="deleteElement(this)"><i class="fas fa-trash"></i></button></div>`;
+            document.getElementById('themesList').appendChild(div);
+            
+            const opt = document.createElement('option');
+            opt.value = val; opt.text = val;
+            document.getElementById('selectThemeDefi').add(opt);
+            
+            closeModal('modalTheme');
+            document.getElementById('themeInput').value = "";
+        }
+
+        function createDefi() {
+            const title = document.getElementById('defiTitle').value;
+            const desc = document.getElementById('defiDesc').value;
+            const theme = document.getElementById('selectThemeDefi').value;
+            const actions = Array.from(document.getElementsByClassName('action-input')).map(i => i.value).filter(v => v !== "");
+            
+            if(!title || !theme || actions.length === 0) {
+                alert("Veuillez remplir le titre, la thématique et au moins une action.");
+                return;
+            }
+
+            const list = document.getElementById('defisList');
+            if(list.querySelector('.empty-msg')) list.innerHTML = "";
+
+            const div = document.createElement('div');
+            div.className = 'defi-admin-card';
+            div.innerHTML = `
+                <div class="defi-admin-header">
+                    <strong>${title}</strong>
+                    <span class="theme-tag">${theme}</span>
+                </div>
+                <p class="defi-admin-desc">${desc}</p>
+                <div class="actions-summary">
+                    <small>Actions possibles : ${actions.join(' • ')}</small>
+                </div>
+                <button class="btn-del-small" onclick="deleteElement(this)">Supprimer le défi</button>
+            `;
+            list.appendChild(div);
+            closeModal('modalDefi');
+            
+            // Reset form
+            document.getElementById('defiTitle').value = "";
+            document.getElementById('defiDesc').value = "";
+            document.getElementById('actionsContainer').innerHTML = '<input type="text" class="action-input" placeholder="Action 1">';
+        }
+
+        function deleteElement(btn) {
+            btn.closest('div').parentElement.remove();
+            const list = document.getElementById('defisList');
+            if(list.children.length === 0) {
+                list.innerHTML = '<p class="empty-msg">Aucun défi créé pour le moment.</p>';
+            }
+        }
+    </script>
+</body>
+</html>

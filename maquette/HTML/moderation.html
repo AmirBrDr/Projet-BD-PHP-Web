@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Modération des Preuves</title>
+    <link rel="stylesheet" href="../CSS/moderation.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <img src="../Images/logo.png" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardA.html">Statistiques</a>
+            <a href="gestionDefis.html">Gestion Catalogue</a>
+            <a href="defiMois.html">Défis du Mois</a>
+            <a href="moderation.html" class="active">Modération</a>
+            <a href="compteA.html">Mon Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge">Animateur</div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="moderation-container">
+        <header class="mod-header">
+            <h1>Audit des Réussites</h1>
+            <div class="filter-controls">
+                <label>Filtrer par défi :</label>
+                <select id="challengeFilter">
+                    <option value="all">Tous les défis</option>
+                    <option value="velo">Vélotaf de printemps</option>
+                    <option value="pied">L'Éveil du Piéton</option>
+                </select>
+            </div>
+        </header>
+
+        <section class="audit-grid" id="auditGrid">
+            <div class="audit-card">
+                <div class="user-info">
+                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2015%2F10%2F05%2F22%2F37%2Fblank-profile-picture-973460_960_720.png&f=1&nofb=1&ipt=05067034b93f3030870e5a373ea06cbd82aec2a00329d48959f81e6d816409730" alt="Avatar" class="mini-avatar">
+                    <div>
+                        <strong>Jean Dupont</strong>
+                        <small>Équipe : Les Éco-Héros</small>
+                    </div>
+                </div>
+                <div class="proof-content">
+                    <span class="challenge-name">Vélotaf de printemps</span>
+                    <div class="photo-wrapper">
+                        <img src="https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?w=300" alt="Preuve Vélo">
+                    </div>
+                    <p class="proof-desc">"Trajet de 5km sous le soleil ce matin !"</p>
+                </div>
+                <div class="card-actions">
+                    <span class="status-valid"><i class="fas fa-check-circle"></i> Validé (Auto)</span>
+                    <button class="btn-revoke" onclick="revokeValidation(this)">Annuler la validation</button>
+                </div>
+            </div>
+
+            <div class="audit-card">
+                <div class="user-info">
+                    <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.pixabay.com%2Fphoto%2F2015%2F10%2F05%2F22%2F37%2Fblank-profile-picture-973460_960_720.png&f=1&nofb=1&ipt=05067034b93f3030870e5a373ea06cbd82aec2a00329d48959f81e6d816409730" alt="Avatar" class="mini-avatar">
+                    <div>
+                        <strong>Léa Martin</strong>
+                        <small>Équipe : Green Warriors</small>
+                    </div>
+                </div>
+                <div class="proof-content">
+                    <span class="challenge-name">Bureau Zéro Veille</span>
+                    <div class="photo-wrapper">
+                        <img src="https://images.unsplash.com/photo-1585351230113-9080646b5a32?w=300" alt="Preuve Veille">
+                    </div>
+                    <p class="proof-desc">"Multiprise éteinte avant de partir."</p>
+                </div>
+                <div class="card-actions">
+                    <span class="status-valid"><i class="fas fa-check-circle"></i> Validé (Auto)</span>
+                    <button class="btn-revoke" onclick="revokeValidation(this)">Annuler la validation</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function revokeValidation(btn) {
+            if(confirm("Voulez-vous vraiment annuler cette réussite ? Les points seront retirés à l'équipe et l'utilisateur sera notifié.")) {
+                const card = btn.closest('.audit-card');
+                card.style.opacity = '0.5';
+                btn.innerHTML = "Annulation traitée";
+                btn.disabled = true;
+                btn.style.background = "#ff4757";
+                btn.style.color = "white";
+                card.querySelector('.status-valid').innerHTML = '<i class="fas fa-times-circle"></i> Révoyé';
+                card.querySelector('.status-valid').style.color = "#ff4757";
+            }
+        }
+    </script>
+</body>
+</html>

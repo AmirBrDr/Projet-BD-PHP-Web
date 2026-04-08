@@ -1,0 +1,75 @@
+:root {
+    --bg-color: #1B2D31;
+    --green-light: #94BB39;
+    --green-main: #2A997F;
+    --white: #ffffff;
+    --text-muted: #a0b1b5;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --btn-gray: #e1e1e1;
+    --admin-red: #e74c3c;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--white);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+/* --- NAVBAR --- */
+.navbar {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    height: 70px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.nav-logo { 
+    /* On augmente la hauteur sensiblement */
+    height: 90px; 
+    width: auto;
+    /* Optionnel : si le logo est très large, on peut le décaler un peu */
+    object-fit: contain;
+}
+.nav-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-weight: 500; transition: 0.2s; }
+.nav-links a.active, .nav-links a:hover { color: var(--green-light); }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.role-badge.admin { background: var(--admin-red); color: white; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+.logout-btn { color: var(--text-muted); text-decoration: none; font-size: 1.1rem; transition: 0.2s; }
+.logout-btn:hover { color: var(--admin-red); }
+
+/* --- HEADER --- */
+.dashboard-main { padding: 40px 5%; max-width: 1400px; margin: 0 auto; }
+.admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.admin-header h1 { margin: 0; font-size: 2rem; }
+.admin-header p { color: var(--text-muted); margin-top: 5px; }
+
+.header-btns { display: flex; gap: 15px; }
+.btn-secondary { background: var(--btn-gray); color: #1B2D31; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.btn-secondary:hover { background: white; transform: translateY(-2px); }
+
+/* --- KPI GRID --- */
+.kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 40px; }
+.kpi-card { 
+    background: var(--card-bg); padding: 25px; border-radius: 15px; 
+    border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 20px;
+}
+.kpi-card.highlight { background: rgba(148, 187, 57, 0.1); border: 1px solid var(--green-light); }
+.kpi-card.highlight .kpi-icon { color: var(--green-light); }
+.kpi-card.highlight .kpi-value { color: var(--green-light); }
+
+.kpi-icon { font-size: 2.5rem; color: var(--green-main); }
+.kpi-data { display: flex; flex-direction: column; }
+.kpi-value { font-size: 2.2rem; font-weight: bold; line-height: 1.1; }
+.kpi-value small { font-size: 1rem; font-weight: normal; }
+.kpi-label { color: var(--text-muted); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 5px; }
+
+/* --- CHARTS --- */
+.charts-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+.chart-section { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
+.chart-section h2 { font-size: 1.2rem; margin-top: 0; margin-bottom: 25px; color: var(--white); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+
+.chart-container { position: relative; height: 300px; width: 100%; }

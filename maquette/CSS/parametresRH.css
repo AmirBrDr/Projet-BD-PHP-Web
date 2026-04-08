@@ -1,0 +1,153 @@
+:root {
+    --bg-color: #1B2D31;
+    --green-light: #94BB39;
+    --green-main: #2A997F;
+    --white: #ffffff;
+    --text-muted: #a0b1b5;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --btn-gray: #e1e1e1;
+    --admin-red: #e74c3c;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--white);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+/* --- NAVBAR --- */
+.navbar {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    height: 70px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.nav-logo { 
+    /* On augmente la hauteur sensiblement */
+    height: 90px; 
+    width: auto;
+    /* Optionnel : si le logo est très large, on peut le décaler un peu */
+    object-fit: contain;
+}
+.nav-links a { color: var(--text-muted); text-decoration: none; margin: 0 15px; font-weight: 500; transition: 0.2s; }
+.nav-links a.active, .nav-links a:hover { color: var(--green-light); }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.role-badge.admin { background: var(--admin-red); color: white; padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+.logout-btn { color: var(--text-muted); text-decoration: none; font-size: 1.1rem; transition: 0.2s; }
+.logout-btn:hover { color: var(--admin-red); }
+
+/* --- HEADER --- */
+.param-main { padding: 40px 5%; max-width: 1300px; margin: 0 auto; }
+.admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.admin-header h1 { margin: 0; font-size: 2rem; }
+.admin-header p { color: var(--text-muted); margin-top: 5px; }
+.btn-primary { background: var(--green-main); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.btn-primary:hover { background: var(--green-light); color: var(--bg-color); }
+
+/* --- LAYOUT GRID --- */
+.param-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; }
+.param-col { display: flex; flex-direction: column; gap: 30px; }
+
+/* --- BOXES --- */
+.param-box { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
+.box-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.param-box h2 { font-size: 1.2rem; margin: 0; color: var(--white); }
+.param-box h2 i { color: var(--green-light); margin-right: 8px; }
+.box-desc { color: var(--text-muted); font-size: 0.9rem; margin-top: 5px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+
+/* Inline Edit Lists */
+.item-list { list-style: none; padding: 0; margin: 0 0 15px 0; }
+.item-list li { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 8px; margin-bottom: 8px; }
+.inline-edit { background: transparent; border: none; color: white; font-size: 0.95rem; width: 100%; outline: none; }
+.inline-edit:focus { border-bottom: 1px solid var(--green-light); }
+.inline-edit.bold { font-weight: bold; font-size: 1rem; }
+
+.btn-icon { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 5px; color: var(--text-muted); transition: 0.2s; }
+.btn-icon.delete:hover { color: #e74c3c; }
+
+.btn-add-dashed { background: none; border: 1px dashed rgba(255,255,255,0.2); color: var(--text-muted); padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; transition: 0.2s; }
+.btn-add-dashed:hover { border-color: var(--green-light); color: var(--green-light); }
+
+/* --- SWITCH (Toggle) --- */
+.toggle-group { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; }
+.toggle-info strong { display: block; font-size: 0.95rem; }
+.toggle-info small { color: var(--text-muted); font-size: 0.8rem; }
+
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #34495e; transition: .4s; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+input:checked + .slider { background-color: var(--green-main); }
+input:checked + .slider:before { transform: translateX(20px); }
+.slider.round { border-radius: 24px; }
+.slider.round:before { border-radius: 50%; }
+
+/* Formulaires */
+.mt-15 { margin-top: 15px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+select { background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 6px; outline: none; }
+
+/* --- BADGES CONFIG --- */
+.btn-small { background: var(--btn-gray); border: none; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 0.8rem; color: #1B2D31; }
+.badge-list { display: flex; flex-direction: column; gap: 15px; }
+.badge-config-item { display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border-left: 3px solid var(--green-main); }
+.badge-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
+.preview-green { background: rgba(148, 187, 57, 0.2); color: var(--green-light); }
+.preview-blue { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+
+.badge-details { flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }
+.badge-conditions { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); flex-wrap: wrap; }
+.cond-select { padding: 4px 8px; font-size: 0.8rem; }
+.cond-num { width: 50px; padding: 4px; text-align: center; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px; }
+
+/* --- MODAL BADGE & UPLOAD ZONE --- */
+.modal { 
+    position: fixed; top:0; left:0; width:100%; height:100%; 
+    background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; 
+}
+.modal-content { 
+    background: #233a3f; padding: 30px; border-radius: 12px; 
+    width: 450px; border: 1px solid var(--green-main); 
+}
+.modal-content h3 { margin-top: 0; margin-bottom: 5px; color: var(--green-light); display: flex; align-items: center; gap: 10px; }
+.modal-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px; }
+
+/* Zone de glisser-déposer pour l'icône */
+.icon-upload-zone {
+    border: 2px dashed rgba(255,255,255,0.2); 
+    padding: 25px 20px; 
+    text-align: center; 
+    border-radius: 8px; 
+    position: relative; 
+    cursor: pointer; 
+    transition: 0.3s; 
+    background: rgba(0,0,0,0.1);
+    margin-bottom: 10px;
+}
+.icon-upload-zone:hover { border-color: var(--green-light); background: rgba(148, 187, 57, 0.05); }
+.icon-upload-zone i { font-size: 2.5rem; color: var(--green-main); margin-bottom: 10px; }
+.icon-upload-zone p { margin: 0; color: var(--text-muted); font-size: 0.85rem; }
+.file-hidden { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
+/* Ligne des conditions dans la modale */
+.condition-row-modal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.condition-row-modal select { flex-grow: 1; }
+.condition-row-modal input[type="number"] { width: 70px; text-align: center; }
+
+.modal-footer { display: flex; justify-content: flex-end; gap: 15px; margin-top: 25px; }
+.btn-cancel { background: none; border: none; color: var(--text-muted); cursor: pointer; font-weight: 600; }
+.btn-confirm { background: var(--green-main); border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+/* Curseur sur l'icône dans la liste pour montrer qu'on peut la changer */
+.badge-icon { cursor: pointer; transition: 0.2s; }
+.badge-icon:hover { opacity: 0.8; transform: scale(1.05); }
