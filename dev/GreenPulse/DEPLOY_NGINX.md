@@ -25,6 +25,12 @@ sudo adduser --system --group --home /srv/greenpulse deploy
 
 Ajuster ensuite les permissions (voir section 6).
 
+### Modèle d'utilisateurs recommandé
+
+- `postgres` : administration PostgreSQL et import du schéma.
+- `deploy` : propriétaire des fichiers applicatifs (`/srv/greenpulse`).
+- `www-data` : exécution Nginx + PHP-FPM (lecture uniquement sur l'app).
+
 ## 3) Initialiser PostgreSQL
 
 ### 3.1 Créer la base et l'utilisateur dédié
@@ -47,7 +53,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO greenpulse_app;
 ```
 
-### 3.2 Importer le schéma
+### 3.2 Importer le schéma (choisir une seule méthode)
 
 ```bash
 sudo -u postgres psql -d greenpulse -f /srv/greenpulse/db/schema.sql
@@ -58,6 +64,8 @@ Vous pouvez aussi utiliser le template SQL :
 ```bash
 sudo -u postgres psql -f /srv/greenpulse/deploy/db/init-greenpulse.sql
 ```
+
+Utilisez soit les commandes SQL manuelles de 3.1 + import de `schema.sql`, soit le fichier `init-greenpulse.sql` (qui crée l'utilisateur/la base si besoin), mais pas les deux de manière répétée.
 
 ## 4) Configurer les variables d'environnement
 
