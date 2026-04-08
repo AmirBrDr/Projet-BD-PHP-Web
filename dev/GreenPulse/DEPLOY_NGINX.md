@@ -69,7 +69,7 @@ Recommandation :
 - **Méthode A (contrôle fin)** : section 3.1 puis import `schema.sql`.
 - **Méthode B (rapide)** : `init-greenpulse.sql` uniquement.
 
-Évitez d'exécuter les deux workflows en boucle : cela n'endommage pas la base, mais applique les mêmes droits plusieurs fois et complique le troubleshooting.
+Évitez d'exécuter les deux workflows en boucle : cela n'endommage pas la base, mais applique les mêmes droits plusieurs fois et complique le dépannage.
 
 ## 4) Configurer les variables d'environnement
 
