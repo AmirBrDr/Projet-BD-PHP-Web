@@ -1,0 +1,13 @@
+/* classement Styles */
+/* TODO: Add styles for classement */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    color: #333;
+    font-size: 2em;
+}
