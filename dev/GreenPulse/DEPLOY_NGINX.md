@@ -14,7 +14,7 @@ sudo apt install -y nginx postgresql postgresql-client php8.2-fpm php8.2-cli php
 Exemple de chemin d'application attendu :
 
 ```text
-/home/runner/work/Projet-BD-PHP-Web/Projet-BD-PHP-Web/dev/GreenPulse
+/srv/greenpulse
 ```
 
 Créer un utilisateur de déploiement (optionnel mais recommandé) :
@@ -50,13 +50,13 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO gr
 ### 3.2 Importer le schéma
 
 ```bash
-sudo -u postgres psql -d greenpulse -f /home/runner/work/Projet-BD-PHP-Web/Projet-BD-PHP-Web/dev/GreenPulse/db/schema.sql
+sudo -u postgres psql -d greenpulse -f /srv/greenpulse/db/schema.sql
 ```
 
 Vous pouvez aussi utiliser le template SQL :
 
 ```bash
-sudo -u postgres psql -f /home/runner/work/Projet-BD-PHP-Web/Projet-BD-PHP-Web/dev/GreenPulse/deploy/db/init-greenpulse.sql
+sudo -u postgres psql -f /srv/greenpulse/deploy/db/init-greenpulse.sql
 ```
 
 ## 4) Configurer les variables d'environnement
@@ -64,7 +64,7 @@ sudo -u postgres psql -f /home/runner/work/Projet-BD-PHP-Web/Projet-BD-PHP-Web/d
 Copier le template :
 
 ```bash
-sudo cp /home/runner/work/Projet-BD-PHP-Web/Projet-BD-PHP-Web/dev/GreenPulse/deploy/env/greenpulse.env.example /etc/default/greenpulse
+sudo cp /srv/greenpulse/deploy/env/greenpulse.env.example /etc/default/greenpulse
 sudo nano /etc/default/greenpulse
 ```
 
@@ -76,7 +76,7 @@ sudo nano /etc/default/greenpulse
 ## 5) Configurer PHP-FPM (pool dédié)
 
 ```bash
-sudo cp /home/runner/work/Projet-BD-PHP-Web/Projet-BD-PHP-Web/dev/GreenPulse/deploy/php-fpm/greenpulse.conf /etc/php/8.2/fpm/pool.d/greenpulse.conf
+sudo cp /srv/greenpulse/deploy/php-fpm/greenpulse.conf /etc/php/8.2/fpm/pool.d/greenpulse.conf
 ```
 
 Dans `/etc/php/8.2/fpm/pool.d/greenpulse.conf`, ajuster :
@@ -107,7 +107,7 @@ sudo systemctl restart php8.2-fpm
 ## 6) Configurer Nginx (virtual host)
 
 ```bash
-sudo cp /home/runner/work/Projet-BD-PHP-Web/Projet-BD-PHP-Web/dev/GreenPulse/deploy/nginx/greenpulse.conf /etc/nginx/sites-available/greenpulse
+sudo cp /srv/greenpulse/deploy/nginx/greenpulse.conf /etc/nginx/sites-available/greenpulse
 sudo ln -s /etc/nginx/sites-available/greenpulse /etc/nginx/sites-enabled/greenpulse
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
@@ -126,9 +126,9 @@ Le fichier Nginx fourni :
 Exemple sécurisé :
 
 ```bash
-sudo chown -R deploy:www-data /home/runner/work/Projet-BD-PHP-Web/Projet-BD-PHP-Web/dev/GreenPulse
-sudo find /home/runner/work/Projet-BD-PHP-Web/Projet-BD-PHP-Web/dev/GreenPulse -type d -exec chmod 750 {} \;
-sudo find /home/runner/work/Projet-BD-PHP-Web/Projet-BD-PHP-Web/dev/GreenPulse -type f -exec chmod 640 {} \;
+sudo chown -R deploy:www-data /srv/greenpulse
+sudo find /srv/greenpulse -type d -exec chmod 750 {} \;
+sudo find /srv/greenpulse -type f -exec chmod 640 {} \;
 ```
 
 ## 8) HTTPS (Let's Encrypt)
