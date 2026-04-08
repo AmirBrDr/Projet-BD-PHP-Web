@@ -1,0 +1,35 @@
+# Configuration files with secrets
+config.local.php
+.env
+.env.local
+.env.*.local
+
+# Compiled/dependencies
+vendor/
+node_modules/
+composer.lock
+package-lock.json
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Development
+.php-cs-fixer.cache
+.phpunit.result.cache
+
+# Build artifacts
+dist/
+build/
