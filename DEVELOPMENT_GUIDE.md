@@ -1,13 +1,13 @@
-# GreenPulse Development Guide
+# Guide de Développement GreenPulse
 
-## Project Structure Overview
+## Vue d'ensemble de la structure du projet
 
 ```
 /srv/greenpulse/
 ├── api/
-│   ├── auth/                 # Authentication endpoints
-│   ├── lib/                  # Shared libraries (db, http, jwt)
-│   ├── modules/              # Feature modules (NEW)
+│   ├── auth/                 # Points de terminaison d'authentification
+│   ├── lib/                  # Bibliothèques partagées (db, http, jwt)
+│   ├── modules/              # Modules de fonctionnalités (NOUVEAU)
 │   │   ├── admin/
 │   │   ├── animator/
 │   │   ├── employee/
@@ -21,8 +21,8 @@
 │   ├── bootstrap.php
 │   └── config.php
 ├── public/
-│   ├── auth.html             # Login/Register page
-│   ├── pages/                # Application pages (NEW)
+│   ├── auth.html             # Page de connexion/inscription
+│   ├── pages/                # Pages de l'application (NOUVEAU)
 │   │   ├── dashboardRH.html
 │   │   ├── dashboardE.html
 │   │   ├── gestionUtilisateurs.html
@@ -39,24 +39,24 @@
 │   │   ├── documents.html
 │   │   └── index.html
 │   └── assets/
-│       ├── css/              # Stylesheets (NEW)
-│       ├── js/               # JavaScript files (NEW)
+│       ├── css/              # Feuilles de style (NOUVEAU)
+│       ├── js/               # Fichiers JavaScript (NOUVEAU)
 │       └── logo.png
-└── maquette/                 # UI mockups reference
+└── maquette/                 # Référence des maquettes UI
 ```
 
 ---
 
-## User Roles & Pages
+## Rôles utilisateur et pages
 
-### 👨‍💼 **Admin RH (HR Administrator)**
-- **Dashboard RH** - `public/pages/dashboardRH.html` - Overview of all system metrics
-- **Gestion des Utilisateurs** - `public/pages/gestionUtilisateurs.html` - Manage users
-- **Gestion des Défis** - `public/pages/gestionDefis.html` - Manage challenges
-- **Modération** - `public/pages/moderation.html` - Review and moderate content
-- **Paramètres** - `public/pages/parametresRH.html` - HR-specific settings
+### 👨‍💼 **Admin RH (Administrateur RH)**
+- **Dashboard RH** - `public/pages/dashboardRH.html` - Vue d'ensemble des métriques système
+- **Gestion des Utilisateurs** - `public/pages/gestionUtilisateurs.html` - Gérer les utilisateurs
+- **Gestion des Défis** - `public/pages/gestionDefis.html` - Gérer les défis
+- **Modération** - `public/pages/moderation.html` - Examiner et modérer le contenu
+- **Paramètres** - `public/pages/parametresRH.html` - Paramètres spécifiques RH
 
-**API Modules:**
+**Modules API :**
 - `api/modules/admin/`
 - `api/modules/users/`
 - `api/modules/moderation/`
@@ -64,27 +64,27 @@
 
 ---
 
-### 🎬 **Animateur (Animator/Organizer)**
-- **Statistiques** - `public/pages/statistiques.html` - View statistics and analytics
-- **Profil** - `public/pages/profil.html` - User profile
-- **Paramètres** - `public/pages/parametresAnimateur.html` - Animator settings
+### 🎬 **Animateur**
+- **Statistiques** - `public/pages/statistiques.html` - Voir les statistiques et analyses
+- **Profil** - `public/pages/profil.html` - Profil utilisateur
+- **Paramètres** - `public/pages/parametresAnimateur.html` - Paramètres animateur
 
-**API Modules:**
+**Modules API :**
 - `api/modules/animator/`
 - `api/modules/statistics/`
 
 ---
 
-### 👥 **Employé (Employee)**
-- **Dashboard** - `public/pages/dashboardE.html` - Personal dashboard
-- **Équipe** - `public/pages/detailEquipe.html` - Team details and members
-- **Défis** - `public/pages/defis.html` - List of available challenges
-- **Classement** - `public/pages/classement.html` - Rankings/leaderboard
-- **Détail Défi** - `public/pages/detailDefi.html` - Challenge details
-- **Documents** - `public/pages/documents.html` - Document repository
-- **Profil** - `public/pages/profil.html` - User profile
+### 👥 **Employé**
+- **Dashboard** - `public/pages/dashboardE.html` - Tableau de bord personnel
+- **Équipe** - `public/pages/detailEquipe.html` - Détails et membres de l'équipe
+- **Défis** - `public/pages/defis.html` - Liste des défis disponibles
+- **Classement** - `public/pages/classement.html` - Classements/tableau des scores
+- **Détail Défi** - `public/pages/detailDefi.html` - Détails du défi
+- **Documents** - `public/pages/documents.html` - Référentiel de documents
+- **Profil** - `public/pages/profil.html` - Profil utilisateur
 
-**API Modules:**
+**Modules API :**
 - `api/modules/employee/`
 - `api/modules/challenges/`
 - `api/modules/teams/`
@@ -92,113 +92,113 @@
 
 ---
 
-## Getting Started for Team Members
+## Premiers pas pour les membres de l'équipe
 
-### 1. **Frontend Development** (HTML/CSS/JS)
-Each page has placeholder files:
-- `public/pages/[pagename].html` - Edit the HTML structure
-- `public/assets/css/[pagename].css` - Add your styles
-- `public/assets/js/[pagename].js` - Add your JavaScript
+### 1. **Développement Frontend** (HTML/CSS/JS)
+Chaque page a des fichiers modèles :
+- `public/pages/[pagename].html` - Modifiez la structure HTML
+- `public/assets/css/[pagename].css` - Ajoutez vos styles
+- `public/assets/js/[pagename].js` - Ajoutez votre JavaScript
 
-**Example workflow:**
+**Exemple de flux de travail :**
 ```bash
 cd /srv/greenpulse
-# Make changes
+# Faites vos modifications
 git add .
-git commit -m "feat: implement dashboardRH page"
+git commit -m "feat: implémente la page dashboardRH"
 git push origin main
 ```
 
-### 2. **Backend Development** (PHP/API)
-Each module has a placeholder:
-- `api/modules/[module]/index.php` - Add your API endpoints
+### 2. **Développement Backend** (PHP/API)
+Chaque module a un fichier modèle :
+- `api/modules/[module]/index.php` - Ajoutez vos points de terminaison API
 
-**Example endpoint structure:**
+**Exemple de structure de point de terminaison :**
 ```php
 <?php
 // api/modules/challenges/index.php
 require_once __DIR__ . '/../../bootstrap.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // Get challenges
+    // Récupère les défis
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Create challenge
+    // Crée un défi
 }
 ?>
 ```
 
-### 3. **Update Nginx Routes** (If needed)
-Nginx configuration is in `deploy/nginx/greenpulse.conf`
-- Frontend routes: `/pages/` automatically serve HTML
-- API routes: `/api/modules/` 
+### 3. **Mise à jour des routes Nginx** (Si nécessaire)
+La configuration Nginx est dans `deploy/nginx/greenpulse.conf`
+- Routes frontend : `/pages/` servent automatiquement HTML
+- Routes API : `/api/modules/` 
 
 ---
 
-## Available API & Libraries
+## API et bibliothèques disponibles
 
-### Authentication
-- `api/auth/login.php` - User login
-- `api/auth/register.php` - User registration
-- `api/auth/me.php` - Get current user info
+### Authentification
+- `api/auth/login.php` - Connexion utilisateur
+- `api/auth/register.php` - Inscription utilisateur
+- `api/auth/me.php` - Obtenir les informations de l'utilisateur actuel
 
-### Shared Libraries
-- `api/lib/db.php` - Database connection
-- `api/lib/http.php` - HTTP utilities
-- `api/lib/jwt.php` - JWT token handling
+### Bibliothèques partagées
+- `api/lib/db.php` - Connexion base de données
+- `api/lib/http.php` - Utilitaires HTTP
+- `api/lib/jwt.php` - Gestion des jetons JWT
 
 ---
 
-## Development Workflow
+## Flux de travail de développement
 
-1. **Clone repository**
+1. **Cloner le référentiel**
    ```bash
    git clone https://github.com/AmirBrDr/Projet-BD-PHP-Web.git
    cd Projet-BD-PHP-Web
    ```
 
-2. **Create your working branch**
+2. **Créer votre branche de travail**
    ```bash
-   git checkout -b feature/your-feature-name
+   git checkout -b feature/nom-de-votre-fonctionnalite
    ```
 
-3. **Make your changes** in the appropriate page/module
+3. **Effectuez vos modifications** dans la page/module appropriée
 
-4. **Test locally** at `http://greenpulse.stri`
+4. **Testez localement** sur `http://greenpulse.stri`
 
-5. **Commit and push**
+5. **Validez et poussez**
    ```bash
    git add .
-   git commit -m "feat: add feature description"
-   git push origin feature/your-feature-name
+   git commit -m "feat: description de la fonctionnalité"
+   git push origin feature/nom-de-votre-fonctionnalite
    ```
 
-6. **Create a Pull Request** on GitHub for review
+6. **Créez une Pull Request** sur GitHub pour examen
 
 ---
 
-## Database
+## Base de données
 
-Schema located in: `db/schema.sql`
-- Use this to understand data models
-- Database connection available via `api/lib/db.php`
-
----
-
-## Maquette Reference
-
-UI mockups and designs in `/maquette/`:
-- HTML templates: `maquette/HTML/[pagename].html`
-- CSS styles: `maquette/CSS/[pagename].css`
-
-Use these as reference for your implementation!
+Schéma situé dans : `db/schema.sql`
+- Utilisez-le pour comprendre les modèles de données
+- Connexion base de données disponible via `api/lib/db.php`
 
 ---
 
-## Contact & Support
+## Référence des maquettes
 
-For questions or blockers:
-- Check existing issues on GitHub
-- Create a new issue if needed
-- Tag team members for review
+Maquettes UI et conceptions dans `/maquette/` :
+- Templates HTML : `maquette/HTML/[pagename].html`
+- Styles CSS : `maquette/CSS/[pagename].css`
 
-Happy coding! 🚀
+Utilisez-les comme référence pour votre implémentation !
+
+---
+
+## Contact et support
+
+Pour des questions ou des blocages :
+- Vérifiez les problèmes existants sur GitHub
+- Créez une nouvelle issue si nécessaire
+- Taggez les membres de l'équipe pour examen
+
+Bon codage ! 🚀
