@@ -38,7 +38,7 @@ Puis :
 ```sql
 CREATE DATABASE greenpulse;
 CREATE USER greenpulse_app WITH ENCRYPTED PASSWORD 'CHANGE_ME_STRONG_DB_PASSWORD';
-GRANT ALL PRIVILEGES ON DATABASE greenpulse TO greenpulse_app;
+GRANT CONNECT ON DATABASE greenpulse TO greenpulse_app;
 \c greenpulse
 GRANT USAGE ON SCHEMA public TO greenpulse_app;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO greenpulse_app;
