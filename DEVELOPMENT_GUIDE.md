@@ -92,6 +92,253 @@
 
 ---
 
+## Configuration initiale et installation
+
+### Prérequis
+
+Pour développer localement, vous aurez besoin de :
+- **Git**
+- **PHP 8.4+** (si vous développez le backend)
+- **PostgreSQL 14+** (base de données)
+- **Nginx ou Apache** (serveur web)
+- **Composer** (gestionnaire de dépendances PHP)
+- **Node.js & npm** (optionnel, pour le frontend)
+
+---
+
+### 🍎 **Installation sur macOS**
+
+#### 1. Installer les outils requis
+
+**Avec Homebrew :**
+```bash
+# Installer Homebrew si ce n'est pas déjà fait
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Installer les dépendances
+brew install git php@8.4 postgresql nginx composer node
+```
+
+#### 2. Démarrer les services
+
+```bash
+# Démarrer PostgreSQL
+brew services start postgresql
+
+# Démarrer Nginx
+brew services start nginx
+```
+
+#### 3. Cloner le projet
+
+```bash
+# Naviguer vers le dossier de votre choix
+cd ~/Projets
+
+# Cloner le référentiel
+git clone https://github.com/AmirBrDr/Projet-BD-PHP-Web.git
+cd Projet-BD-PHP-Web
+```
+
+#### 4. Configurer la base de données locale
+
+```bash
+# Créer la base de données
+createdb greenpulse
+
+# Importer le schéma
+psql greenpulse < db/schema.sql
+
+# Créer l'utilisateur DB (optionnel)
+createuser greenpulse_dev
+```
+
+#### 5. Configurer PHP localement
+
+```bash
+# Créer une configuration locale
+cp api/config.php api/config.local.php
+
+# Éditez config.local.php avec vos détails de base de données
+nano api/config.local.php
+```
+
+#### 6. Exécuter le serveur local
+
+```bash
+# Depuis le dossier du projet
+php -S localhost:8000 -t public/
+```
+
+Accédez à : `http://localhost:8000`
+
+---
+
+### 🪟 **Installation sur Windows (avec WAMP/XAMPP)**
+
+#### 1. Installer les outils requis
+
+**Option A : XAMPP (recommandé)**
+- Téléchargez XAMPP depuis https://www.apachefriends.org/
+- Installez-le (il inclut Apache, PHP, PostgreSQL, Nginx)
+
+**Option B : Installations individuelles**
+- Git : https://git-scm.com/download/win
+- PHP 8.4 : https://windows.php.net/download/
+- PostgreSQL : https://www.postgresql.org/download/windows/
+- Nginx : https://nginx.org/en/download.html
+- Composer : https://getcomposer.org/
+
+#### 2. Ajouter PHP au PATH Windows
+
+1. Appuyez sur `Win + X` → **Paramètres système avancés**
+2. Cliquez sur **Variables d'environnement**
+3. Sous **Variables utilisateur**, cliquez sur **Nouveau**
+   - Nom : `PATH`
+   - Valeur : `C:\xampp\php` (ou votre chemin PHP)
+4. Cliquez **OK** et redémarrez
+
+#### 3. Vérifier l'installation
+
+Ouvrez **PowerShell** et testez :
+```powershell
+php -v
+composer --version
+git --version
+```
+
+#### 4. Cloner le projet
+
+```powershell
+# Naviguer vers le dossier de votre choix
+cd C:\Projets
+
+# Cloner le référentiel
+git clone https://github.com/AmirBrDr/Projet-BD-PHP-Web.git
+cd Projet-BD-PHP-Web
+```
+
+#### 5. Configurer PostgreSQL
+
+1. Ouvrez **PostgreSQL Command Line Client** (pgAdmin)
+2. Connectez-vous en tant qu'administrateur
+3. Exécutez :
+```sql
+CREATE DATABASE greenpulse;
+CREATE USER greenpulse_dev WITH PASSWORD 'password123';
+GRANT ALL PRIVILEGES ON DATABASE greenpulse TO greenpulse_dev;
+```
+
+#### 6. Importer le schéma
+
+```powershell
+# Dans PowerShell, depuis le dossier du projet
+psql -U greenpulse_dev -d greenpulse -f db/schema.sql
+```
+
+#### 7. Configurer PHP
+
+```powershell
+# Copier la config
+Copy-Item api\config.php api\config.local.php
+
+# Éditez avec Notepad++ ou VS Code
+code api\config.local.php
+```
+
+#### 8. Exécuter le serveur local
+
+```powershell
+# Depuis le dossier du projet
+php -S localhost:8000 -t public/
+```
+
+Accédez à : `http://localhost:8000`
+
+---
+
+### 🐧 **Installation sur Linux (Ubuntu/Debian)**
+
+#### 1. Installer les dépendances
+
+```bash
+# Mettre à jour les paquets
+sudo apt update && sudo apt upgrade -y
+
+# Installer les outils requis
+sudo apt install -y git php8.4 php8.4-pgsql postgresql postgresql-contrib nginx composer nodejs npm
+
+# Démarrer les services
+sudo systemctl start postgresql
+sudo systemctl start nginx
+```
+
+#### 2. Configurer PostgreSQL
+
+```bash
+# Basculer vers l'utilisateur postgres
+sudo -u postgres psql
+
+# Dans le terminal PostgreSQL :
+CREATE DATABASE greenpulse;
+CREATE USER greenpulse_dev WITH ENCRYPTED PASSWORD 'password123';
+GRANT ALL PRIVILEGES ON DATABASE greenpulse TO greenpulse_dev;
+\q
+
+# Importer le schéma
+sudo -u postgres psql -d greenpulse -f $(pwd)/db/schema.sql
+```
+
+#### 3. Cloner le projet
+
+```bash
+# Naviguer vers le dossier de votre choix
+cd ~/Projets
+
+# Cloner le référentiel
+git clone https://github.com/AmirBrDr/Projet-BD-PHP-Web.git
+cd Projet-BD-PHP-Web
+```
+
+#### 4. Configurer PHP
+
+```bash
+# Copier la configuration
+cp api/config.php api/config.local.php
+
+# Éditer la configuration
+nano api/config.local.php
+```
+
+#### 5. Exécuter le serveur local
+
+```bash
+# Accédez au dossier du projet
+cd Projet-BD-PHP-Web
+
+# Lancer le serveur HTTP PHP
+php -S localhost:8000 -t public/
+```
+
+Accédez à : `http://localhost:8000`
+
+---
+
+### Configuration de la base de données locale
+
+Modifiez `api/config.local.php` :
+```php
+<?php
+define('DB_HOST', 'localhost');
+define('DB_PORT', 5432);
+define('DB_NAME', 'greenpulse');
+define('DB_USER', 'greenpulse_dev');
+define('DB_PASSWORD', 'votre_mot_de_passe');
+?>
+```
+
+---
+
 ## Premiers pas pour les membres de l'équipe
 
 ### 1. **Développement Frontend** (HTML/CSS/JS)
@@ -148,31 +395,181 @@ La configuration Nginx est dans `deploy/nginx/greenpulse.conf`
 
 ---
 
-## Flux de travail de développement
+## Bonnes pratiques de développement
 
-1. **Cloner le référentiel**
+### ✅ À faire
+
+- Faire des commits réguliers et descriptifs
+- Créer une branche pour chaque fonctionnalité
+- Tester avant de pousser
+- Garder votre branche à jour avec `main`
+- Écrire du code lisible et commenté
+
+### ❌ À ne pas faire
+
+- Committer directement sur `main`
+- Pousser du code non testé
+- Ignorer les erreurs de compilation
+- Modifier les fichiers de configuration globaux
+- Committer des mots de passe ou secrets
+
+---
+
+## Flux de travail complet de développement
+
+### Étape 1 : Configuration initiale (une seule fois)
+
+```bash
+# Cloner le projet
+git clone https://github.com/AmirBrDr/Projet-BD-PHP-Web.git
+cd Projet-BD-PHP-Web
+
+# Configurer vos informations Git
+git config user.name "Votre Nom"
+git config user.email "votre.email@example.com"
+
+# Configurer votre branche locale pour le suivi
+git branch --set-upstream-to=origin/main main
+```
+
+### Étape 2 : Avant de commencer une nouvelle fonctionnalité
+
+```bash
+# Mettre à jour votre code local
+git checkout main
+git pull origin main
+
+# Créer une nouvelle branche pour votre fonctionnalité
+git checkout -b feature/ma-function
+```
+
+### Étape 3 : Pendant le développement
+
+```bash
+# Voir les fichiers modifiés
+git status
+
+# Vérifier vos modifications
+git diff
+
+# Ajouter vos modifications
+git add .
+# ou ajouter des fichiers spécifiques
+git add public/pages/dashboardRH.html
+
+# Faire un commit descriptif
+git commit -m "feat: ajoute le dashboardRH avec les statistiques principales"
+
+# Pousser votre branche vers GitHub
+git push origin feature/ma-function
+```
+
+### Étape 4 : Demander examen (Pull Request sur GitHub)
+
+1. Allez sur https://github.com/AmirBrDr/Projet-BD-PHP-Web
+2. Cliquez sur **Pull requests** → **New pull request**
+3. Sélectionnez votre branche (`feature/ma-function`)
+4. Décrivez vos changements détaillés
+5. Cliquez **Create pull request**
+6. Attendez l'examen et les commentaires de l'équipe
+
+### Étape 5 : Répondre aux commentaires
+
+```bash
+# Si vous devez apporter des modifications :
+# Faites les changements
+git add .
+git commit -m "fix: adresse les commentaires de révision"
+git push origin feature/ma-function
+
+# Le PR se met à jour automatiquement
+```
+
+### Étape 6 : Après l'approbation
+
+```bash
+# Revenir à main
+git checkout main
+
+# Mettre à jour main
+git pull origin main
+
+# Supprimer votre branche (optionnel)
+git branch -d feature/ma-function
+git push origin --delete feature/ma-function
+```
+
+---
+
+## Commandes Git essentielles
+
+| Commande | Description |
+|----------|-------------|
+| `git status` | Voir les fichiers modifiés |
+| `git add .` | Ajouter tous les fichiers au staging |
+| `git commit -m "message"` | Créer un commit |
+| `git push origin <branche>` | Pousser vers GitHub |
+| `git pull origin main` | Récupérer les mises à jour |
+| `git log --oneline` | Voir l'historique des commits |
+| `git checkout -b <branche>` | Créer et basculer vers une branche |
+| `git branch -a` | Voir toutes les branches |
+| `git diff` | Voir les modifications |
+| `git merge <branche>` | Fusionner une branche |
+
+---
+
+## Dépannage courant
+
+### Le site ne charge pas après le clonage
+
+```bash
+# 1. Vérifier que la base de données est démarrée
+# macOS
+brew services list
+
+# Windows
+services.msc (cherchez PostgreSQL)
+
+# Linux
+sudo systemctl status postgresql
+
+# 2. Vérifier que le serveur PHP est en cours d'exécution
+php -S localhost:8000 -t public/
+
+# 3. Accédez à http://localhost:8000
+```
+
+### Erreur de connexion à la base de données
+
+1. Vérifiez que PostgreSQL est démarré
+2. Vérifiez les identifiants dans `api/config.local.php`
+3. Testez la connexion :
    ```bash
-   git clone https://github.com/AmirBrDr/Projet-BD-PHP-Web.git
-   cd Projet-BD-PHP-Web
+   psql -U greenpulse_dev -d greenpulse -h localhost
    ```
 
-2. **Créer votre branche de travail**
-   ```bash
-   git checkout -b feature/nom-de-votre-fonctionnalite
-   ```
+### Le push échoue avec "rejected"
 
-3. **Effectuez vos modifications** dans la page/module appropriée
+```bash
+# Votre branche est en retard
+git pull origin <votre-branche>
 
-4. **Testez localement** sur `http://greenpulse.stri`
+# Résoudre les conflits s'il y en a
+# Puis pousser à nouveau
+git push origin <votre-branche>
+```
 
-5. **Validez et poussez**
-   ```bash
-   git add .
-   git commit -m "feat: description de la fonctionnalité"
-   git push origin feature/nom-de-votre-fonctionnalite
-   ```
+### J'ai fait un commit sur main par accident
 
-6. **Créez une Pull Request** sur GitHub pour examen
+```bash
+# Annuler le dernier commit (garde les modifications)
+git reset --soft HEAD~1
+
+# Créer une branche et repousser correctement
+git checkout -b feature/oops
+git commit -m "feat: description"
+git push origin feature/oops
+```
 
 ---
 
