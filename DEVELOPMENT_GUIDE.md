@@ -1,3 +1,31 @@
+# Connexion au serveur container via SSH
+
+## Configuration SSH
+
+Pour se connecter au serveur container, ajoutez la configuration suivante à votre fichier `~/.ssh/config` :
+
+```
+Host cServer
+    HostName 2001:678:3fc:1c:1266:6aff:fea8:aa33
+    User etu
+    Port 2222
+```
+
+### Informations de connexion
+
+- **Utilisateur** : `etu`
+- **Mot de passe** : `webuserGreenPulse`
+
+### Connexion
+
+Une fois configuré, connectez-vous avec :
+
+```bash
+ssh cServer
+```
+
+---
+
 # Guide de Développement GreenPulse
 
 ## Vue d'ensemble de la structure du projet
