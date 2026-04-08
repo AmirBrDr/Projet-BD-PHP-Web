@@ -1,12 +1,12 @@
 # GreenPulse - Déploiement production avec Nginx
 
-Ce guide implémente une mise en production de GreenPulse avec **Nginx + PHP-FPM + PostgreSQL**.
+Ce guide implémente une mise en production de GreenPulse avec **Nginx + PHP-FPM 8.4 + PostgreSQL**.
 
 ## 1) Préparer le serveur (Ubuntu/Debian)
 
 ```bash
 sudo apt update
-sudo apt install -y nginx postgresql postgresql-client php8.2-fpm php8.2-cli php8.2-pgsql openssl certbot python3-certbot-nginx
+sudo apt install -y nginx postgresql postgresql-client php8.4-fpm php8.4-cli php8.4-pgsql openssl certbot python3-certbot-nginx
 ```
 
 ## 2) Déployer le code
@@ -15,6 +15,13 @@ Exemple de chemin d'application attendu :
 
 ```text
 /srv/greenpulse
+```
+
+Exemple de déploiement exact (copie uniquement de `dev/GreenPulse`) :
+
+```bash
+sudo mkdir -p /srv/greenpulse
+sudo rsync -av --delete /path/to/Projet-BD-PHP-Web/dev/GreenPulse/ /srv/greenpulse/
 ```
 
 Créer un utilisateur de déploiement (optionnel mais recommandé) :
@@ -88,10 +95,10 @@ sudo nano /etc/default/greenpulse
 ## 5) Configurer PHP-FPM (pool dédié)
 
 ```bash
-sudo cp /srv/greenpulse/deploy/php-fpm/greenpulse.conf /etc/php/8.2/fpm/pool.d/greenpulse.conf
+sudo cp /srv/greenpulse/deploy/php-fpm/greenpulse.conf /etc/php/8.4/fpm/pool.d/greenpulse.conf
 ```
 
-Dans `/etc/php/8.2/fpm/pool.d/greenpulse.conf`, ajuster :
+Dans `/etc/php/8.4/fpm/pool.d/greenpulse.conf`, ajuster :
 - `user` / `group`,
 - le chemin d'app,
 - le socket `listen`.
@@ -99,7 +106,7 @@ Dans `/etc/php/8.2/fpm/pool.d/greenpulse.conf`, ajuster :
 Pour injecter les variables d'environnement dans PHP-FPM :
 
 ```bash
-sudo systemctl edit php8.2-fpm
+sudo systemctl edit php8.4-fpm
 ```
 
 Ajouter :
@@ -113,7 +120,7 @@ Puis recharger :
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl restart php8.2-fpm
+sudo systemctl restart php8.4-fpm
 ```
 
 ## 6) Configurer Nginx (virtual host)
@@ -165,7 +172,7 @@ Le fichier Nginx inclut déjà une redirection HTTP → HTTPS.
 5. En cas d'erreur :
    ```bash
    sudo tail -f /var/log/nginx/error.log
-   sudo journalctl -u php8.2-fpm -f
+   sudo journalctl -u php8.4-fpm -f
    ```
 
 ## Important
