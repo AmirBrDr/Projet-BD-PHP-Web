@@ -114,3 +114,9 @@ cd C:\xampp\htdocs\PHP
 ```
 
 Puis accédez à http://localhost:8000
+
+## Déploiement production (Nginx)
+
+Consultez le guide complet :
+
+- `dev/GreenPulse/DEPLOY_NGINX.md`
