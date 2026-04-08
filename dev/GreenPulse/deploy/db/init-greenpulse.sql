@@ -1,6 +1,7 @@
 -- GreenPulse production bootstrap SQL
 -- Execute as postgres superuser:
 --   psql -f init-greenpulse.sql
+-- IMPORTANT: replace CHANGE_ME_STRONG_DB_PASSWORD before first use.
 
 DO
 $$

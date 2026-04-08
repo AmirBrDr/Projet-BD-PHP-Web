@@ -65,7 +65,11 @@ Vous pouvez aussi utiliser le template SQL :
 sudo -u postgres psql -f /srv/greenpulse/deploy/db/init-greenpulse.sql
 ```
 
-Utilisez soit les commandes SQL manuelles de 3.1 + import de `schema.sql`, soit le fichier `init-greenpulse.sql` (qui crée l'utilisateur/la base si besoin), mais pas les deux de manière répétée.
+Recommandation :
+- **Méthode A (contrôle fin)** : section 3.1 puis import `schema.sql`.
+- **Méthode B (rapide)** : `init-greenpulse.sql` uniquement.
+
+Évitez d'exécuter les deux workflows en boucle : cela n'endommage pas la base, mais applique les mêmes droits plusieurs fois et complique le troubleshooting.
 
 ## 4) Configurer les variables d'environnement
 
