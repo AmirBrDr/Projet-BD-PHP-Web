@@ -15,6 +15,7 @@ $prenomUser = trim((string)($body['prenomUser'] ?? $body['prenom_user'] ?? ''));
 $email = trim((string)($body['email'] ?? ''));
 $statutUser = trim((string)($body['statutUser'] ?? $body['statut_user'] ?? 'actif'));
 $mdp = (string)($body['mdp'] ?? '');
+$role = gp_normalize_role((string)($body['role'] ?? 'employe'));
 $pdpUser = $body['pdpUser'] ?? $body['pdp_user'] ?? null;
 $inscriptionUser = $body['inscriptionUser'] ?? $body['inscription_user'] ?? null;
 $idEntreprise = $body['idEntreprise'] ?? $body['id_entreprise'] ?? $body['Id_Entreprise'] ?? null;
@@ -36,6 +37,10 @@ if (strlen($mdp) < 6) {
 $allowedStatuts = ['actif', 'inactif', 'suspendu'];
 if (!in_array($statutUser, $allowedStatuts, true)) {
     gp_send_json(400, ['message' => 'Statut utilisateur invalide']);
+}
+
+if (!gp_is_valid_role($role)) {
+    gp_send_json(400, ['message' => 'Rôle utilisateur invalide']);
 }
 
 try {
@@ -100,34 +105,51 @@ try {
 
     $hash = password_hash($mdp, PASSWORD_DEFAULT);
 
-    $sql = 'INSERT INTO utilisateur (nomuser, pdpuser, prenomuser, email, statutuser, mdp, inscriptionuser, id_entreprise)
-            VALUES (:nomuser, :pdpuser, :prenomuser, :email, :statutuser, :mdp, COALESCE(:inscriptionuser, CURRENT_DATE), :id_entreprise)
-            RETURNING id_user';
-
     $dateValue = null;
     if (is_string($inscriptionUser) && trim($inscriptionUser) !== '') {
         $dateValue = substr($inscriptionUser, 0, 10);
     }
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':nomuser' => $nomUser,
-        ':pdpuser' => $pdpUser,
-        ':prenomuser' => $prenomUser,
-        ':email' => $email,
-        ':statutuser' => $statutUser,
-        ':mdp' => $hash,
-        ':inscriptionuser' => $dateValue,
-        ':id_entreprise' => $resolvedEntrepriseId,
-    ]);
+    $pdo->beginTransaction();
 
-    $row = $stmt->fetch();
-    $idUser = (int)($row['id_user'] ?? 0);
+    try {
+        $sql = 'INSERT INTO utilisateur (nomuser, pdpuser, prenomuser, email, statutuser, mdp, inscriptionuser, id_entreprise)
+                VALUES (:nomuser, :pdpuser, :prenomuser, :email, :statutuser, :mdp, COALESCE(:inscriptionuser, CURRENT_DATE), :id_entreprise)
+                RETURNING id_user';
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':nomuser' => $nomUser,
+            ':pdpuser' => $pdpUser,
+            ':prenomuser' => $prenomUser,
+            ':email' => $email,
+            ':statutuser' => $statutUser,
+            ':mdp' => $hash,
+            ':inscriptionuser' => $dateValue,
+            ':id_entreprise' => $resolvedEntrepriseId,
+        ]);
+
+        $row = $stmt->fetch();
+        $idUser = (int)($row['id_user'] ?? 0);
+
+        if ($idUser <= 0) {
+            throw new RuntimeException('Impossible de créer l\'utilisateur');
+        }
+
+        gp_insert_user_role($pdo, $idUser, $role);
+        $pdo->commit();
+    } catch (Throwable $inner) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $inner;
+    }
 
     $token = gp_jwt_sign([
         'sub' => (string)$idUser,
         'email' => $email,
         'statutUser' => $statutUser,
+        'role' => $role,
     ], $config['jwt']);
 
     gp_send_json(201, [
@@ -141,6 +163,7 @@ try {
             'statutUser' => $statutUser,
             'pdpUser' => $pdpUser,
             'idEntreprise' => $resolvedEntrepriseId,
+            'role' => $role,
         ],
     ]);
 } catch (Throwable $e) {

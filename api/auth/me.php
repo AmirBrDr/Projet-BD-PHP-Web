@@ -26,6 +26,11 @@ try {
         gp_send_json(404, ['message' => 'Utilisateur introuvable']);
     }
 
+    $role = gp_resolve_user_role($pdo, $idUser);
+    if ($role === null) {
+        gp_send_json(403, ['message' => 'Compte sans rôle associé']);
+    }
+
     gp_send_json(200, [
         'user' => [
             'idUser' => (int)$user['id_user'],
@@ -35,6 +40,7 @@ try {
             'statutUser' => (string)($user['statutuser'] ?? ''),
             'pdpUser' => $user['pdpuser'] ?? null,
             'inscriptionUser' => $user['inscriptionuser'] ?? null,
+            'role' => $role,
         ],
     ]);
 } catch (Throwable $e) {

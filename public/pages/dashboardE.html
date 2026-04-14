@@ -1,16 +1,83 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - dashboardE</title>
-    <link rel="stylesheet" href="../assets/css/dashboardE.css">
-</head>
-<body>
-    <div class="container">
-        <h1>dashboardE</h1>
-        <p>Page en développement...</p>
-    </div>
-    <script src="../assets/js/dashboardE.js"></script>
-</body>
-</html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GreenPulse - Espace Employé</title>
+        <link rel="stylesheet" href="../assets/css/app-shell.css" />
+    </head>
+    <body class="app-page" data-required-role="employe">
+        <main class="app-shell">
+            <header class="app-header">
+                <div class="brand-block">
+                    <div class="brand-name">GreenPulse</div>
+                    <div class="brand-title">Espace Employé</div>
+                    <div class="brand-subtitle">Suivi des défis, validations et impact individuel</div>
+                </div>
+                <div class="header-actions">
+                    <div class="role-pill">Rôle: <strong data-user-role>EMPLOYE</strong></div>
+                    <button class="logout-btn" type="button" data-logout>Déconnexion</button>
+                </div>
+            </header>
+
+            <section class="hero">
+                <div class="panel hero-copy">
+                    <p class="eyebrow">Tableau de bord personnel</p>
+                    <h1>Avancez sur vos défis et suivez vos validations en temps réel.</h1>
+                    <p>
+                        Bonjour <strong data-user-name></strong>, votre espace rassemble les actions à terminer,
+                        les défis en cours et les résultats de votre contribution RSE.
+                    </p>
+                </div>
+
+                <aside class="panel profile-card">
+                    <div class="profile-label">Session active</div>
+                    <div class="profile-name" data-user-name>Utilisateur</div>
+                    <div class="profile-email" data-user-email></div>
+                    <div class="status-pill">Connecté le <strong data-today></strong></div>
+                </aside>
+            </section>
+
+            <section class="stats-grid" aria-label="Indicateurs principaux">
+                <article class="panel stat-card">
+                    <div class="stat-kicker">Points</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-copy">Vos points apparaîtront ici après la validation des actions.</div>
+                </article>
+                <article class="panel stat-card">
+                    <div class="stat-kicker">CO2 évité</div>
+                    <div class="stat-value">0 kg</div>
+                    <div class="stat-copy">Le suivi se base sur vos actions validées dans les défis actifs.</div>
+                </article>
+                <article class="panel stat-card">
+                    <div class="stat-kicker">Badges</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-copy">Débloquez des badges au fil de votre progression.</div>
+                </article>
+            </section>
+
+            <section class="action-grid">
+                <article class="panel action-card">
+                    <h2>Actions à poursuivre</h2>
+                    <p>Retrouvez ici le prochain contenu à intégrer: défis en cours, preuves à déposer et retours de validation.</p>
+                    <ul class="action-list">
+                        <li>Consulter les défis du mois</li>
+                        <li>Déposer une validation</li>
+                        <li>Suivre vos badges</li>
+                    </ul>
+                </article>
+                <article class="panel action-card">
+                    <h2>Navigation rapide</h2>
+                    <p>Cette page sert maintenant de base fonctionnelle pour le parcours employé.</p>
+                    <ul class="action-list">
+                        <li>Profil et paramètres</li>
+                        <li>Classement d'équipe</li>
+                        <li>Défis du moment</li>
+                    </ul>
+                </article>
+            </section>
+        </main>
+
+        <script src="../assets/js/app-shell.js" defer></script>
+    </body>
+    </html>

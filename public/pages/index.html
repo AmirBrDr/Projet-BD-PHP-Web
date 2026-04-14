@@ -1,15 +1,62 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - Accueil</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-</head>
-<body>
-    <div class="container">
-        <h1>GreenPulse Application</h1>
-        <p>Bienvenue sur la plateforme GreenPulse</p>
-    </div>
-</body>
-</html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GreenPulse - Accueil</title>
+        <link rel="stylesheet" href="../assets/css/app-shell.css" />
+    </head>
+    <body class="app-page">
+        <main class="app-shell">
+            <header class="app-header">
+                <div class="brand-block">
+                    <div class="brand-name">GreenPulse</div>
+                    <div class="brand-title">Plateforme de durabilité gamifiée</div>
+                    <div class="brand-subtitle">Connexion par rôle, suivi des défis et pilotage RSE</div>
+                </div>
+                <div class="header-actions">
+                    <a class="logout-btn cta-link" href="/auth.html">Accéder à l’auth</a>
+                </div>
+            </header>
+
+            <section class="hero">
+                <div class="panel hero-copy">
+                    <p class="eyebrow">Bienvenue</p>
+                    <h1>Un point d’entrée clair pour les employés, animateurs et administrateurs.</h1>
+                    <p>
+                        Cette page sert de vitrine et renvoie vers l’authentification. Une fois connecté, le
+                        système vous place automatiquement dans l’espace correspondant à votre rôle.
+                    </p>
+                </div>
+
+                <aside class="panel profile-card">
+                    <div class="profile-label">Accès rapide</div>
+                    <div class="profile-name">Connexion</div>
+                    <div class="profile-email">/auth.html</div>
+                    <div class="status-pill">Flux de session <strong>actif</strong></div>
+                </aside>
+            </section>
+
+            <section class="action-grid">
+                <article class="panel action-card">
+                    <h2>Ce qui fonctionne maintenant</h2>
+                    <p>Le parcours d’accès est relié aux rôles réels en base.</p>
+                    <ul class="action-list">
+                        <li>Inscription dans la table cible</li>
+                        <li>Connexion avec détection de rôle</li>
+                        <li>Redirection vers la bonne page</li>
+                    </ul>
+                </article>
+                <article class="panel action-card">
+                    <h2>Suite logique</h2>
+                    <p>Vous pouvez brancher ensuite les modules métiers sans changer cette base.</p>
+                    <ul class="action-list">
+                        <li>Profils détaillés</li>
+                        <li>Tableaux de bord métiers</li>
+                        <li>Accès protégés</li>
+                    </ul>
+                </article>
+            </section>
+        </main>
+    </body>
+    </html>

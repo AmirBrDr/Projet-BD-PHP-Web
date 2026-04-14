@@ -1,16 +1,83 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - parametresAnimateur</title>
-    <link rel="stylesheet" href="../assets/css/parametresAnimateur.css">
-</head>
-<body>
-    <div class="container">
-        <h1>parametresAnimateur</h1>
-        <p>Page en développement...</p>
-    </div>
-    <script src="../assets/js/parametresAnimateur.js"></script>
-</body>
-</html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GreenPulse - Espace Animateur</title>
+        <link rel="stylesheet" href="../assets/css/app-shell.css" />
+    </head>
+    <body class="app-page" data-required-role="animateur">
+        <main class="app-shell">
+            <header class="app-header">
+                <div class="brand-block">
+                    <div class="brand-name">GreenPulse</div>
+                    <div class="brand-title">Espace Animateur</div>
+                    <div class="brand-subtitle">Pilotage des défis et accompagnement des équipes</div>
+                </div>
+                <div class="header-actions">
+                    <div class="role-pill">Rôle: <strong data-user-role>ANIMATEUR</strong></div>
+                    <button class="logout-btn" type="button" data-logout>Déconnexion</button>
+                </div>
+            </header>
+
+            <section class="hero">
+                <div class="panel hero-copy">
+                    <p class="eyebrow">Configuration des défis</p>
+                    <h1>Animez les défis mensuels et suivez la progression de votre thématique.</h1>
+                    <p>
+                        Bonjour <strong data-user-name></strong>, vous disposez ici de la base d’accès pour
+                        organiser les contenus, suivre les validations et préparer les prochains défis.
+                    </p>
+                </div>
+
+                <aside class="panel profile-card">
+                    <div class="profile-label">Session active</div>
+                    <div class="profile-name" data-user-name>Utilisateur</div>
+                    <div class="profile-email" data-user-email></div>
+                    <div class="status-pill">Connecté le <strong data-today></strong></div>
+                </aside>
+            </section>
+
+            <section class="stats-grid" aria-label="Indicateurs animateur">
+                <article class="panel stat-card">
+                    <div class="stat-kicker">Défis</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-copy">Espace prêt à accueillir le suivi des défis proposés.</div>
+                </article>
+                <article class="panel stat-card">
+                    <div class="stat-kicker">Thématiques</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-copy">Les thématiques seront reliées au contenu du mois.</div>
+                </article>
+                <article class="panel stat-card">
+                    <div class="stat-kicker">Forum</div>
+                    <div class="stat-value">ON</div>
+                    <div class="stat-copy">La page est protégée pour les animateurs uniquement.</div>
+                </article>
+            </section>
+
+            <section class="action-grid">
+                <article class="panel action-card">
+                    <h2>Actions rapides</h2>
+                    <p>Base d’interface pour préparer et suivre l’animation des défis.</p>
+                    <ul class="action-list">
+                        <li>Créer un défi</li>
+                        <li>Préparer une thématique</li>
+                        <li>Suivre les messages du forum</li>
+                    </ul>
+                </article>
+                <article class="panel action-card">
+                    <h2>Accès à compléter</h2>
+                    <p>Les futures données API pourront être intégrées sans changer cette structure.</p>
+                    <ul class="action-list">
+                        <li>Paramètres d’animation</li>
+                        <li>Gestion des publications</li>
+                        <li>Suivi des équipes</li>
+                    </ul>
+                </article>
+            </section>
+        </main>
+
+        <script src="../assets/js/app-shell.js" defer></script>
+    </body>
+    </html>
