@@ -88,19 +88,22 @@ body {
 }
 
 .tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 12px 14px 0;
   gap: 8px;
 }
 
 .tab {
+  flex: 1 1 0;
   appearance: none;
   border: 0;
   background: transparent;
   color: rgba(255, 255, 255, 0.55);
   padding: 12px 12px 14px;
   font-size: 13px;
+  text-align: center;
   cursor: pointer;
   border-bottom: 2px solid transparent;
 }
@@ -174,13 +177,54 @@ input {
   font-size: 13px;
 }
 
+select {
+  width: 100%;
+  height: 40px;
+  border-radius: 9px;
+  border: 1px solid var(--field-border);
+  background: var(--field);
+  outline: none;
+  color: var(--text);
+  padding: 0 34px 0 12px;
+  font-size: 13px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
 .control .icon + input {
   padding-left: 34px;
+}
+
+.control--select {
+  position: relative;
+}
+
+.control--select::after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid rgba(255, 255, 255, 0.55);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.55);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
 }
 
 input:focus {
   border-color: rgba(43, 212, 124, 0.35);
   box-shadow: 0 0 0 3px rgba(43, 212, 124, 0.08);
+}
+
+select:focus {
+  border-color: rgba(43, 212, 124, 0.35);
+  box-shadow: 0 0 0 3px rgba(43, 212, 124, 0.08);
+}
+
+select option {
+  color: #071225;
 }
 
 .hint {
@@ -271,6 +315,13 @@ input:focus {
   margin-top: 18px;
   font-size: 11px;
   color: rgba(255, 255, 255, 0.38);
+}
+
+.small-note {
+  margin-top: -4px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
 }
 
 @media (max-width: 420px) {

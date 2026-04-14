@@ -77,6 +77,52 @@ Puis mettez à jour `api/config.php` :
 ],
 ```
 
+## Étape 5 : Configurer l'envoi d'emails de réinitialisation
+
+Le flux "Mot de passe oublié" peut utiliser soit `mail()` local, soit Gmail SMTP.
+
+### Option A : Gmail SMTP recommandé
+
+1. Activez la validation en 2 étapes sur votre compte Google.
+2. Générez un **mot de passe d’application** Google.
+3. Créez `api/config.local.php` avec vos paramètres Gmail SMTP :
+
+```php
+<?php
+return [
+    'app' => [
+        'base_url' => 'http://localhost:8000',
+    ],
+    'mail' => [
+        'driver' => 'smtp',
+        'from_email' => 'votre.compte@gmail.com',
+        'from_name' => 'GreenPulse',
+        'reply_to' => 'votre.compte@gmail.com',
+        'smtp_host' => 'smtp.gmail.com',
+        'smtp_port' => 587,
+        'smtp_username' => 'votre.compte@gmail.com',
+        'smtp_password' => 'mot_de_passe_application_google',
+        'smtp_encryption' => 'tls',
+    ],
+];
+```
+
+### Option B : `mail()` local
+
+Si vous ne configurez pas SMTP, le projet utilise `mail()` par défaut. Sur Windows/XAMPP, cela dépend de votre `php.ini` et d'un service mail local.
+
+## Étape 6 : Vérifier le reset de mot de passe
+
+1. Ouvrez `http://localhost:8000/auth.html`.
+2. Cliquez sur **Mot de passe oublié**.
+3. Saisissez un email existant.
+4. Vérifiez la réception du message avec le lien de réinitialisation.
+5. Ouvrez le lien et définissez un nouveau mot de passe.
+
+Si le message n'arrive pas, activez `GP_DEBUG=1` et vérifiez `api/config.local.php`, `smtp_host`, `smtp_username` et `smtp_password`.
+
+Pour Gmail, vérifiez aussi que le mot de passe utilisé est bien un **mot de passe d'application** et pas le mot de passe de connexion normal.
+
 ## Troubleshooting
 
 ### Erreur : "Impossible de se connecter au serveur"

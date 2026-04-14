@@ -25,8 +25,13 @@
 
   const loginForm = document.getElementById("loginForm");
   const registerForm = document.getElementById("registerForm");
+  const resetRequestForm = document.getElementById("resetRequestForm");
   const loginAlert = document.getElementById("loginAlert");
   const registerAlert = document.getElementById("registerAlert");
+  const resetAlert = document.getElementById("resetAlert");
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  const ALLOWED_ROLES = new Set(["employe", "admin", "animateur"]);
 
   function setAlert(el, msg, type) {
     if (!msg) {
@@ -45,10 +50,144 @@
     hint.classList.toggle("is-error", Boolean(msg));
   }
 
+  function storeSession(data) {
+    if (data && data.token) {
+      localStorage.setItem("gp_token", data.token);
+    }
+    if (data && data.user) {
+      localStorage.setItem("gp_user", JSON.stringify(data.user));
+    }
+  }
+
+  function redirectByRole(role) {
+    const routes = {
+      employe: "/pages/dashboardE.html",
+      admin: "/pages/dashboardRH.html",
+      animateur: "/pages/parametresAnimateur.html",
+    };
+
+    const target = routes[(role || "").toLowerCase()];
+    if (target) {
+      window.location.assign(target);
+    }
+  }
+
+  function openResetPanel(email) {
+    setTab("reset");
+    const resetEmail = document.getElementById("resetEmail");
+    if (resetEmail && email) {
+      resetEmail.value = email;
+    }
+  }
+
   function clearHints(form) {
     form.querySelectorAll(".hint").forEach((h) => {
       h.textContent = "";
       h.classList.remove("is-error");
+    });
+  }
+
+  function normalizeSpaces(value) {
+    return value.replace(/\s+/g, " ").trim();
+  }
+
+  function getValue(inputId) {
+    const el = document.getElementById(inputId);
+    if (!el) return "";
+    return typeof el.value === "string" ? el.value : "";
+  }
+
+  function validators() {
+    return {
+      loginEmail: () => {
+        const email = normalizeSpaces(getValue("loginEmail"));
+        if (!email) return "Email requis";
+        if (!EMAIL_REGEX.test(email)) return "Format d'email invalide";
+        return "";
+      },
+      loginPassword: () => {
+        const value = getValue("loginPassword");
+        if (!value) return "Mot de passe requis";
+        return "";
+      },
+      regFullName: () => {
+        const value = normalizeSpaces(getValue("regFullName"));
+        if (!value) return "Nom complet requis";
+        if (value.length < 3) return "Minimum 3 caractères";
+        if (!/^[A-Za-zÀ-ÖØ-öø-ÿ'\-\s]+$/.test(value)) return "Caractères non autorisés";
+        return "";
+      },
+      regEmail: () => {
+        const email = normalizeSpaces(getValue("regEmail"));
+        if (!email) return "Email requis";
+        if (!EMAIL_REGEX.test(email)) return "Format d'email invalide";
+        return "";
+      },
+      regEntreprise: () => {
+        const value = normalizeSpaces(getValue("regEntreprise"));
+        if (!value) return "Entreprise requise";
+        if (value.length < 2) return "Minimum 2 caractères";
+        return "";
+      },
+      regRole: () => {
+        const value = getValue("regRole").toLowerCase();
+        if (!value) return "Rôle requis";
+        if (!ALLOWED_ROLES.has(value)) return "Rôle invalide";
+        return "";
+      },
+      regPassword: () => {
+        const value = getValue("regPassword");
+        if (!value) return "Mot de passe requis";
+        if (!PASSWORD_REGEX.test(value)) {
+          return "8+ caractères, 1 majuscule, 1 minuscule, 1 chiffre";
+        }
+        return "";
+      },
+      regPassword2: () => {
+        const value = getValue("regPassword2");
+        const password = getValue("regPassword");
+        if (!value) return "Confirmation requise";
+        if (value !== password) return "Les mots de passe ne correspondent pas";
+        return "";
+      },
+      resetEmail: () => {
+        const email = normalizeSpaces(getValue("resetEmail"));
+        if (!email) return "Email requis";
+        if (!EMAIL_REGEX.test(email)) return "Format d'email invalide";
+        return "";
+      },
+    };
+  }
+
+  function validateField(inputId) {
+    const rule = validators()[inputId];
+    if (!rule) return true;
+    const message = rule();
+    setHint(inputId, message);
+    return message === "";
+  }
+
+  function validateFields(inputIds) {
+    let valid = true;
+    inputIds.forEach((inputId) => {
+      if (!validateField(inputId)) {
+        valid = false;
+      }
+    });
+    return valid;
+  }
+
+  function bindFieldValidation(inputIds) {
+    inputIds.forEach((inputId) => {
+      const el = document.getElementById(inputId);
+      if (!el) return;
+      el.addEventListener("blur", () => validateField(inputId));
+      el.addEventListener("input", () => {
+        const hint = document.querySelector(`[data-hint-for=\"${inputId}\"]`);
+        if (hint && hint.classList.contains("is-error")) {
+          validateField(inputId);
+        }
+      });
     });
   }
 
@@ -72,31 +211,32 @@
     return data;
   }
 
+  bindFieldValidation(["loginEmail", "loginPassword"]);
+  bindFieldValidation([
+    "regFullName",
+    "regEmail",
+    "regEntreprise",
+    "regRole",
+    "regPassword",
+    "regPassword2",
+  ]);
+  bindFieldValidation(["resetEmail"]);
+
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     clearHints(loginForm);
     setAlert(loginAlert, "", "");
 
-    const email = document.getElementById("loginEmail").value.trim();
+    const email = normalizeSpaces(document.getElementById("loginEmail").value);
     const mdp = document.getElementById("loginPassword").value;
 
-    let hasError = false;
-    if (!email) {
-      setHint("loginEmail", "Email requis");
-      hasError = true;
-    }
-    if (!mdp) {
-      setHint("loginPassword", "Mot de passe requis");
-      hasError = true;
-    }
-    if (hasError) return;
+    if (!validateFields(["loginEmail", "loginPassword"])) return;
 
     try {
       const data = await apiPost("/auth/login.php", { email, mdp });
-      if (data && data.token) {
-        localStorage.setItem("gp_token", data.token);
-      }
+      storeSession(data);
       setAlert(loginAlert, "Connexion réussie.", "success");
+      redirectByRole(data?.user?.role);
     } catch (err) {
       setAlert(loginAlert, err?.message || "Connexion impossible.", "error");
     }
@@ -107,38 +247,13 @@
     clearHints(registerForm);
     setAlert(registerAlert, "", "");
 
-    const fullName = document.getElementById("regFullName").value.trim();
-    const email = document.getElementById("regEmail").value.trim();
-    const entreprise = document.getElementById("regEntreprise").value.trim();
+    const fullName = normalizeSpaces(document.getElementById("regFullName").value);
+    const email = normalizeSpaces(document.getElementById("regEmail").value);
+    const entreprise = normalizeSpaces(document.getElementById("regEntreprise").value);
+    const role = document.getElementById("regRole").value;
     const mdp = document.getElementById("regPassword").value;
-    const mdp2 = document.getElementById("regPassword2").value;
 
-    let hasError = false;
-    if (!fullName) {
-      setHint("regFullName", "Nom complet requis");
-      hasError = true;
-    }
-    if (!email) {
-      setHint("regEmail", "Email requis");
-      hasError = true;
-    }
-    if (!entreprise) {
-      setHint("regEntreprise", "Entreprise requise");
-      hasError = true;
-    }
-    if (!mdp) {
-      setHint("regPassword", "Mot de passe requis");
-      hasError = true;
-    }
-    if (mdp && mdp.length < 6) {
-      setHint("regPassword", "Minimum 6 caractères");
-      hasError = true;
-    }
-    if (mdp !== mdp2) {
-      setHint("regPassword2", "Les mots de passe ne correspondent pas");
-      hasError = true;
-    }
-    if (hasError) return;
+    if (!validateFields(["regFullName", "regEmail", "regEntreprise", "regRole", "regPassword", "regPassword2"])) return;
 
     const parts = fullName.split(/\s+/).filter(Boolean);
     const prenomUser = parts.shift() || "";
@@ -154,11 +269,10 @@
         inscriptionUser: new Date().toISOString(),
         pdpUser: null,
         nomEntreprise: entreprise,
+        role,
       });
 
-      if (data && data.token) {
-        localStorage.setItem("gp_token", data.token);
-      }
+      storeSession(data);
       setAlert(registerAlert, "Inscription réussie.", "success");
       setTab("login");
     } catch (err) {
@@ -166,9 +280,25 @@
     }
   });
 
+  resetRequestForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearHints(resetRequestForm);
+    setAlert(resetAlert, "", "");
+
+    const email = normalizeSpaces(document.getElementById("resetEmail").value);
+    if (!validateFields(["resetEmail"])) return;
+
+    try {
+      const data = await apiPost("/auth/forgot-password.php", { email });
+      setAlert(resetAlert, data?.message || "Un email a été envoyé.", "success");
+    } catch (err) {
+      setAlert(resetAlert, err?.message || "Impossible d'envoyer le lien.", "error");
+    }
+  });
+
   const forgotLink = document.getElementById("forgotLink");
   forgotLink.addEventListener("click", (e) => {
     e.preventDefault();
-    setAlert(loginAlert, "Fonctionnalité non disponible pour le moment.", "error");
+    openResetPanel(document.getElementById("loginEmail").value.trim());
   });
 })();

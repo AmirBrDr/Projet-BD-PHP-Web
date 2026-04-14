@@ -86,6 +86,18 @@
             </div>
 
             <div class="field">
+              <label class="label" for="regRole">Type de compte</label>
+              <div class="control control--select">
+                <select id="regRole" name="role" required>
+                  <option value="employe" selected>Employé</option>
+                  <option value="animateur">Animateur</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div class="hint" data-hint-for="regRole"></div>
+            </div>
+
+            <div class="field">
               <label class="label" for="regPassword">Mot de passe</label>
               <div class="control">
                 <span class="icon" aria-hidden="true">🔒</span>
@@ -110,6 +122,32 @@
             <div class="footnote">
               Vous avez déjà un compte ?
               <button class="link as-button" type="button" data-switch="login">Se connecter</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel" role="tabpanel" data-panel="reset">
+          <div class="titleblock">
+            <div class="title">Réinitialiser le mot de passe</div>
+            <div class="subtitle">Saisissez votre email professionnel pour recevoir un lien de réinitialisation.</div>
+          </div>
+
+          <form id="resetRequestForm" class="form" novalidate>
+            <div class="field">
+              <label class="label" for="resetEmail">Email professionnel</label>
+              <div class="control">
+                <span class="icon" aria-hidden="true">@</span>
+                <input id="resetEmail" name="email" type="email" placeholder="nom@entreprise.fr" autocomplete="email" required />
+              </div>
+              <div class="hint" data-hint-for="resetEmail"></div>
+            </div>
+
+            <button class="btn" type="submit">Envoyer le lien</button>
+
+            <div class="alert" id="resetAlert" role="status" aria-live="polite"></div>
+
+            <div class="footnote">
+              <button class="link as-button" type="button" data-switch="login">Retour à la connexion</button>
             </div>
           </form>
         </div>

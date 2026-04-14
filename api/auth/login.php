@@ -34,11 +34,17 @@ try {
 
     $idUser = (int)$user['id_user'];
     $statutUser = (string)($user['statutuser'] ?? '');
+    $role = gp_resolve_user_role($pdo, $idUser);
+
+    if ($role === null) {
+        gp_send_json(403, ['message' => 'Compte sans rôle associé']);
+    }
 
     $token = gp_jwt_sign([
         'sub' => (string)$idUser,
         'email' => (string)$user['email'],
         'statutUser' => $statutUser,
+        'role' => $role,
     ], $config['jwt']);
 
     gp_send_json(200, [
@@ -51,6 +57,7 @@ try {
             'email' => (string)($user['email'] ?? ''),
             'statutUser' => $statutUser,
             'pdpUser' => $user['pdpuser'] ?? null,
+            'role' => $role,
         ],
     ]);
 } catch (Throwable $e) {
