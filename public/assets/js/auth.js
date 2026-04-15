@@ -62,7 +62,7 @@
   function redirectByRole(role) {
     const routes = {
       employe: "/pages/dashboardE.html",
-      admin: "/pages/dashboardRH.html",
+      admin: "/pages/gestionUtilisateurs.html",
       animateur: "/pages/parametresAnimateur.html",
     };
 

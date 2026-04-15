@@ -3,14 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - gestionUtilisateurs</title>
+    <title>GreenPulse - Admin RH | Utilisateurs</title>
     <link rel="stylesheet" href="../assets/css/gestionUtilisateurs.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <div class="container">
-        <h1>gestionUtilisateurs</h1>
-        <p>Page en développement...</p>
+<body data-required-role="admin">
+    <nav class="navbar">
+        <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardRH.html">Dashboard RSE</a>
+            <a href="gestionUtilisateurs.html" class="active">Utilisateurs & Équipes</a>
+            <a href="parametresRH.html">Paramètres Globaux</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge admin">Admin RH</div>
+            <button type="button" class="logout-btn" data-logout title="Déconnexion"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </nav>
+
+    <main class="admin-main">
+        <header class="admin-header">
+            <div>
+                <h1>Gestion des Utilisateurs et des Équipes</h1>
+                <p>L’administrateur RH pilote les accès, les rôles, les imports de masse et la structure des équipes.</p>
+            </div>
+            <div class="header-btns">
+                <button class="btn-secondary" id="btnOpenImport"><i class="fas fa-file-csv"></i> Import CSV</button>
+                <button class="btn-primary" id="btnOpenTeam"><i class="fas fa-users"></i> Nouvelle Équipe</button>
+                <button class="btn-primary" id="btnOpenUser"><i class="fas fa-user-plus"></i> Nouvel Utilisateur</button>
+            </div>
+        </header>
+
+        <div id="feedback" class="feedback" aria-live="polite"></div>
+
+        <div class="filter-bar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input id="searchInput" type="text" placeholder="Rechercher un collaborateur (Nom, Email)...">
+            </div>
+            <select id="roleFilter">
+                <option value="all">Tous les rôles</option>
+                <option value="employe">Employé</option>
+                <option value="animateur">Animateur DD</option>
+                <option value="admin">Admin RH</option>
+            </select>
+            <select id="teamFilter">
+                <option value="all">Toutes les équipes</option>
+            </select>
+        </div>
+
+        <section class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nom Complet</th>
+                        <th>Email Professionnel</th>
+                        <th>Rôle</th>
+                        <th>Équipe affectée</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody"></tbody>
+            </table>
+            <div id="emptyState" class="empty-state hidden">
+                Aucun utilisateur ne correspond aux filtres actuels.
+            </div>
+            <div class="pagination">
+                <span id="paginationText">0 - 0 sur 0 utilisateurs</span>
+                <div class="page-controls">
+                    <button id="prevPageBtn" type="button" disabled><i class="fas fa-chevron-left"></i></button>
+                    <button id="nextPageBtn" type="button" disabled><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="modalUser" class="modal" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
+        <div class="modal-content">
+            <h3 id="userModalTitle">Créer un Utilisateur</h3>
+            <form id="userForm">
+                <input type="hidden" id="userIdField">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="prenomField">Prénom</label>
+                        <input id="prenomField" type="text" placeholder="Ex: Alice" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nomField">Nom</label>
+                        <input id="nomField" type="text" placeholder="Ex: Durand" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="emailField">Email</label>
+                        <input id="emailField" type="email" placeholder="a.durand@entreprise.fr" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="roleField">Rôle</label>
+                        <select id="roleField" required>
+                            <option value="employe">Employé</option>
+                            <option value="animateur">Animateur DD</option>
+                            <option value="admin">Admin RH</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="teamField">Affectation Équipe</label>
+                        <select id="teamField">
+                            <option value="">-- Sans équipe --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="statusField">Statut</label>
+                        <select id="statusField" required>
+                            <option value="actif">Actif</option>
+                            <option value="inactif">Inactif</option>
+                            <option value="suspendu">Suspendu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordField">Mot de passe (optionnel)</label>
+                        <input id="passwordField" type="password" placeholder="Laisser vide pour auto-générer / conserver">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" type="button" data-close-modal="modalUser">Annuler</button>
+                    <button class="btn-confirm" type="submit" id="saveUserBtn">Enregistrer</button>
+                </div>
+            </form>
+        </div>
     </div>
-    <script src="../assets/js/gestionUtilisateurs.js"></script>
+
+    <div id="modalTeam" class="modal" role="dialog" aria-modal="true" aria-labelledby="teamModalTitle">
+        <div class="modal-content">
+            <h3 id="teamModalTitle">Créer une Équipe</h3>
+            <form id="teamForm">
+                <div class="form-group full-width">
+                    <label for="teamNameField">Nom de l'équipe</label>
+                    <input id="teamNameField" type="text" placeholder="Ex: Green Warriors" required>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" type="button" data-close-modal="modalTeam">Annuler</button>
+                    <button class="btn-confirm" type="submit">Créer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalImport" class="modal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+        <div class="modal-content">
+            <h3 id="importModalTitle"><i class="fas fa-file-csv"></i> Importation de Masse</h3>
+            <p class="modal-desc">Colonnes acceptées: nom, prenom, email, role, id_equipe, statut, entreprise, mdp.</p>
+            <div class="upload-zone" id="uploadZone">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Glissez-déposez votre fichier ici ou <strong>cliquez pour parcourir</strong></p>
+                <input id="csvInput" type="file" accept=".csv" class="file-hidden">
+            </div>
+            <div id="selectedFileName" class="selected-file">Aucun fichier sélectionné</div>
+            <div class="modal-footer">
+                <button class="btn-cancel" type="button" data-close-modal="modalImport">Annuler</button>
+                <button class="btn-confirm" type="button" id="importBtn">Lancer l'import</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/app-shell.js" defer></script>
+    <script src="../assets/js/gestionUtilisateurs.js" defer></script>
 </body>
 </html>
