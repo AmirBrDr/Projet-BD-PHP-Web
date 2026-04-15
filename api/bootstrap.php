@@ -1,5 +1,7 @@
 <?php
 
+// Fichier: api/bootstrap.php - API et logique serveur.
+
 declare(strict_types=1);
 
 $config = require __DIR__ . '/config.php';

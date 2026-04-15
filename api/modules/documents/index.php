@@ -1,4 +1,6 @@
 <?php
+
+// Fichier: api/modules/documents/index.php - API et logique serveur.
 /**
  * documents Module
  * Handles documents related operations

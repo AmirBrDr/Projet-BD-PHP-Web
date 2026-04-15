@@ -1,3 +1,4 @@
+// Fichier: public/assets/js/profil.js - Logique frontend et interactions.
 // profil JavaScript
 // TODO: Add functionality for profil
 

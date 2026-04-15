@@ -1,13 +1,17 @@
 <?php
 
+// Fichier: api/auth/login.php - API et logique serveur.
+
 declare(strict_types=1);
 
 require __DIR__ . '/../bootstrap.php';
 
+// Vérifier que la méthode HTTP est POST
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     gp_send_json(405, ['message' => 'Méthode non autorisée']);
 }
 
+// Récupérer et valider les identifiants
 $body = gp_read_json_body();
 
 $email = trim((string)($body['email'] ?? ''));
@@ -21,6 +25,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     gp_send_json(400, ['message' => 'Email invalide']);
 }
 
+// Vérifier les identifiants en base de données et générer un token JWT
 try {
     $pdo = gp_pdo($config);
 
@@ -28,10 +33,12 @@ try {
     $stmt->execute([':email' => $email]);
     $user = $stmt->fetch();
 
+    // Valider le mot de passe
     if (!$user || !isset($user['mdp']) || !password_verify($mdp, (string)$user['mdp'])) {
         gp_send_json(401, ['message' => 'Identifiants invalides']);
     }
 
+    // Récupérer le rôle de l'utilisateur
     $idUser = (int)$user['id_user'];
     $statutUser = (string)($user['statutuser'] ?? '');
     $role = gp_resolve_user_role($pdo, $idUser);

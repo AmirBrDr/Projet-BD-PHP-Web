@@ -1,3 +1,4 @@
+// Fichier: public/assets/js/defis.js - Logique frontend et interactions.
 // defis JavaScript
 // TODO: Add functionality for defis
 

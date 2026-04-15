@@ -1,3 +1,4 @@
+// Fichier: public/assets/js/app-shell.js - Logique frontend et interactions.
 (() => {
   const token = localStorage.getItem("gp_token");
   const rawUser = localStorage.getItem("gp_user");

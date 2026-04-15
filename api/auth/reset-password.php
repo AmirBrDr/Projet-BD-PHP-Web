@@ -1,13 +1,17 @@
 <?php
 
+// Fichier: api/auth/reset-password.php - API et logique serveur.
+
 declare(strict_types=1);
 
 require __DIR__ . '/../bootstrap.php';
 
+// Vérifier que la méthode HTTP est POST
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     gp_send_json(405, ['message' => 'Méthode non autorisée']);
 }
 
+// Récupérer le token et le nouveau mot de passe
 $body = gp_read_json_body();
 $token = trim((string)($body['token'] ?? ''));
 $password = (string)($body['password'] ?? '');
@@ -20,7 +24,9 @@ if (strlen($password) < 6) {
     gp_send_json(400, ['message' => 'Mot de passe trop court']);
 }
 
+// Valider le token de réinitialisation et mettre à jour le mot de passe
 try {
+    // Vérifier la signature du token
     $payload = gp_password_reset_verify($token, $config['jwt']);
     $idUser = (int)($payload['sub'] ?? 0);
     $email = (string)($payload['email'] ?? '');

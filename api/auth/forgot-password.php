@@ -1,13 +1,17 @@
 <?php
 
+// Fichier: api/auth/forgot-password.php - API et logique serveur.
+
 declare(strict_types=1);
 
 require __DIR__ . '/../bootstrap.php';
 
+// Vérifier que la méthode HTTP est POST
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     gp_send_json(405, ['message' => 'Méthode non autorisée']);
 }
 
+// Récupérer l'email fourni
 $body = gp_read_json_body();
 $email = trim((string)($body['email'] ?? ''));
 
@@ -19,8 +23,10 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     gp_send_json(400, ['message' => 'Email invalide']);
 }
 
+// Chercher l'utilisateur et générer un token de réinitialisation
 try {
     $pdo = gp_pdo($config);
+    // Vérifier si l'utilisateur existe
     $stmt = $pdo->prepare('SELECT id_user, nomuser, prenomuser, email, statutuser FROM utilisateur WHERE LOWER(email) = LOWER(:email) LIMIT 1');
     $stmt->execute([':email' => $email]);
     $user = $stmt->fetch();

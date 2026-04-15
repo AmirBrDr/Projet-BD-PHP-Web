@@ -1,4 +1,6 @@
 <?php
+
+// Fichier: api/modules/challenges/index.php - API et logique serveur.
 /**
  * challenges Module
  * Handles challenges related operations

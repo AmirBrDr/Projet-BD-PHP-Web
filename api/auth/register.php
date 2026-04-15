@@ -1,13 +1,17 @@
 <?php
 
+// Fichier: api/auth/register.php - API et logique serveur.
+
 declare(strict_types=1);
 
 require __DIR__ . '/../bootstrap.php';
 
+// Vérifier que la méthode HTTP est POST
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     gp_send_json(405, ['message' => 'Méthode non autorisée']);
 }
 
+// Récupérer les données d'enregistrement
 $body = gp_read_json_body();
 
 $nomUser = trim((string)($body['nomUser'] ?? $body['nom_user'] ?? ''));
@@ -43,6 +47,7 @@ if (!gp_is_valid_role($role)) {
     gp_send_json(400, ['message' => 'Rôle utilisateur invalide']);
 }
 
+// Résoudre et créer l'entreprise si nécessaire
 try {
     $pdo = gp_pdo($config);
 

@@ -1,4 +1,6 @@
 <?php
+
+// Fichier: api/modules/statistics/index.php - API et logique serveur.
 /**
  * statistics Module
  * Handles statistics related operations

@@ -1,3 +1,4 @@
+// Fichier: public/assets/js/dashboardE.js - Logique frontend et interactions.
 // dashboardE JavaScript
 // TODO: Add functionality for dashboardE
 

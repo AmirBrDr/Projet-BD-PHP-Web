@@ -1,4 +1,6 @@
 <?php
+
+// Fichier: api/modules/employee/index.php - API et logique serveur.
 /**
  * employee Module
  * Handles employee related operations

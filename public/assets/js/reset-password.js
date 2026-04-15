@@ -1,3 +1,4 @@
+// Fichier: public/assets/js/reset-password.js - Logique frontend et interactions.
 (() => {
   const API_BASE = "/api";
   const params = new URLSearchParams(window.location.search);

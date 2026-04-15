@@ -1,5 +1,7 @@
 <?php
 
+// Fichier: api/lib/db.php - API et logique serveur.
+
 declare(strict_types=1);
 
 function gp_pdo(array $config): PDO

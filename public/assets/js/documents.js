@@ -1,3 +1,4 @@
+// Fichier: public/assets/js/documents.js - Logique frontend et interactions.
 // documents JavaScript
 // TODO: Add functionality for documents
 

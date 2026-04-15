@@ -1,4 +1,6 @@
 <?php
+
+// Fichier: api/modules/admin/index.php - API et logique serveur.
 /**
  * admin Module
  * Handles admin related operations

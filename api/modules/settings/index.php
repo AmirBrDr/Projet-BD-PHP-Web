@@ -1,4 +1,6 @@
 <?php
+
+// Fichier: api/modules/settings/index.php - API et logique serveur.
 /**
  * settings Module
  * Handles settings related operations

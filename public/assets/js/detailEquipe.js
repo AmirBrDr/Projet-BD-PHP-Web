@@ -1,3 +1,4 @@
+// Fichier: public/assets/js/detailEquipe.js - Logique frontend et interactions.
 // detailEquipe JavaScript
 // TODO: Add functionality for detailEquipe
 

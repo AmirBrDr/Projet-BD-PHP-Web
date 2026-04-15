@@ -1,22 +1,28 @@
 <?php
 
+// Fichier: api/auth/me.php - API et logique serveur.
+
 declare(strict_types=1);
 
 require __DIR__ . '/../bootstrap.php';
 
+// Vérifier que la méthode HTTP est GET
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'GET') {
     gp_send_json(405, ['message' => 'Méthode non autorisée']);
 }
 
+// Récupérer et valider le token JWT
 $token = gp_get_bearer_token();
 if ($token === '') {
     gp_send_json(401, ['message' => 'Token manquant']);
 }
 
+// Vérifier le token et récupérer les données de l'utilisateur
 try {
     $payload = gp_jwt_verify($token, $config['jwt']);
     $idUser = (int)($payload['sub'] ?? 0);
 
+    // Récupérer l'utilisateur depuis la base de données
     $pdo = gp_pdo($config);
     $stmt = $pdo->prepare('SELECT id_user, nomuser, prenomuser, email, statutuser, pdpuser, inscriptionuser FROM utilisateur WHERE id_user = :id LIMIT 1');
     $stmt->execute([':id' => $idUser]);

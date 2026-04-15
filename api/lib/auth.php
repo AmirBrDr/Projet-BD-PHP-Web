@@ -1,5 +1,7 @@
 <?php
 
+// Fichier: api/lib/auth.php - API et logique serveur.
+
 declare(strict_types=1);
 
 function gp_normalize_role(string $role): string

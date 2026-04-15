@@ -1,4 +1,6 @@
 <?php
+
+// Fichier: api/modules/moderation/index.php - API et logique serveur.
 /**
  * moderation Module
  * Handles moderation related operations

@@ -1,4 +1,6 @@
 <?php
+
+// Fichier: api/modules/animator/index.php - API et logique serveur.
 /**
  * animator Module
  * Handles animator related operations

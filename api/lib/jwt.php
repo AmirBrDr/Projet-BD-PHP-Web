@@ -1,7 +1,10 @@
 <?php
 
+// Fichier: api/lib/jwt.php - API et logique serveur.
+
 declare(strict_types=1);
 
+// TEST COMMENT
 function gp_b64url_encode(string $data): string
 {
     return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');

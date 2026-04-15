@@ -1,5 +1,7 @@
 <?php
 
+// Fichier: api/lib/http.php - API et logique serveur.
+
 declare(strict_types=1);
 
 function gp_send_json(int $status, array $payload): void

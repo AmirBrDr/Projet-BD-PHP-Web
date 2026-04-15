@@ -1,5 +1,7 @@
 <?php
 
+// Fichier: api/lib/mail.php - API et logique serveur.
+
 declare(strict_types=1);
 
 function gp_mail_read_response($stream): string

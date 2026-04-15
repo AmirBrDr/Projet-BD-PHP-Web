@@ -1,5 +1,7 @@
 <?php
 
+// Fichier: router.php - API et logique serveur.
+
 declare(strict_types=1);
 
 $uriPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';

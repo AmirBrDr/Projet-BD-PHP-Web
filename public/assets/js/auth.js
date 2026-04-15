@@ -1,9 +1,12 @@
+// Fichier: public/assets/js/auth.js - Logique frontend et interactions.
 (() => {
   const API_BASE = "/api";
 
+  // Gestion des onglets et panneaux
   const tabs = Array.from(document.querySelectorAll(".tab"));
   const panels = Array.from(document.querySelectorAll(".panel"));
 
+  // Bascule l'onglet actif et affiche le panneau associé
   function setTab(name) {
     tabs.forEach((t) => {
       const active = t.dataset.tab === name;
@@ -26,6 +29,7 @@
   const loginForm = document.getElementById("loginForm");
   const registerForm = document.getElementById("registerForm");
   const resetRequestForm = document.getElementById("resetRequestForm");
+  // Éléments du DOM et expressions régulières de validation
   const loginAlert = document.getElementById("loginAlert");
   const registerAlert = document.getElementById("registerAlert");
   const resetAlert = document.getElementById("resetAlert");
@@ -33,6 +37,7 @@
   const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
   const ALLOWED_ROLES = new Set(["employe", "admin", "animateur"]);
 
+  // Affiche un message d'alerte avec le type spécifié
   function setAlert(el, msg, type) {
     if (!msg) {
       el.className = "alert";
@@ -50,6 +55,7 @@
     hint.classList.toggle("is-error", Boolean(msg));
   }
 
+  // Sauvegarde le token et les données utilisateur en localStorage
   function storeSession(data) {
     if (data && data.token) {
       localStorage.setItem("gp_token", data.token);
@@ -59,6 +65,7 @@
     }
   }
 
+  // Redirige l'utilisateur vers sa page en fonction de son rôle
   function redirectByRole(role) {
     const routes = {
       employe: "/pages/dashboardE.html",
@@ -97,6 +104,7 @@
     return typeof el.value === "string" ? el.value : "";
   }
 
+  // Retourne les règles de validation pour chaque champ
   function validators() {
     return {
       loginEmail: () => {
@@ -159,6 +167,7 @@
     };
   }
 
+  // Valide un champ individuel et affiche l'erreur si nécessaire
   function validateField(inputId) {
     const rule = validators()[inputId];
     if (!rule) return true;
@@ -167,6 +176,7 @@
     return message === "";
   }
 
+  // Valide plusieurs champs à la fois
   function validateFields(inputIds) {
     let valid = true;
     inputIds.forEach((inputId) => {
@@ -177,6 +187,7 @@
     return valid;
   }
 
+  // Attache les événements de validation aux champs spécifiés
   function bindFieldValidation(inputIds) {
     inputIds.forEach((inputId) => {
       const el = document.getElementById(inputId);
@@ -191,6 +202,7 @@
     });
   }
 
+  // Effectue une requête POST vers l'API avec gestion des erreurs
   async function apiPost(path, payload) {
     const res = await fetch(`${API_BASE}${path}`, {
       method: "POST",
@@ -211,6 +223,7 @@
     return data;
   }
 
+  // Initialisation: liaison des validations aux champs
   bindFieldValidation(["loginEmail", "loginPassword"]);
   bindFieldValidation([
     "regFullName",
@@ -222,6 +235,7 @@
   ]);
   bindFieldValidation(["resetEmail"]);
 
+  // Gestion du formulaire de connexion
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     clearHints(loginForm);
@@ -242,6 +256,7 @@
     }
   });
 
+  // Gestion du formulaire d'inscription
   registerForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     clearHints(registerForm);
@@ -280,6 +295,7 @@
     }
   });
 
+  // Gestion du formulaire de demande de réinitialisation
   resetRequestForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     clearHints(resetRequestForm);
@@ -296,6 +312,7 @@
     }
   });
 
+  // Lien "Mot de passe oublié" - ouvre le panneau de réinitialisation
   const forgotLink = document.getElementById("forgotLink");
   forgotLink.addEventListener("click", (e) => {
     e.preventDefault();

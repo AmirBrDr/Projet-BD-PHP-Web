@@ -1,8 +1,11 @@
+// Fichier: public/assets/js/gestionUtilisateurs.js - Logique frontend et interactions.
 (() => {
+    // Configuration de l'API et de la pagination
     const API_USERS = "/api/modules/users/user-management.php";
     const API_TEAMS = "/api/modules/teams/team-management.php";
     const PAGE_SIZE = 10;
 
+    // État global de l'application
     const state = {
         users: [],
         teams: [],
@@ -12,6 +15,7 @@
         importRows: null,
     };
 
+    // Références aux éléments du DOM
     const els = {
         feedback: document.getElementById("feedback"),
         searchInput: document.getElementById("searchInput"),
@@ -47,10 +51,12 @@
         importBtn: document.getElementById("importBtn"),
     };
 
+    // Récupère le token JWT de la session locale
     function getToken() {
         return localStorage.getItem("gp_token") || "";
     }
 
+    // Effectue une requête API avec authentification
     async function apiRequest(url, options = {}) {
         const token = getToken();
         const headers = {
@@ -87,6 +93,7 @@
         return payload;
     }
 
+    // Affiche un message de rétroaction à l'utilisateur
     function showFeedback(message, type = "success") {
         if (!els.feedback) {
             return;
@@ -102,6 +109,7 @@
         els.feedback.className = `feedback is-${type}`;
     }
 
+    // Échappe les caractères HTML pour éviter les injections XSS
     function escapeHtml(value) {
         return String(value || "")
             .replace(/&/g, "&amp;")
@@ -111,6 +119,7 @@
             .replace(/'/g, "&#039;");
     }
 
+    // Retourne le libellé lisible d'un rôle
     function getRoleLabel(role) {
         const normalized = String(role || "").toLowerCase();
         if (normalized === "admin") return "Admin RH";
@@ -135,6 +144,7 @@
         return '<span class="text-muted">Sans équipe</span>';
     }
 
+    // Filtre les utilisateurs selon la recherche et les sélecteurs
     function getFilteredUsers() {
         const q = (els.searchInput.value || "").trim().toLowerCase();
         const role = (els.roleFilter.value || "all").toLowerCase();
@@ -159,6 +169,7 @@
         });
     }
 
+    // Affiche le tableau des utilisateurs avec pagination
     function renderTable() {
         state.filteredUsers = getFilteredUsers();
 
@@ -208,6 +219,7 @@
         els.nextPageBtn.disabled = state.page >= totalPages;
     }
 
+    // Remplit les sélecteurs d'équipes
     function fillTeamSelects() {
         const options = state.teams
             .map((t) => `<option value="${t.id_equipe}">${escapeHtml(t.nomequipe)}</option>`)
@@ -217,6 +229,7 @@
         els.teamField.innerHTML = `<option value="">-- Sans équipe --</option>${options}`;
     }
 
+    // Ouvre une fenêtre modale
     function openModal(id) {
         const modal = document.getElementById(id);
         if (modal) {
@@ -224,6 +237,7 @@
         }
     }
 
+    // Ferme une fenêtre modale
     function closeModal(id) {
         const modal = document.getElementById(id);
         if (modal) {
@@ -231,6 +245,7 @@
         }
     }
 
+    // Réinitialise le formulaire utilisateur
     function resetUserForm(isEdit = false) {
         els.userForm.reset();
         els.userIdField.value = "";
@@ -240,6 +255,7 @@
         toggleTeamFieldByRole();
     }
 
+    // Active/désactive le champ équipe selon le rôle
     function toggleTeamFieldByRole() {
         const role = (els.roleField.value || "employe").toLowerCase();
         const disabled = role !== "employe";
@@ -249,18 +265,21 @@
         }
     }
 
+    // Charge les utilisateurs depuis l'API
     async function loadUsers() {
         const response = await apiRequest(API_USERS);
         state.users = Array.isArray(response.items) ? response.items : [];
         renderTable();
     }
 
+    // Charge les équipes depuis l'API
     async function loadTeams() {
         const response = await apiRequest(API_TEAMS);
         state.teams = Array.isArray(response.items) ? response.items : [];
         fillTeamSelects();
     }
 
+    // Extrait les données utilisateur du formulaire
     function userPayloadFromForm() {
         return {
             prenomUser: (els.prenomField.value || "").trim(),
@@ -273,6 +292,7 @@
         };
     }
 
+    // Valide les données utilisateur avant envoi
     function validateUserPayload(payload) {
         if (!payload.prenomUser || !payload.nomUser || !payload.email) {
             throw new Error("Prénom, nom et email sont obligatoires.");
@@ -285,6 +305,7 @@
         }
     }
 
+    // Remplit le formulaire avec les données de l'utilisateur
     function hydrateUserForm(user) {
         els.userIdField.value = String(user.id_user || "");
         els.prenomField.value = user.prenomuser || "";
@@ -300,6 +321,7 @@
         state.editingUser = user;
     }
 
+    // Enregistre ou met à jour un utilisateur
     async function saveUser(event) {
         event.preventDefault();
         showFeedback("");
@@ -331,6 +353,7 @@
         }
     }
 
+    // Supprime un utilisateur après confirmation
     async function deleteUser(userId) {
         if (!window.confirm("Supprimer cet utilisateur ? Cette action est irréversible.")) {
             return;
@@ -346,6 +369,7 @@
         }
     }
 
+    // Crée une nouvelle équipe
     async function createTeam(event) {
         event.preventDefault();
         showFeedback("");
@@ -370,6 +394,7 @@
         }
     }
 
+    // Parse un fichier CSV en tableau d'objets
     function parseCsvText(csvText) {
         const lines = csvText.split(/\r?\n/).filter((line) => line.trim() !== "");
         if (lines.length < 2) {
@@ -391,12 +416,14 @@
         return rows;
     }
 
+    // Lit un fichier CSV sélectionné
     async function readSelectedCsv(file) {
         const text = await file.text();
         state.importRows = parseCsvText(text);
         els.selectedFileName.textContent = `${file.name} (${state.importRows.length} lignes)`;
     }
 
+    // Lance l'import des utilisateurs depuis le fichier CSV
     async function triggerImport() {
         if (!Array.isArray(state.importRows) || state.importRows.length === 0) {
             showFeedback("Sélectionnez un fichier CSV valide avant de lancer l'import.", "error");
@@ -428,6 +455,7 @@
         }
     }
 
+    // Gère les clics sur les boutons du tableau
     function onTableClick(event) {
         const button = event.target.closest("button[data-action]");
         if (!button) return;
@@ -449,6 +477,7 @@
         }
     }
 
+    // Attache les événements de fermeture des modales
     function bindModalCloseButtons() {
         document.querySelectorAll("[data-close-modal]").forEach((btn) => {
             btn.addEventListener("click", () => {
@@ -469,20 +498,24 @@
         });
     }
 
+    // Attache tous les événements de l'interface
     function bindEvents() {
         els.searchInput.addEventListener("input", () => {
             state.page = 1;
             renderTable();
         });
+        // Filtrage par rôle
         els.roleFilter.addEventListener("change", () => {
             state.page = 1;
             renderTable();
         });
+        // Filtrage par équipe
         els.teamFilter.addEventListener("change", () => {
             state.page = 1;
             renderTable();
         });
 
+        // Navigation de pagination
         els.prevPageBtn.addEventListener("click", () => {
             state.page = Math.max(1, state.page - 1);
             renderTable();
@@ -493,6 +526,7 @@
             renderTable();
         });
 
+        // Ouverture des fenêtres modales
         els.btnOpenUser.addEventListener("click", () => {
             resetUserForm(false);
             openModal("modalUser");
@@ -500,11 +534,13 @@
         els.btnOpenTeam.addEventListener("click", () => openModal("modalTeam"));
         els.btnOpenImport.addEventListener("click", () => openModal("modalImport"));
 
+        // Soumission des formulaires
         els.roleField.addEventListener("change", toggleTeamFieldByRole);
         els.userForm.addEventListener("submit", saveUser);
         els.teamForm.addEventListener("submit", createTeam);
         els.importBtn.addEventListener("click", triggerImport);
 
+        // Sélection du fichier CSV
         els.csvInput.addEventListener("change", async (event) => {
             const file = event.target.files && event.target.files[0];
             if (!file) {
@@ -522,6 +558,7 @@
             }
         });
 
+        // Feedback visuel du drag-and-drop
         els.uploadZone.addEventListener("dragover", (event) => {
             event.preventDefault();
             els.uploadZone.classList.add("is-dragover");
@@ -529,6 +566,7 @@
         els.uploadZone.addEventListener("dragleave", () => {
             els.uploadZone.classList.remove("is-dragover");
         });
+        // Gestion du drag-and-drop de fichiers CSV
         els.uploadZone.addEventListener("drop", async (event) => {
             event.preventDefault();
             els.uploadZone.classList.remove("is-dragover");
@@ -549,10 +587,12 @@
             }
         });
 
+        // Gestion du tableau et des modales
         els.tableBody.addEventListener("click", onTableClick);
         bindModalCloseButtons();
     }
 
+    // Initialisation de l'application
     async function init() {
         try {
             bindEvents();
@@ -562,5 +602,6 @@
         }
     }
 
+    // Lance l'initialisation au chargement de la page
     document.addEventListener("DOMContentLoaded", init);
 })();

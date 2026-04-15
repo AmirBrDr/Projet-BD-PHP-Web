@@ -1,3 +1,4 @@
+// Fichier: public/assets/js/moderation.js - Logique frontend et interactions.
 // moderation JavaScript
 // TODO: Add functionality for moderation
 

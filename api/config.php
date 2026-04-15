@@ -1,5 +1,7 @@
 <?php
 
+// Fichier: api/config.php - API et logique serveur.
+
 declare(strict_types=1);
 
 $envPath = dirname(__DIR__) . '/.env';

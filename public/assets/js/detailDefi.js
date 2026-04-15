@@ -1,3 +1,4 @@
+// Fichier: public/assets/js/detailDefi.js - Logique frontend et interactions.
 // detailDefi JavaScript
 // TODO: Add functionality for detailDefi
 
