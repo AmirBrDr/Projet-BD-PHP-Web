@@ -21,7 +21,7 @@
   if (requiredRole && (user.role || "").toLowerCase() !== requiredRole) {
     const roleRoutes = {
       employe: "/pages/dashboardE.html",
-      admin: "/pages/dashboardRH.html",
+      admin: "/pages/gestionUtilisateurs.html",
       animateur: "/pages/parametresAnimateur.html",
     };
 

@@ -65,15 +65,43 @@
     }
   }
 
+  // Normalise les variantes possibles d'un role vers les roles applicatifs
+  function normalizeRole(role) {
+    const normalized = String(role || "").trim().toLowerCase();
+    if (normalized === "rh" || normalized === "administrateur") return "admin";
+    return normalized;
+  }
+
+  // Lit le payload JWT sans verifier la signature (usage frontend uniquement)
+  function decodeJwtPayload(token) {
+    if (!token || typeof token !== "string") return null;
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+
+    try {
+      const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const json = decodeURIComponent(
+        atob(b64)
+          .split("")
+          .map((c) => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`)
+          .join("")
+      );
+      return JSON.parse(json);
+    } catch (_err) {
+      return null;
+    }
+  }
+
   // Redirige l'utilisateur vers sa page en fonction de son rôle
   function redirectByRole(role) {
     const routes = {
       employe: "/pages/dashboardE.html",
       admin: "/pages/gestionUtilisateurs.html",
+      rh: "/pages/gestionUtilisateurs.html",
       animateur: "/pages/parametresAnimateur.html",
     };
 
-    const target = routes[(role || "").toLowerCase()];
+    const target = routes[normalizeRole(role)];
     if (target) {
       window.location.assign(target);
     }
@@ -248,9 +276,21 @@
 
     try {
       const data = await apiPost("/auth/login.php", { email, mdp });
-      storeSession(data);
+      const roleFromResponse = normalizeRole(data?.user?.role);
+      const roleFromToken = normalizeRole(decodeJwtPayload(data?.token)?.role);
+      const resolvedRole = roleFromResponse || roleFromToken;
+
+      const sessionData = {
+        ...(data || {}),
+        user: {
+          ...(data?.user || {}),
+          role: resolvedRole || data?.user?.role || "",
+        },
+      };
+
+      storeSession(sessionData);
       setAlert(loginAlert, "Connexion réussie.", "success");
-      redirectByRole(data?.user?.role);
+      redirectByRole(resolvedRole);
     } catch (err) {
       setAlert(loginAlert, err?.message || "Connexion impossible.", "error");
     }
