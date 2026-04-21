@@ -96,8 +96,8 @@
   function redirectByRole(role) {
     const routes = {
       employe: "/pages/Employe/dashboardE.html",
-      admin: "/pages/Admin/gestionUtilisateurs.html",
-      rh: "/pages/Admin/gestionUtilisateurs.html",
+      admin: "/pages/AdminRH/gestionUtilisateurs.html",
+      rh: "/pages/AdminRH/gestionUtilisateurs.html",
       animateur: "/pages/Animateur/parametresAnimateur.html",
     };
 
