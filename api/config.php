@@ -43,12 +43,12 @@ $config = [
         'base_url' => getenv('GP_APP_BASE_URL') ?: 'http://localhost:8000',
     ],
     'db' => [
-        'host' => getenv('GP_DB_HOST') ?: 'localhost',
-        'port' => getenv('GP_DB_PORT') ?: '5432',
-        'name' => getenv('GP_DB_NAME') ?: 'greenpulse',
-        'user' => getenv('GP_DB_USER') ?: 'postgres',
-        'pass' => getenv('GP_DB_PASS') ?: 'postgres',
-    ],
+    'host' => getenv('GP_DB_HOST') ?: '127.0.0.1',
+    'port' => getenv('GP_DB_PORT') ?: '5432',
+    'name' => getenv('GP_DB_NAME') ?: 'greenpulse',
+    'user' => getenv('GP_DB_USER') ?: 'greenpulse',  // Changez en 'greenpulse'
+    'pass' => getenv('GP_DB_PASS') ?: 'Greenpulse1234',  // Votre mot de passe
+],
     'jwt' => [
         'secret' => getenv('GP_JWT_SECRET') ?: 'change_this_secret',
         'issuer' => getenv('GP_JWT_ISSUER') ?: 'greenpulse',
