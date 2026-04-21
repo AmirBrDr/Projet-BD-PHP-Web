@@ -95,10 +95,10 @@
   // Redirige l'utilisateur vers sa page en fonction de son rôle
   function redirectByRole(role) {
     const routes = {
-      employe: "/pages/dashboardE.html",
-      admin: "/pages/gestionUtilisateurs.html",
-      rh: "/pages/gestionUtilisateurs.html",
-      animateur: "/pages/parametresAnimateur.html",
+      employe: "/pages/Employe/dashboardE.html",
+      admin: "/pages/Admin/gestionUtilisateurs.html",
+      rh: "/pages/Admin/gestionUtilisateurs.html",
+      animateur: "/pages/Animateur/parametresAnimateur.html",
     };
 
     const target = routes[normalizeRole(role)];
