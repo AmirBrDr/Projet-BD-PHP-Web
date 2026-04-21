@@ -3,81 +3,112 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>GreenPulse - Espace Employé</title>
-        <link rel="stylesheet" href="../assets/css/app-shell.css" />
+        <title>GreenPulse - Dashboard Employe</title>
+        <link rel="stylesheet" href="../../assets/css/app-shell.css" />
+        <link rel="stylesheet" href="../../assets/css/Employe/dashboardE.css" />
     </head>
     <body class="app-page" data-required-role="employe">
-        <main class="app-shell">
+        <main class="app-shell employee-layout">
             <header class="app-header">
                 <div class="brand-block">
                     <div class="brand-name">GreenPulse</div>
-                    <div class="brand-title">Espace Employé</div>
-                    <div class="brand-subtitle">Suivi des défis, validations et impact individuel</div>
+                    <div class="brand-title">Espace Employe</div>
+                    <div class="brand-subtitle">Suivi de vos defis, actions et progression equipe</div>
                 </div>
+                <nav class="employee-tabs" aria-label="Navigation employe">
+                    <a class="employee-tab is-active" href="dashboardE.html">Dashboard</a>
+                    <a class="employee-tab" href="defis.html">Defis</a>
+                    <a class="employee-tab" href="classement.html">Classement</a>
+                    <a class="employee-tab" href="profilE.html">Mon profil</a>
+                </nav>
                 <div class="header-actions">
-                    <div class="role-pill">Rôle: <strong data-user-role>EMPLOYE</strong></div>
-                    <button class="logout-btn" type="button" data-logout>Déconnexion</button>
+                    <div class="role-pill">Role: <strong data-user-role>EMPLOYE</strong></div>
+                    <button class="logout-btn" type="button" data-logout>Deconnexion</button>
                 </div>
             </header>
 
             <section class="hero">
                 <div class="panel hero-copy">
-                    <p class="eyebrow">Tableau de bord personnel</p>
-                    <h1>Avancez sur vos défis et suivez vos validations en temps réel.</h1>
+                    <p class="eyebrow">Impact du mois</p>
+                    <h1>Bonjour <span data-user-name>Employe</span>, votre equipe garde le rythme.</h1>
                     <p>
-                        Bonjour <strong data-user-name></strong>, votre espace rassemble les actions à terminer,
-                        les défis en cours et les résultats de votre contribution RSE.
+                        Retrouvez votre progression carbone, vos validations recentes et les raccourcis vers les
+                        prochaines actions a realiser.
                     </p>
+                    <div class="hero-cta-row">
+                        <a class="hero-cta" href="defis.html">Voir les defis actifs</a>
+                        <a class="hero-ghost" href="classement.html">Observer le classement</a>
+                    </div>
                 </div>
 
                 <aside class="panel profile-card">
                     <div class="profile-label">Session active</div>
                     <div class="profile-name" data-user-name>Utilisateur</div>
                     <div class="profile-email" data-user-email></div>
-                    <div class="status-pill">Connecté le <strong data-today></strong></div>
+                    <div class="status-pill">Connecte le <strong data-today></strong></div>
+                    <a class="inline-link" href="profilE.html">Gerer mon profil</a>
                 </aside>
             </section>
 
             <section class="stats-grid" aria-label="Indicateurs principaux">
                 <article class="panel stat-card">
-                    <div class="stat-kicker">Points</div>
-                    <div class="stat-value">0</div>
-                    <div class="stat-copy">Vos points apparaîtront ici après la validation des actions.</div>
+                    <div class="stat-kicker">Points personnels</div>
+                    <div class="stat-value" data-stat-points>0</div>
+                    <div class="stat-copy">Cumules sur les validations de ce mois.</div>
                 </article>
                 <article class="panel stat-card">
-                    <div class="stat-kicker">CO2 évité</div>
-                    <div class="stat-value">0 kg</div>
-                    <div class="stat-copy">Le suivi se base sur vos actions validées dans les défis actifs.</div>
+                    <div class="stat-kicker">CO2 evite</div>
+                    <div class="stat-value" data-stat-co2>0 kg</div>
+                    <div class="stat-copy">Estimation issue des defis completes.</div>
                 </article>
                 <article class="panel stat-card">
-                    <div class="stat-kicker">Badges</div>
-                    <div class="stat-value">0</div>
-                    <div class="stat-copy">Débloquez des badges au fil de votre progression.</div>
+                    <div class="stat-kicker">Badges debloques</div>
+                    <div class="stat-value" data-stat-badges>0</div>
+                    <div class="stat-copy">Nouveaux badges gagnables cette semaine.</div>
                 </article>
             </section>
 
-            <section class="action-grid">
+            <section class="dashboard-grid">
                 <article class="panel action-card">
-                    <h2>Actions à poursuivre</h2>
-                    <p>Retrouvez ici le prochain contenu à intégrer: défis en cours, preuves à déposer et retours de validation.</p>
-                    <ul class="action-list">
-                        <li>Consulter les défis du mois</li>
-                        <li>Déposer une validation</li>
-                        <li>Suivre vos badges</li>
+                    <h2>Defis en cours</h2>
+                    <ul class="task-list" data-challenge-list>
+                        <li class="task-item is-loading">Chargement des defis...</li>
+                    </ul>
+                    <a class="inline-link" href="defis.html">Ouvrir le parcours complet</a>
+                </article>
+
+                <article class="panel action-card">
+                    <h2>Mon equipe</h2>
+                    <div class="team-highlight">
+                        <div>
+                            <div class="team-name" data-team-name>Les Eco-Heros</div>
+                            <div class="team-meta" data-team-rank>Classement: --</div>
+                        </div>
+                        <a class="hero-ghost" href="detailEquipe.html?id=eco-heros">Detail equipe</a>
+                    </div>
+                    <p class="muted-copy">La progression collective se met a jour apres chaque validation.</p>
+                </article>
+
+                <article class="panel action-card">
+                    <h2>Dernieres notifications</h2>
+                    <ul class="feed-list" data-notification-list>
+                        <li class="feed-item is-loading">Chargement des notifications...</li>
                     </ul>
                 </article>
+
                 <article class="panel action-card">
                     <h2>Navigation rapide</h2>
-                    <p>Cette page sert maintenant de base fonctionnelle pour le parcours employé.</p>
-                    <ul class="action-list">
-                        <li>Profil et paramètres</li>
-                        <li>Classement d'équipe</li>
-                        <li>Défis du moment</li>
-                    </ul>
+                    <div class="quick-grid">
+                        <a class="quick-link" href="detailDefi.html?id=zero-voiture">Valider une action</a>
+                        <a class="quick-link" href="classement.html">Voir le podium</a>
+                        <a class="quick-link" href="profilE.html">Modifier mon profil</a>
+                        <a class="quick-link" href="defis.html">Suivre le parcours</a>
+                    </div>
                 </article>
             </section>
         </main>
 
-        <script src="../assets/js/app-shell.js" defer></script>
+        <script src="../../assets/js/app-shell.js" defer></script>
+        <script src="../../assets/js/Employe/dashboardE.js" defer></script>
     </body>
-    </html>
+</html>

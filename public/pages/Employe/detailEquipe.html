@@ -1,16 +1,62 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - detailEquipe</title>
-    <link rel="stylesheet" href="../assets/css/detailEquipe.css">
-</head>
-<body>
-    <div class="container">
-        <h1>detailEquipe</h1>
-        <p>Page en développement...</p>
-    </div>
-    <script src="../assets/js/detailEquipe.js"></script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GreenPulse - Detail Equipe</title>
+        <link rel="stylesheet" href="../../assets/css/app-shell.css" />
+        <link rel="stylesheet" href="../../assets/css/Employe/detailEquipe.css" />
+    </head>
+    <body class="app-page" data-required-role="employe">
+        <main class="app-shell employee-layout">
+            <header class="app-header">
+                <div class="brand-block">
+                    <div class="brand-name">GreenPulse</div>
+                    <div class="brand-title">Detail equipe</div>
+                    <div class="brand-subtitle">Performance collective et membres actifs</div>
+                </div>
+                <nav class="employee-tabs" aria-label="Navigation employe">
+                    <a class="employee-tab" href="dashboardE.html">Dashboard</a>
+                    <a class="employee-tab" href="defis.html">Defis</a>
+                    <a class="employee-tab is-active" href="classement.html">Classement</a>
+                    <a class="employee-tab" href="profilE.html">Mon profil</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="role-pill">Role: <strong data-user-role>EMPLOYE</strong></div>
+                    <button class="logout-btn" type="button" data-logout>Deconnexion</button>
+                </div>
+            </header>
+
+            <a class="back-link" href="classement.html">Retour au classement</a>
+
+            <section class="panel team-header" data-team-header>
+                <div>
+                    <p class="eyebrow" data-team-rank>Classement</p>
+                    <h1 data-team-name>Equipe</h1>
+                    <p class="team-motto" data-team-motto></p>
+                </div>
+                <div class="score-pill">
+                    <span class="score-value" data-team-score>0</span>
+                    <span class="score-label">points</span>
+                </div>
+            </section>
+
+            <section class="team-stats-grid" data-team-stats></section>
+
+            <section class="split-grid">
+                <article class="panel members-panel">
+                    <h2>Membres de l'equipe</h2>
+                    <ul class="members-list" data-members-list></ul>
+                </article>
+
+                <article class="panel timeline-panel">
+                    <h2>Derniers succes</h2>
+                    <ul class="timeline-list" data-achievements-list></ul>
+                </article>
+            </section>
+        </main>
+
+        <script src="../../assets/js/app-shell.js" defer></script>
+        <script src="../../assets/js/Employe/detailEquipe.js" defer></script>
+    </body>
 </html>

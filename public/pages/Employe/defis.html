@@ -1,16 +1,55 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - defis</title>
-    <link rel="stylesheet" href="../assets/css/defis.css">
-</head>
-<body>
-    <div class="container">
-        <h1>defis</h1>
-        <p>Page en développement...</p>
-    </div>
-    <script src="../assets/js/defis.js"></script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GreenPulse - Defis Employe</title>
+        <link rel="stylesheet" href="../../assets/css/app-shell.css" />
+        <link rel="stylesheet" href="../../assets/css/Employe/defis.css" />
+    </head>
+    <body class="app-page" data-required-role="employe">
+        <main class="app-shell employee-layout">
+            <header class="app-header">
+                <div class="brand-block">
+                    <div class="brand-name">GreenPulse</div>
+                    <div class="brand-title">Parcours des defis</div>
+                    <div class="brand-subtitle">Theme du mois: Mobilite douce</div>
+                </div>
+                <nav class="employee-tabs" aria-label="Navigation employe">
+                    <a class="employee-tab" href="dashboardE.html">Dashboard</a>
+                    <a class="employee-tab is-active" href="defis.html">Defis</a>
+                    <a class="employee-tab" href="classement.html">Classement</a>
+                    <a class="employee-tab" href="profilE.html">Mon profil</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="role-pill">Role: <strong data-user-role>EMPLOYE</strong></div>
+                    <button class="logout-btn" type="button" data-logout>Deconnexion</button>
+                </div>
+            </header>
+
+            <section class="panel page-intro">
+                <p class="eyebrow">Progression collective</p>
+                <h1>Le parcours eco-responsable de votre equipe</h1>
+                <p>
+                    Debloquez chaque etape dans l'ordre. Chaque validation individuelle fait progresser
+                    l'equipe complete.
+                </p>
+                <div class="filter-row" role="group" aria-label="Filtres des defis">
+                    <button class="filter-btn is-active" type="button" data-filter="all">Tous</button>
+                    <button class="filter-btn" type="button" data-filter="active">En cours</button>
+                    <button class="filter-btn" type="button" data-filter="completed">Termines</button>
+                    <button class="filter-btn" type="button" data-filter="locked">Verrouilles</button>
+                </div>
+            </section>
+
+            <section class="timeline-container panel" aria-label="Timeline des defis">
+                <div class="timeline-list" data-timeline-list>
+                    <article class="challenge-step is-loading">Chargement des etapes...</article>
+                </div>
+            </section>
+        </main>
+
+        <script src="../../assets/js/app-shell.js" defer></script>
+        <script src="../../assets/js/Employe/defis.js" defer></script>
+    </body>
 </html>

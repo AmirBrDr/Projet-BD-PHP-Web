@@ -1,13 +1,184 @@
-/* defis Styles */
-/* TODO: Add styles for defis */
-
-.container {
-    max-width: 1200px;
+.employee-layout {
+    max-width: 1100px;
     margin: 0 auto;
+}
+
+.employee-tabs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.employee-tab {
+    text-decoration: none;
+    color: var(--shell-muted);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 13px;
+}
+
+.employee-tab:hover,
+.employee-tab.is-active {
+    background: linear-gradient(90deg, #94bb39, #2bd47c);
+    color: #052415;
+}
+
+.page-intro {
+    padding: 22px;
+}
+
+.page-intro h1 {
+    margin: 0;
+    font-size: clamp(24px, 4vw, 40px);
+}
+
+.page-intro p {
+    color: var(--shell-muted);
+}
+
+.filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--shell-text);
+    padding: 8px 13px;
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.filter-btn.is-active {
+    border-color: #94bb39;
+    background: rgba(148, 187, 57, 0.18);
+    color: #b7d96a;
+}
+
+.timeline-container {
     padding: 20px;
 }
 
-h1 {
-    color: #333;
-    font-size: 2em;
+.timeline-list {
+    position: relative;
+    display: grid;
+    gap: 22px;
+}
+
+.timeline-list::before {
+    content: "";
+    position: absolute;
+    left: 25px;
+    top: 20px;
+    bottom: 20px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.challenge-step {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+}
+
+.step-bullet {
+    z-index: 1;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 3px solid #0a1830;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+}
+
+.step-card {
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.step-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+}
+
+.step-title {
+    margin: 0;
+    font-size: 20px;
+}
+
+.step-points {
+    font-weight: 700;
+    color: #94bb39;
+}
+
+.step-description,
+.step-progress {
+    margin: 8px 0 0;
+    color: var(--shell-muted);
+    font-size: 14px;
+}
+
+.step-link,
+.step-button {
+    margin-top: 12px;
+    display: inline-flex;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 9px 12px;
+}
+
+.step-link {
+    background: linear-gradient(90deg, #2a997f, #94bb39);
+    color: #032012;
+}
+
+.step-button {
+    border: 1px dashed rgba(255, 255, 255, 0.24);
+    color: var(--shell-muted);
+    background: transparent;
+}
+
+.challenge-step.completed .step-bullet {
+    background: #2a997f;
+}
+
+.challenge-step.active .step-bullet {
+    background: #94bb39;
+    color: #032012;
+    box-shadow: 0 0 18px rgba(148, 187, 57, 0.4);
+}
+
+.challenge-step.locked .step-bullet {
+    background: #3a4e59;
+    color: #a0b1b5;
+}
+
+.challenge-step.locked .step-card {
+    opacity: 0.64;
+}
+
+.challenge-step.is-loading {
+    color: var(--shell-muted);
+    font-style: italic;
+}
+
+@media (max-width: 980px) {
+    .employee-tabs {
+        order: 3;
+        width: 100%;
+    }
 }

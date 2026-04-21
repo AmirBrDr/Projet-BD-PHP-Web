@@ -1,13 +1,163 @@
-/* dashboardE Styles */
-/* TODO: Add styles for dashboardE */
-
-.container {
-    max-width: 1200px;
+.employee-layout {
+    max-width: 1320px;
     margin: 0 auto;
-    padding: 20px;
 }
 
-h1 {
-    color: #333;
-    font-size: 2em;
+.employee-tabs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.employee-tab {
+    text-decoration: none;
+    color: var(--shell-muted);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 13px;
+    transition: 0.2s ease;
+}
+
+.employee-tab:hover,
+.employee-tab.is-active {
+    color: #032012;
+    background: linear-gradient(90deg, #94bb39, #2bd47c);
+}
+
+.hero-cta-row {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.hero-cta,
+.hero-ghost,
+.inline-link,
+.quick-link {
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    transition: 0.2s ease;
+}
+
+.hero-cta {
+    background: linear-gradient(90deg, #2a997f, #94bb39);
+    color: #052415;
+    padding: 10px 14px;
+}
+
+.hero-ghost {
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: var(--shell-text);
+    padding: 10px 14px;
+}
+
+.hero-ghost:hover,
+.hero-cta:hover,
+.inline-link:hover,
+.quick-link:hover {
+    transform: translateY(-1px);
+}
+
+.inline-link {
+    color: #94bb39;
+}
+
+.stats-grid .stat-value {
+    color: #94bb39;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.action-card {
+    min-height: 210px;
+}
+
+.task-list,
+.feed-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+
+.task-item,
+.feed-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--shell-text);
+    font-size: 13px;
+}
+
+.task-item strong,
+.feed-item strong {
+    color: #94bb39;
+}
+
+.task-item.is-loading,
+.feed-item.is-loading {
+    color: var(--shell-muted);
+    font-style: italic;
+}
+
+.team-highlight {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.team-name {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.team-meta,
+.muted-copy {
+    color: var(--shell-muted);
+    font-size: 13px;
+}
+
+.quick-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.quick-link {
+    padding: 12px;
+    color: var(--shell-text);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+@media (max-width: 1120px) {
+    .employee-tabs {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 900px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-grid {
+        grid-template-columns: 1fr;
+    }
 }

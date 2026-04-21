@@ -1,16 +1,78 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - detailDefi</title>
-    <link rel="stylesheet" href="../assets/css/detailDefi.css">
-</head>
-<body>
-    <div class="container">
-        <h1>detailDefi</h1>
-        <p>Page en développement...</p>
-    </div>
-    <script src="../assets/js/detailDefi.js"></script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GreenPulse - Detail Defi</title>
+        <link rel="stylesheet" href="../../assets/css/app-shell.css" />
+        <link rel="stylesheet" href="../../assets/css/Employe/detailDefi.css" />
+    </head>
+    <body class="app-page" data-required-role="employe">
+        <main class="app-shell employee-layout">
+            <header class="app-header">
+                <div class="brand-block">
+                    <div class="brand-name">GreenPulse</div>
+                    <div class="brand-title">Detail du defi</div>
+                    <div class="brand-subtitle">Validez vos actions et suivez les retours</div>
+                </div>
+                <nav class="employee-tabs" aria-label="Navigation employe">
+                    <a class="employee-tab" href="dashboardE.html">Dashboard</a>
+                    <a class="employee-tab is-active" href="defis.html">Defis</a>
+                    <a class="employee-tab" href="classement.html">Classement</a>
+                    <a class="employee-tab" href="profilE.html">Mon profil</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="role-pill">Role: <strong data-user-role>EMPLOYE</strong></div>
+                    <button class="logout-btn" type="button" data-logout>Deconnexion</button>
+                </div>
+            </header>
+
+            <a class="back-link" href="defis.html">Retour aux defis</a>
+
+            <section class="panel challenge-head" data-challenge-head>
+                <p class="eyebrow" data-challenge-theme>Theme du mois</p>
+                <h1 data-challenge-title>Defi</h1>
+                <p data-challenge-description>Description du defi.</p>
+                <div class="head-metrics">
+                    <span class="metric-chip" data-challenge-points>+0 pts</span>
+                    <span class="metric-chip" data-challenge-co2>0 kg CO2</span>
+                    <span class="metric-chip" data-challenge-progress>0% equipe</span>
+                </div>
+            </section>
+
+            <section class="detail-grid">
+                <article class="panel submission-panel">
+                    <h2>Valider une action</h2>
+                    <form class="submission-form" data-submission-form>
+                        <div class="action-options" data-action-options></div>
+                        <label class="input-label" for="proofText">Commentaire de preuve</label>
+                        <textarea
+                            id="proofText"
+                            name="proofText"
+                            rows="4"
+                            maxlength="300"
+                            placeholder="Decrivez votre action du jour..."
+                            required
+                        ></textarea>
+                        <button class="submit-btn" type="submit">Soumettre pour validation</button>
+                    </form>
+                    <p class="feedback-msg" data-form-feedback></p>
+                </article>
+
+                <aside class="panel side-panel">
+                    <h2>Forum du defi</h2>
+                    <ul class="forum-list" data-forum-list></ul>
+                    <a class="inline-link" href="defis.html">Voir tous les defis</a>
+                </aside>
+            </section>
+
+            <section class="panel history-panel">
+                <h2>Mes dernieres soumissions</h2>
+                <ul class="history-list" data-history-list></ul>
+            </section>
+        </main>
+
+        <script src="../../assets/js/app-shell.js" defer></script>
+        <script src="../../assets/js/Employe/detailDefi.js" defer></script>
+    </body>
 </html>

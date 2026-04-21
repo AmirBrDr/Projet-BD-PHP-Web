@@ -1,16 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - profil</title>
-    <link rel="stylesheet" href="../assets/css/profil.css">
-</head>
-<body>
-    <div class="container">
-        <h1>profil</h1>
-        <p>Page en développement...</p>
-    </div>
-    <script src="../assets/js/profil.js"></script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GreenPulse - Profil Employe</title>
+        <link rel="stylesheet" href="../../assets/css/app-shell.css" />
+        <link rel="stylesheet" href="../../assets/css/Employe/profilE.css" />
+    </head>
+    <body class="app-page" data-required-role="employe">
+        <main class="app-shell employee-layout">
+            <header class="app-header">
+                <div class="brand-block">
+                    <div class="brand-name">GreenPulse</div>
+                    <div class="brand-title">Mon profil</div>
+                    <div class="brand-subtitle">Informations personnelles, badges et preferences</div>
+                </div>
+                <nav class="employee-tabs" aria-label="Navigation employe">
+                    <a class="employee-tab" href="dashboardE.html">Dashboard</a>
+                    <a class="employee-tab" href="defis.html">Defis</a>
+                    <a class="employee-tab" href="classement.html">Classement</a>
+                    <a class="employee-tab is-active" href="profilE.html">Mon profil</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="role-pill">Role: <strong data-user-role>EMPLOYE</strong></div>
+                    <button class="logout-btn" type="button" data-logout>Deconnexion</button>
+                </div>
+            </header>
+
+            <section class="panel profile-header">
+                <div class="avatar-block">
+                    <div class="avatar-circle" data-user-initials>GP</div>
+                </div>
+                <div class="identity-block">
+                    <h1 data-user-name>Utilisateur</h1>
+                    <p data-user-email></p>
+                    <div class="team-chip" data-profile-team>Equipe non definie</div>
+                </div>
+            </section>
+
+            <section class="stats-grid" data-profile-stats></section>
+
+            <section class="profile-grid">
+                <article class="panel profile-card">
+                    <h2>Mes badges</h2>
+                    <ul class="badge-list" data-badge-list></ul>
+                </article>
+
+                <article class="panel profile-card">
+                    <h2>Defis termines</h2>
+                    <ul class="history-list" data-history-list></ul>
+                </article>
+
+                <article class="panel profile-card preference-card">
+                    <h2>Parametres</h2>
+                    <form data-preference-form>
+                        <label class="toggle-row" for="notifMail">
+                            <span>Recevoir les notifications email</span>
+                            <input id="notifMail" name="notifMail" type="checkbox" checked />
+                        </label>
+                        <label class="toggle-row" for="notifForum">
+                            <span>Suivre les nouveaux messages forum</span>
+                            <input id="notifForum" name="notifForum" type="checkbox" checked />
+                        </label>
+                        <button class="submit-btn" type="submit">Enregistrer mes preferences</button>
+                    </form>
+                    <p class="feedback-msg" data-pref-feedback></p>
+                </article>
+            </section>
+        </main>
+
+        <script src="../../assets/js/app-shell.js" defer></script>
+        <script src="../../assets/js/Employe/profilE.js" defer></script>
+    </body>
 </html>
