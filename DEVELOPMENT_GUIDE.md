@@ -588,7 +588,7 @@ git push origin <votre-branche>
 ```
 
 ### J'ai fait un commit sur main par accident
-
+ 
 ```bash
 # Annuler le dernier commit (garde les modifications)
 git reset --soft HEAD~1
