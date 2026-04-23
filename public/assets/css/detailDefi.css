@@ -2,10 +2,12 @@
    Fichier: public/assets/css/detailDefi.css
    ============================================================ */
 
+/* --- NAV --- */
 .brand-left {
     display: flex;
     align-items: center;
     gap: 14px;
+    flex-shrink: 0;
 }
 
 .nav-logo {
@@ -13,9 +15,26 @@
     width: auto;
 }
 
+.brand-name {
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--shell-accent);
+    font-weight: 700;
+    display: block;
+}
+
+.brand-title {
+    font-size: 18px;
+    font-weight: 700;
+    display: block;
+    white-space: nowrap;
+}
+
 .nav-links {
     display: flex;
     gap: 8px;
+    flex-wrap: nowrap;
 }
 
 .nav-links a {
@@ -24,6 +43,7 @@
     color: var(--shell-muted);
     text-decoration: none;
     font-size: 13px;
+    white-space: nowrap;
     transition: color 0.2s, background 0.2s;
 }
 
@@ -49,7 +69,8 @@
     border: 1px solid var(--shell-border);
     color: var(--shell-muted);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
+    white-space: nowrap;
     transition: color 0.2s, border-color 0.2s;
 }
 
@@ -60,17 +81,19 @@
 
 /* --- HERO --- */
 .defi-hero {
-    padding: 32px;
+    padding: 28px;
     background: var(--shell-card);
     border: 1px solid var(--shell-border);
     border-radius: 24px;
     backdrop-filter: blur(10px);
+    box-shadow: var(--shell-shadow);
+    margin-bottom: 4px;
 }
 
 .defi-hero-left {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
 }
 
 .defi-theme-badge {
@@ -81,7 +104,7 @@
     border-radius: 999px;
     background: rgba(43, 212, 124, 0.12);
     color: var(--shell-accent);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -90,7 +113,7 @@
 
 .defi-nom {
     margin: 0;
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 800;
     line-height: 1.1;
 }
@@ -98,13 +121,13 @@
 .defi-desc {
     margin: 0;
     color: var(--shell-muted);
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.6;
 }
 
 .defi-stats-row {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
@@ -112,7 +135,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 14px;
+    padding: 7px 13px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid var(--shell-border);
@@ -128,24 +151,17 @@
 .detail-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 18px;
     align-items: start;
 }
 
 /* --- PANELS --- */
-.panel {
-    background: var(--shell-card);
-    border: 1px solid var(--shell-border);
-    border-radius: 24px;
-    backdrop-filter: blur(10px);
-}
-
 .actions-panel,
 .forum-panel {
-    padding: 28px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
     background: var(--shell-card);
     border: 1px solid var(--shell-border);
     border-radius: 24px;
@@ -154,29 +170,27 @@
 }
 
 .panel-title {
-    margin: 0 0 20px;
-    font-size: 16px;
+    margin: 0;
+    font-size: 15px;
     font-weight: 700;
     color: var(--shell-accent);
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-shrink: 0;
 }
 
 /* --- ACTIONS --- */
 .actions-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    flex: 1;
+    gap: 10px;
 }
 
 .action-item {
     display: flex;
     align-items: flex-start;
-    gap: 14px;
-    padding: 16px;
+    gap: 12px;
+    padding: 14px;
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--shell-border);
@@ -188,8 +202,8 @@
 }
 
 .action-icon {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     background: rgba(43, 212, 124, 0.15);
     display: flex;
@@ -197,18 +211,18 @@
     justify-content: center;
     flex-shrink: 0;
     color: var(--shell-accent);
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .action-body h4 {
-    margin: 0 0 4px;
-    font-size: 14px;
+    margin: 0 0 3px;
+    font-size: 13px;
     font-weight: 700;
 }
 
 .action-body p {
     margin: 0;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--shell-muted);
     line-height: 1.5;
 }
@@ -218,19 +232,15 @@
     text-align: center;
     color: var(--shell-muted);
     font-size: 13px;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 /* --- FORUM --- */
 .forum-messages {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    flex: 1;
+    gap: 12px;
     overflow-y: auto;
+    max-height: 350px;
     padding-right: 4px;
 }
 
@@ -276,24 +286,24 @@
 }
 
 .forum-vide {
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 30px;
     color: var(--shell-muted);
     gap: 10px;
 }
 
 .forum-vide i {
-    font-size: 36px;
+    font-size: 32px;
     color: var(--shell-accent);
     opacity: 0.4;
 }
 
 .forum-vide p {
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 /* --- ÉTATS --- */
@@ -301,7 +311,7 @@
     padding: 60px;
     text-align: center;
     color: var(--shell-muted);
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .loading-state i {
@@ -331,7 +341,8 @@
     .detail-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 20px;
+        gap: 18px;
         align-items: start;
+        margin-top: 4px;
     }
 }

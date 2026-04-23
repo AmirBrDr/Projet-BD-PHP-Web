@@ -3,14 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - statistiques</title>
+    <title>GreenPulse - Statistiques</title>
+    <link rel="stylesheet" href="../assets/css/app-shell.css">
     <link rel="stylesheet" href="../assets/css/statistiques.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <div class="container">
-        <h1>statistiques</h1>
-        <p>Page en développement...</p>
+<body class="app-page" data-required-role="animateur">
+
+    <div class="app-shell">
+
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="brand-block">
+                <div class="brand-left">
+                    <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo">
+                    <div>
+                        <span class="brand-name">GreenPulse</span>
+                        <span class="brand-title">Statistiques</span>
+                        <span class="brand-subtitle" id="mois-label"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="nav-links">
+                    <a href="statistiques.html" class="active">Statistiques</a>
+                    <a href="defis.html">Défis du mois</a>
+                    <a href="moderation.html">Modération</a>
+                    <a href="parametresAnimateur.html">Paramètres</a>
+                </div>
+                <span class="role-pill">Rôle : <strong>Animateur DD</strong></span>
+                <button class="logout-btn" data-logout title="Déconnexion">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- LOADING -->
+        <div class="loading-state" id="loading">
+            <i class="fas fa-spinner fa-spin"></i> Chargement des statistiques...
+        </div>
+
+        <!-- CONTENU -->
+        <div id="contenu" class="hidden" style="display:flex; flex-direction:column; gap:18px;">
+
+            <!-- KPIs GLOBAUX -->
+            <section class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fas fa-trophy"></i></div>
+                    <div class="kpi-body">
+                        <span class="kpi-label">Défis ce mois</span>
+                        <span class="kpi-value" id="kpi-defis">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                    <div class="kpi-body">
+                        <span class="kpi-label">Participants</span>
+                        <span class="kpi-value" id="kpi-participants">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fas fa-leaf"></i></div>
+                    <div class="kpi-body">
+                        <span class="kpi-label">kg CO₂ économisés</span>
+                        <span class="kpi-value" id="kpi-co2">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon"><i class="fas fa-tags"></i></div>
+                    <div class="kpi-body">
+                        <span class="kpi-label">Thématiques</span>
+                        <span class="kpi-value" id="kpi-themes">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- GRILLE STATS -->
+            <div class="stats-grid">
+
+                <!-- PARTICIPANTS PAR DÉFI -->
+                <section class="stat-panel">
+                    <h2 class="panel-title">
+                        <i class="fas fa-chart-bar"></i> Participants par défi
+                    </h2>
+                    <div id="chart-defis" class="bar-chart"></div>
+                </section>
+
+                <!-- STATS PAR THÉMATIQUE -->
+                <section class="stat-panel">
+                    <h2 class="panel-title">
+                        <i class="fas fa-chart-pie"></i> Stats par thématique
+                    </h2>
+                    <div id="chart-themes" class="theme-list"></div>
+                </section>
+
+            </div>
+
+            <!-- TAUX DE VALIDATION -->
+            <section class="stat-panel full-width">
+                <h2 class="panel-title">
+                    <i class="fas fa-check-double"></i> Taux de validation des actions
+                </h2>
+                <div id="chart-validation" class="validation-list"></div>
+            </section>
+
+        </div>
+
+        <!-- ERREUR -->
+        <div id="erreur" class="erreur-state hidden">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p id="erreur-msg"></p>
+        </div>
+
     </div>
-    <script src="../assets/js/statistiques.js"></script>
+
+    <script src="../assets/js/app-shell.js" defer></script>
+    <script src="../assets/js/statistiques.js" defer></script>
 </body>
 </html>
