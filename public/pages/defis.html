@@ -3,14 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - defis</title>
+    <title>GreenPulse - Défis du mois</title>
+    <link rel="stylesheet" href="../assets/css/app-shell.css">
     <link rel="stylesheet" href="../assets/css/defis.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <div class="container">
-        <h1>defis</h1>
-        <p>Page en développement...</p>
+<body class="app-page" data-required-role="animateur">
+
+    <div class="app-shell">
+
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="brand-block">
+                <div class="brand-left">
+                    <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo">
+                    <div>
+                        <span class="brand-name">GreenPulse</span>
+                        <span class="brand-title">Défis du mois</span>
+                        <span class="brand-subtitle" id="mois-label"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="nav-links">
+                    <a href="statistiques.html">Statistiques</a>
+                    <a href="defis.html" class="active">Défis du mois</a>
+                    <a href="moderation.html">Modération</a>
+                    <a href="parametresAnimateur.html">Paramètres</a>
+                </div>
+                <span class="role-pill">Rôle : <strong>Animateur DD</strong></span>
+                <button class="logout-btn" data-logout title="Déconnexion">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- TITRE SECTION -->
+        <section class="parcours-header">
+            <h2 class="parcours-title">
+                <i class="fas fa-leaf"></i> Le Parcours Éco-Responsable
+            </h2>
+            <p class="parcours-subtitle">
+                Progressez étape par étape. Validez un défi pour débloquer le suivant.
+            </p>
+        </section>
+
+        <!-- FILTRE THÉMATIQUE -->
+        <div class="filter-bar">
+            <select id="filtreTheme">
+                <option value="all">Toutes les thématiques</option>
+            </select>
+        </div>
+
+        <!-- LISTE DES DÉFIS -->
+        <main class="parcours-list" id="parcours-list">
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i> Chargement des défis...
+            </div>
+        </main>
+
+        <!-- ÉTAT VIDE -->
+        <div class="empty-state hidden" id="empty-state">
+            <i class="fas fa-seedling"></i>
+            <p>Aucun défi programmé ce mois-ci.</p>
+        </div>
+
     </div>
-    <script src="../assets/js/defis.js"></script>
+
+    <script src="../assets/js/app-shell.js" defer></script>
+    <script src="../assets/js/defis.js" defer></script>
 </body>
 </html>

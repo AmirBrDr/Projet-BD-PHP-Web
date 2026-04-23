@@ -20,6 +20,9 @@ if (is_file($publicPath)) {
 
 if (str_starts_with($uriPath, '/api/')) {
     $apiPath = $apiDir . substr($uriPath, 4);
+    if (is_dir($apiPath)) {
+        $apiPath = rtrim($apiPath, '/') . '/index.php';
+    }
     if (is_file($apiPath)) {
         if (pathinfo($apiPath, PATHINFO_EXTENSION) === 'php') {
             require $apiPath;

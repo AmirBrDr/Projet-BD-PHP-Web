@@ -3,14 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - detailDefi</title>
+    <title>GreenPulse - Détail du défi</title>
+    <link rel="stylesheet" href="../assets/css/app-shell.css">
     <link rel="stylesheet" href="../assets/css/detailDefi.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <div class="container">
-        <h1>detailDefi</h1>
-        <p>Page en développement...</p>
+<body class="app-page" data-required-role="animateur">
+
+    <div class="app-shell">
+
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="brand-block">
+                <div class="brand-left">
+                    <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo">
+                    <div>
+                        <span class="brand-name">GreenPulse</span>
+                        <span class="brand-title">Détail du défi</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="nav-links">
+                    <a href="statistiques.html">Statistiques</a>
+                    <a href="defis.html">Défis du mois</a>
+                    <a href="moderation.html">Modération</a>
+                    <a href="parametresAnimateur.html">Paramètres</a>
+                </div>
+                <span class="role-pill">Rôle : <strong>Animateur DD</strong></span>
+                <button class="logout-btn" data-logout title="Déconnexion">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- BOUTON RETOUR -->
+        <div class="back-bar">
+            <a href="defis.html" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Retour aux défis
+            </a>
+        </div>
+
+        <!-- CHARGEMENT -->
+        <div class="loading-state" id="loading">
+            <i class="fas fa-spinner fa-spin"></i> Chargement...
+        </div>
+
+        <!-- CONTENU PRINCIPAL -->
+        <div id="contenu" class="hidden">
+
+            <!-- HERO DU DÉFI -->
+            <section class="defi-hero">
+                <div class="defi-hero-left">
+                    <span class="defi-theme-badge" id="hero-theme"></span>
+                    <h1 class="defi-nom" id="hero-nom"></h1>
+                    <p class="defi-desc" id="hero-desc"></p>
+                    <div class="defi-stats-row">
+                        <div class="stat-pill">
+                            <i class="fas fa-star"></i>
+                            <span id="hero-pts"></span> pts
+                        </div>
+                        <div class="stat-pill">
+                            <i class="fas fa-leaf"></i>
+                            <span id="hero-co2"></span> kg CO₂
+                        </div>
+                        <div class="stat-pill">
+                            <i class="fas fa-layer-group"></i>
+                            Niveau <span id="hero-niveau"></span>
+                        </div>
+                        <div class="stat-pill">
+                            <i class="fas fa-users"></i>
+                            <span id="hero-participants"></span> participant(s)
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- GRILLE : ACTIONS + FORUM -->
+            <div class="detail-grid">
+
+                <!-- ACTIONS DU DÉFI -->
+                <section class="panel actions-panel">
+                    <h2 class="panel-title">
+                        <i class="fas fa-tasks"></i> Actions du défi
+                    </h2>
+                    <div id="actions-list" class="actions-list"></div>
+                </section>
+
+                <!-- FORUM -->
+                <section class="panel forum-panel">
+                    <h2 class="panel-title">
+                        <i class="fas fa-comments"></i> Forum du défi
+                    </h2>
+                    <div id="forum-messages" class="forum-messages"></div>
+                    <div id="forum-vide" class="forum-vide hidden">
+                        <i class="fas fa-comment-slash"></i>
+                        <p>Aucun message pour l'instant.</p>
+                    </div>
+                </section>
+
+            </div>
+
+        </div>
+
+        <!-- ERREUR -->
+        <div id="erreur" class="erreur-state hidden">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p id="erreur-msg"></p>
+            <a href="defis.html" class="btn-back">Retour aux défis</a>
+        </div>
+
     </div>
-    <script src="../assets/js/detailDefi.js"></script>
+
+    <script src="../assets/js/app-shell.js" defer></script>
+    <script src="../assets/js/detailDefi.js" defer></script>
 </body>
 </html>
