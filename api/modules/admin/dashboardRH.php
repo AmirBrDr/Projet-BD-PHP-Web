@@ -1,5 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
+require __DIR__ . '/../../bootstrap.php';
+
+header('Content-Type: application/json');
+
 $pdo = gp_pdo($config);
 
 // Requêtes avec alias
@@ -44,5 +50,3 @@ echo json_encode([
     'tauxParticipation' => $results['tauxParticipation'],
     'actionsValides' => $results['actionsValides']
 ]);
-
-?>
