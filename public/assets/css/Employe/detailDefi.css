@@ -184,6 +184,16 @@ textarea {
     font-size: 13px;
 }
 
+.forum-form {
+    margin-top: 10px;
+    display: grid;
+    gap: 8px;
+}
+
+.forum-form textarea {
+    font-size: 13px;
+}
+
 @media (max-width: 980px) {
     .detail-grid {
         grid-template-columns: 1fr;

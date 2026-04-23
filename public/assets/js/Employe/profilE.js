@@ -1,95 +1,91 @@
 // Fichier: public/assets/js/Employe/profilE.js - Logique frontend et interactions.
 (() => {
-    const mockProfile = {
-        team: "Les Eco-Heros",
-        stats: [
-            { label: "Points personnels", value: "1 250" },
-            { label: "CO2 evite", value: "42 kg" },
-            { label: "Classement individuel", value: "12e" },
-        ],
-        badges: [
-            { name: "Cycliste Pro", date: "12/02/2026" },
-            { name: "Zero goutte", date: "05/01/2026" },
-            { name: "Eco mentor", date: "22/12/2025" },
-        ],
-        history: [
-            { title: "Zero dechet au bureau", period: "Fevrier 2026" },
-            { title: "Transports doux", period: "Janvier 2026" },
-            { title: "Eteindre les veilles", period: "Decembre 2025" },
-        ],
-    };
+    const API_BASE = '/api';
+    const token = () => localStorage.getItem('gp_token');
 
-    function getUser() {
-        const raw = localStorage.getItem("gp_user");
-        if (!raw) return null;
-        try {
-            return JSON.parse(raw);
-        } catch (_err) {
-            return null;
+    async function apiGet(path) {
+        const res = await fetch(API_BASE + path, {
+            headers: { 'Authorization': 'Bearer ' + token() }
+        });
+        if (!res.ok) throw new Error((await res.json()).message || res.status);
+        return res.json();
+    }
+
+    function setInitials(prenom, nom) {
+        const el = document.querySelector('[data-user-initials]');
+        if (!el) return;
+        el.textContent = (prenom.charAt(0) + nom.charAt(0)).toUpperCase();
+    }
+
+    function renderStats(stats) {
+        const host = document.querySelector('[data-profile-stats]');
+        if (!host) return;
+        const items = [
+            { label: 'Points personnels', value: stats.points.toLocaleString('fr-FR') },
+            { label: 'CO₂ évité', value: stats.co2 + ' kg' },
+            { label: 'Classement individuel', value: stats.rang_perso + 'e' },
+        ];
+        host.innerHTML = items.map(item => `
+            <article class="stat-card panel">
+                <div class="stat-label">${item.label}</div>
+                <div class="stat-value">${item.value}</div>
+            </article>`).join('');
+    }
+
+    function renderBadges(badges) {
+        const host = document.querySelector('[data-badge-list]');
+        if (!host) return;
+        if (!badges.length) {
+            host.innerHTML = '<li class="badge-item" style="color:var(--shell-muted)">Aucun badge encore. Complétez des défis !</li>';
+            return;
         }
+        host.innerHTML = badges.map(b => `
+            <li class="badge-item">
+                <strong>${b.nom}</strong>
+                <small>${new Date(b.date).toLocaleDateString('fr-FR')}</small>
+            </li>`).join('');
     }
 
-    function setInitials() {
-        const user = getUser();
-        const host = document.querySelector("[data-user-initials]");
+    function renderHistory(history) {
+        const host = document.querySelector('[data-history-list]');
         if (!host) return;
-        const first = (user?.prenomUser || "G").charAt(0).toUpperCase();
-        const last = (user?.nomUser || "P").charAt(0).toUpperCase();
-        host.textContent = `${first}${last}`;
-    }
-
-    function renderStats() {
-        const host = document.querySelector("[data-profile-stats]");
-        if (!host) return;
-        host.innerHTML = mockProfile.stats
-            .map((item) => {
-                return `<article class="stat-card"><div class="stat-label">${item.label}</div><div class="stat-value">${item.value}</div></article>`;
-            })
-            .join("");
-    }
-
-    function renderBadges() {
-        const host = document.querySelector("[data-badge-list]");
-        if (!host) return;
-        host.innerHTML = mockProfile.badges
-            .map((item) => {
-                return `<li class="badge-item"><strong>${item.name}</strong><small>${item.date}</small></li>`;
-            })
-            .join("");
-    }
-
-    function renderHistory() {
-        const host = document.querySelector("[data-history-list]");
-        if (!host) return;
-        host.innerHTML = mockProfile.history
-            .map((item) => {
-                return `<li class="history-item"><strong>${item.title}</strong><br /><small>${item.period}</small></li>`;
-            })
-            .join("");
+        if (!history.length) {
+            host.innerHTML = '<li class="history-item" style="color:var(--shell-muted)">Aucun défi terminé pour l\'instant.</li>';
+            return;
+        }
+        host.innerHTML = history.map(h => `
+            <li class="history-item">
+                <strong>${h.nom}</strong><br />
+                <small>${new Date(h.date).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</small>
+            </li>`).join('');
     }
 
     function bindPreferences() {
-        const form = document.querySelector("[data-preference-form]");
-        const feedback = document.querySelector("[data-pref-feedback]");
+        const form = document.querySelector('[data-preference-form]');
+        const feedback = document.querySelector('[data-pref-feedback]');
         if (!form || !feedback) return;
-
-        form.addEventListener("submit", (event) => {
-            event.preventDefault();
-            feedback.className = "feedback-msg is-success";
-            feedback.textContent = "Preferences enregistrees localement.";
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            feedback.className = 'feedback-msg is-success';
+            feedback.textContent = 'Préférences enregistrées.';
         });
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const teamLabel = document.querySelector("[data-profile-team]");
-        if (teamLabel) {
-            teamLabel.textContent = mockProfile.team;
-        }
-
-        setInitials();
-        renderStats();
-        renderBadges();
-        renderHistory();
+    document.addEventListener('DOMContentLoaded', async () => {
         bindPreferences();
+        try {
+            const data = await apiGet('/modules/employee/profile.php');
+
+            setInitials(data.user.prenom, data.user.nom);
+
+            const teamEl = document.querySelector('[data-profile-team]');
+            if (teamEl) teamEl.textContent = data.equipe ? data.equipe.nom : 'Sans équipe';
+
+            renderStats(data.stats);
+            renderBadges(data.badges);
+            renderHistory(data.historique);
+        } catch (err) {
+            console.error('Erreur profil:', err);
+        }
     });
 })();

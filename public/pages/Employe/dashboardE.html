@@ -6,6 +6,7 @@
         <title>GreenPulse - Dashboard Employe</title>
         <link rel="stylesheet" href="../../assets/css/app-shell.css" />
         <link rel="stylesheet" href="../../assets/css/Employe/dashboardE.css" />
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
     </head>
     <body class="app-page" data-required-role="employe">
         <main class="app-shell employee-layout">
@@ -66,6 +67,13 @@
                     <div class="stat-value" data-stat-badges>0</div>
                     <div class="stat-copy">Nouveaux badges gagnables cette semaine.</div>
                 </article>
+            </section>
+
+            <section class="panel chart-panel">
+                <h2>Mon impact CO₂ (6 derniers mois)</h2>
+                <div class="chart-container">
+                    <canvas id="co2Chart"></canvas>
+                </div>
             </section>
 
             <section class="dashboard-grid">

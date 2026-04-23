@@ -62,7 +62,11 @@
                 <aside class="panel side-panel">
                     <h2>Forum du defi</h2>
                     <ul class="forum-list" data-forum-list></ul>
-                    <a class="inline-link" href="defis.html">Voir tous les defis</a>
+                    <form class="forum-form" data-forum-form>
+                        <textarea name="message" rows="3" maxlength="500" placeholder="Partagez un conseil..."></textarea>
+                        <button class="submit-btn" type="submit">Publier</button>
+                    </form>
+                    <p class="feedback-msg" data-forum-feedback></p>
                 </aside>
             </section>
 

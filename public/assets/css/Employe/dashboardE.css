@@ -144,6 +144,16 @@
     background: rgba(255, 255, 255, 0.03);
 }
 
+.chart-panel {
+    padding: 20px;
+}
+
+.chart-container {
+    position: relative;
+    height: 220px;
+    margin-top: 12px;
+}
+
 @media (max-width: 1120px) {
     .employee-tabs {
         order: 3;

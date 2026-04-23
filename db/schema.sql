@@ -735,7 +735,7 @@ BEGIN
                 NEW.ordre, NEW.Id_thematique;
         END IF;
     END IF;
-    RETURN NEW;
+    RETURN NEW; 
 END;
 $$ LANGUAGE plpgsql;
 

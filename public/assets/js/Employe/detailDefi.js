@@ -1,36 +1,25 @@
 // Fichier: public/assets/js/Employe/detailDefi.js - Logique frontend et interactions.
 (() => {
-    const challenges = {
-        "zero-voiture": {
-            theme: "Mobilite douce",
-            title: "Zero voiture",
-            description:
-                "Reduisez l'usage de la voiture individuelle en privilegient velo, marche et transports en commun.",
-            points: 100,
-            co2: 18,
-            teamProgress: 64,
-            options: [
-                { id: "velo", title: "Venir a velo", subtitle: "Trajet complet ou partiel" },
-                { id: "walk", title: "Venir a pied", subtitle: "Minimum 20 minutes" },
-                { id: "bus", title: "Transport collectif", subtitle: "Bus, tram, metro" },
-            ],
-            forum: [
-                { author: "Animateur DD", text: "Pensez a ajouter un commentaire precis pour la validation.", date: "Aujourd'hui" },
-                { author: "Lea", text: "Qui part en velo depuis Toulouse centre demain matin ?", date: "Hier" },
-            ],
-            history: [
-                { action: "Venir a velo", status: "Valide", date: "15/02" },
-                { action: "Transport collectif", status: "En attente", date: "13/02" },
-            ],
-        },
-    };
+    const API_BASE = '/api';
+    const token = () => localStorage.getItem('gp_token');
 
-    let selectedActionId = "";
+    async function apiGet(path) {
+        const res = await fetch(API_BASE + path, {
+            headers: { 'Authorization': 'Bearer ' + token() }
+        });
+        if (!res.ok) throw new Error((await res.json()).message || res.status);
+        return res.json();
+    }
 
-    function getChallengeFromQuery() {
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get("id") || "zero-voiture";
-        return challenges[id] || challenges["zero-voiture"];
+    async function apiPost(path, body) {
+        const res = await fetch(API_BASE + path, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
+            body: JSON.stringify(body),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.message || res.status);
+        return json;
     }
 
     function setText(selector, value) {
@@ -38,88 +27,174 @@
         if (el) el.textContent = value;
     }
 
-    function renderHead(challenge) {
-        setText("[data-challenge-theme]", `Thematique: ${challenge.theme}`);
-        setText("[data-challenge-title]", `Defi: ${challenge.title}`);
-        setText("[data-challenge-description]", challenge.description);
-        setText("[data-challenge-points]", `+${challenge.points} pts`);
-        setText("[data-challenge-co2]", `${challenge.co2} kg CO2`);
-        setText("[data-challenge-progress]", `${challenge.teamProgress}% equipe`);
+    let selectedActionId = 0;
+    let defiId = 0;
+
+    function renderHead(defi) {
+        setText('[data-challenge-theme]', 'Thématique : ' + defi.theme);
+        setText('[data-challenge-title]', defi.nom);
+        setText('[data-challenge-description]', defi.description || '');
+        setText('[data-challenge-points]', '+' + defi.points + ' pts');
+        setText('[data-challenge-co2]', defi.co2 + ' kg CO₂');
+        document.title = 'GreenPulse - ' + defi.nom;
     }
 
-    function renderActionOptions(challenge) {
-        const host = document.querySelector("[data-action-options]");
+    function renderActions(actions, alreadyDone) {
+        const host = document.querySelector('[data-action-options]');
         if (!host) return;
 
-        selectedActionId = challenge.options[0]?.id || "";
-        host.innerHTML = challenge.options
-            .map((option, index) => {
-                const selectedClass = index === 0 ? "is-selected" : "";
-                return `
-                <button class="option-card ${selectedClass}" type="button" data-action-id="${option.id}">
-                    <h3>${option.title}</h3>
-                    <p>${option.subtitle}</p>
-                </button>`;
-            })
-            .join("");
+        const available = actions.filter(a => !a.valide);
+        if (alreadyDone && !available.length) {
+            host.innerHTML = '<p style="color:var(--shell-muted)">Toutes les actions de ce défi ont été validées.</p>';
+            return;
+        }
 
-        const buttons = Array.from(host.querySelectorAll("[data-action-id]"));
-        buttons.forEach((btn) => {
-            btn.addEventListener("click", () => {
-                selectedActionId = btn.dataset.actionId || "";
-                buttons.forEach((item) => item.classList.remove("is-selected"));
-                btn.classList.add("is-selected");
+        const firstAvailable = available[0];
+        selectedActionId = firstAvailable ? firstAvailable.id : 0;
+
+        host.innerHTML = actions.map(a => `
+            <button class="option-card${a.valide ? ' is-done' : (a.id === selectedActionId ? ' is-selected' : '')}"
+                    type="button"
+                    data-action-id="${a.id}"
+                    ${a.valide ? 'disabled' : ''}>
+                <h3>${a.nom}</h3>
+                <p>${a.description || ''}</p>
+                ${a.valide ? '<small style="color:#94bb39">✓ Validée</small>' : ''}
+            </button>`).join('');
+
+        host.querySelectorAll('[data-action-id]:not([disabled])').forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectedActionId = parseInt(btn.dataset.actionId, 10);
+                host.querySelectorAll('[data-action-id]').forEach(b => b.classList.remove('is-selected'));
+                btn.classList.add('is-selected');
             });
         });
     }
 
-    function renderForum(challenge) {
-        const host = document.querySelector("[data-forum-list]");
+    function renderForum(messages) {
+        const host = document.querySelector('[data-forum-list]');
         if (!host) return;
-        host.innerHTML = challenge.forum
-            .map((msg) => {
-                return `<li class="forum-item"><strong>${msg.author}</strong><br />${msg.text}<br /><small>${msg.date}</small></li>`;
-            })
-            .join("");
+        if (!messages.length) {
+            host.innerHTML = '<li class="forum-item" style="color:var(--shell-muted)">Aucun message pour le moment.</li>';
+            return;
+        }
+        host.innerHTML = messages.map(m => `
+            <li class="forum-item">
+                <strong>${m.auteur}</strong><br />
+                ${m.texte}<br />
+                <small>${new Date(m.date).toLocaleDateString('fr-FR')}</small>
+            </li>`).join('');
     }
 
-    function renderHistory(challenge) {
-        const host = document.querySelector("[data-history-list]");
+    function renderHistory(historique) {
+        const host = document.querySelector('[data-history-list]');
         if (!host) return;
-        host.innerHTML = challenge.history
-            .map((item) => {
-                return `<li class="history-item"><strong>${item.action}</strong> - ${item.status}<br /><small>${item.date}</small></li>`;
-            })
-            .join("");
+        if (!historique.length) {
+            host.innerHTML = '<li class="history-item" style="color:var(--shell-muted)">Aucune soumission encore.</li>';
+            return;
+        }
+        host.innerHTML = historique.map(h => `
+            <li class="history-item">
+                <strong>${h.action}</strong><br />
+                <small>${new Date(h.date).toLocaleDateString('fr-FR')}</small>
+                ${h.preuve ? `<br /><span style="color:var(--shell-muted);font-size:12px">${h.preuve}</span>` : ''}
+            </li>`).join('');
     }
 
-    function bindForm(challenge) {
-        const form = document.querySelector("[data-submission-form]");
-        const feedback = document.querySelector("[data-form-feedback]");
+    function bindSubmissionForm() {
+        const form = document.querySelector('[data-submission-form]');
+        const feedback = document.querySelector('[data-form-feedback]');
         if (!form || !feedback) return;
 
-        form.addEventListener("submit", (event) => {
-            event.preventDefault();
-            const text = String(new FormData(form).get("proofText") || "").trim();
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            feedback.className = 'feedback-msg';
+            feedback.textContent = '';
 
-            if (!selectedActionId || !text) {
-                feedback.className = "feedback-msg";
-                feedback.textContent = "Selectionnez une action et ajoutez un commentaire de preuve.";
+            const preuve = String(new FormData(form).get('proofText') || '').trim();
+            if (!selectedActionId) {
+                feedback.textContent = 'Sélectionnez une action.';
+                return;
+            }
+            if (!preuve) {
+                feedback.textContent = 'Ajoutez un commentaire de preuve.';
                 return;
             }
 
-            feedback.className = "feedback-msg is-success";
-            feedback.textContent = `Soumission enregistree pour ${challenge.title}. Validation en attente.`;
-            form.reset();
+            const submitBtn = form.querySelector('[type=submit]');
+            submitBtn.disabled = true;
+            try {
+                await apiPost('/modules/employee/submit-action.php', {
+                    defi_id: defiId,
+                    action_id: selectedActionId,
+                    preuve,
+                });
+                feedback.className = 'feedback-msg is-success';
+                feedback.textContent = 'Action validée avec succès ! Vos points ont été crédités.';
+                form.reset();
+                // Refresh data to update action states
+                const data = await apiGet('/modules/employee/challenge-detail.php?id=' + defiId);
+                renderActions(data.actions, data.deja_valide);
+                renderHistory(data.historique);
+            } catch (err) {
+                feedback.textContent = err.message || 'Erreur lors de la soumission.';
+                submitBtn.disabled = false;
+            }
         });
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const challenge = getChallengeFromQuery();
-        renderHead(challenge);
-        renderActionOptions(challenge);
-        renderForum(challenge);
-        renderHistory(challenge);
-        bindForm(challenge);
+    function bindForumForm() {
+        const form = document.querySelector('[data-forum-form]');
+        const feedback = document.querySelector('[data-forum-feedback]');
+        if (!form || !feedback) return;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = String(new FormData(form).get('message') || '').trim();
+            if (!message) return;
+
+            const btn = form.querySelector('[type=submit]');
+            btn.disabled = true;
+            try {
+                await apiPost('/modules/employee/forum-message.php', { defi_id: defiId, message });
+                form.reset();
+                feedback.className = 'feedback-msg is-success';
+                feedback.textContent = 'Message publié.';
+                // Refresh forum
+                const data = await apiGet('/modules/employee/challenge-detail.php?id=' + defiId);
+                renderForum(data.messages);
+            } catch (err) {
+                feedback.textContent = err.message || 'Erreur.';
+            }
+            btn.disabled = false;
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const params = new URLSearchParams(window.location.search);
+        defiId = parseInt(params.get('id') || '0', 10);
+
+        if (!defiId) {
+            setText('[data-challenge-title]', 'Défi introuvable');
+            return;
+        }
+
+        bindSubmissionForm();
+        bindForumForm();
+
+        try {
+            const data = await apiGet('/modules/employee/challenge-detail.php?id=' + defiId);
+            renderHead(data.defi);
+            renderActions(data.actions, data.deja_valide);
+            renderForum(data.messages);
+            renderHistory(data.historique);
+
+            if (data.deja_valide) {
+                setText('[data-challenge-progress]', 'Déjà validé ✓');
+            }
+        } catch (err) {
+            console.error('Erreur détail défi:', err);
+            setText('[data-challenge-title]', 'Erreur de chargement');
+        }
     });
 })();

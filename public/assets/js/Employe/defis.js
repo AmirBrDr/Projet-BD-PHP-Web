@@ -1,99 +1,88 @@
 // Fichier: public/assets/js/Employe/defis.js - Logique frontend et interactions.
 (() => {
-    const mockChallenges = [
-        {
-            id: "eveil-pieton",
-            rank: 1,
-            title: "L'eveil du pieton",
-            points: 50,
-            description: "Marchez 15 minutes pour un trajet du quotidien.",
-            progressText: "12/15 equipes l'ont valide",
-            status: "completed",
-        },
-        {
-            id: "zero-voiture",
-            rank: 2,
-            title: "Zero voiture",
-            points: 100,
-            description: "Utilisez un transport doux sur plusieurs trajets domicile-travail.",
-            progressText: "5/15 equipes sont en progression",
-            status: "active",
-        },
-        {
-            id: "covoit-party",
-            rank: 3,
-            title: "Covoit party",
-            points: 200,
-            description: "Organisez un covoiturage avec vos collegues.",
-            progressText: "Deblocage apres l'etape 2",
-            status: "locked",
-        },
-    ];
+    const API_BASE = '/api';
+    const token = () => localStorage.getItem('gp_token');
 
-    let currentFilter = "all";
-
-    function getFilteredChallenges() {
-        if (currentFilter === "all") return mockChallenges;
-        return mockChallenges.filter((item) => item.status === currentFilter);
+    async function apiGet(path) {
+        const res = await fetch(API_BASE + path, {
+            headers: { 'Authorization': 'Bearer ' + token() }
+        });
+        if (!res.ok) throw new Error((await res.json()).message || res.status);
+        return res.json();
     }
 
-    function statusBulletLabel(item) {
-        if (item.status === "completed") return "OK";
-        if (item.status === "active") return String(item.rank);
-        return "X";
+    let allDefis = [];
+    let currentFilter = 'all';
+
+    function filtered() {
+        if (currentFilter === 'all') return allDefis;
+        return allDefis.filter(d => d.statut === currentFilter);
     }
 
-    function statusButton(item) {
-        if (item.status === "locked") {
-            return '<button class="step-button" type="button" disabled>Bientot disponible</button>';
+    function bulletLabel(defi) {
+        if (defi.statut === 'completed') return '✓';
+        if (defi.statut === 'locked') return '🔒';
+        return String(defi.ordre);
+    }
+
+    function actionButton(defi) {
+        if (defi.statut === 'locked') {
+            return '<button class="step-button" type="button" disabled>Débloqué après l\'étape précédente</button>';
         }
-        const buttonText = item.status === "completed" ? "Voir ma reussite" : "Contribuer a mon equipe";
-        return `<a class="step-link" href="detailDefi.html?id=${item.id}">${buttonText}</a>`;
+        const label = defi.statut === 'completed' ? 'Voir ma réussite' : 'Contribuer à mon équipe';
+        return `<a class="step-link" href="detailDefi.html?id=${defi.id}">${label}</a>`;
     }
 
     function renderTimeline() {
-        const host = document.querySelector("[data-timeline-list]");
+        const host = document.querySelector('[data-timeline-list]');
         if (!host) return;
-
-        const filtered = getFilteredChallenges();
-        if (!filtered.length) {
-            host.innerHTML = '<article class="challenge-step"><p>Aucun defi pour ce filtre.</p></article>';
+        const list = filtered();
+        if (!list.length) {
+            host.innerHTML = '<article class="challenge-step"><div class="step-card"><p>Aucun défi pour ce filtre.</p></div></article>';
             return;
         }
-
-        host.innerHTML = filtered
-            .map((item) => {
-                return `
-                <article class="challenge-step ${item.status}">
-                    <div class="step-bullet">${statusBulletLabel(item)}</div>
-                    <div class="step-card">
-                        <div class="step-head">
-                            <h2 class="step-title">${item.title}</h2>
-                            <span class="step-points">+${item.points} pts</span>
-                        </div>
-                        <p class="step-description">${item.description}</p>
-                        <p class="step-progress">${item.progressText}</p>
-                        ${statusButton(item)}
+        host.innerHTML = list.map(d => `
+            <article class="challenge-step ${d.statut}">
+                <div class="step-bullet">${bulletLabel(d)}</div>
+                <div class="step-card">
+                    <div class="step-head">
+                        <h2 class="step-title">${d.nom}</h2>
+                        <span class="step-points">+${d.points} pts</span>
                     </div>
-                </article>`;
-            })
-            .join("");
+                    <p class="step-description">${d.description || ''}</p>
+                    <p class="step-progress">Niveau ${d.niveau} · ${d.co2} kg CO₂</p>
+                    ${actionButton(d)}
+                </div>
+            </article>`).join('');
     }
 
     function bindFilters() {
-        const buttons = Array.from(document.querySelectorAll("[data-filter]"));
-        buttons.forEach((btn) => {
-            btn.addEventListener("click", () => {
-                currentFilter = btn.dataset.filter || "all";
-                buttons.forEach((item) => item.classList.remove("is-active"));
-                btn.classList.add("is-active");
+        document.querySelectorAll('[data-filter]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentFilter = btn.dataset.filter || 'all';
+                document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('is-active'));
+                btn.classList.add('is-active');
                 renderTimeline();
             });
         });
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener('DOMContentLoaded', async () => {
         bindFilters();
-        renderTimeline();
+        try {
+            const data = await apiGet('/modules/employee/challenges.php');
+
+            if (data.theme) {
+                const subtitle = document.querySelector('[data-theme-subtitle]');
+                if (subtitle) subtitle.textContent = 'Thème du mois : ' + data.theme.nom;
+            }
+
+            allDefis = data.defis;
+            renderTimeline();
+        } catch (err) {
+            console.error('Erreur défis:', err);
+            const host = document.querySelector('[data-timeline-list]');
+            if (host) host.innerHTML = '<article class="challenge-step is-loading">Impossible de charger les défis.</article>';
+        }
     });
 })();
