@@ -10,7 +10,7 @@
 </head>
 <body>
     <nav class="navbar">
-        <img src="../maquette/Images/logo.png" alt="GreenPulse" class="nav-logo">
+        <img src="/maquette/Images/logo.png" alt="GreenPulse" class="nav-logo">
         <div class="nav-links">
             <a href="dashboardRH.html" class="active">Dashboard RSE</a>
             <a href="gestionUtilisateurs.html">Utilisateurs & Équipes</a>
@@ -23,6 +23,7 @@
         </div>
     </nav>
 
+
     <main class="dashboard-main">
         <header class="admin-header">
             <div>
@@ -31,11 +32,9 @@
             </div>
             <div class="header-btns">
                 <button class="btn-secondary" onclick="alert('Génération du rapport PDF en cours...')"><i class="fas fa-file-pdf"></i> Rapport PDF</button>
-                <button class="btn-secondary" onclick="alert('Export des données brutes...')"><i class="fas fa-file-csv"></i> Export CSV</button>
+                <button class="btn-secondary" onclick="exportCSV(window.dashboardData, window.co2ParCategorie, window.engagementParDept)"><i class="fas fa-file-csv"></i> Export CSV</button>
             </div>
         </header>
-        
-    <script src="/public/assets/js/dashboardRH.js"></script>
 
         <section class="kpi-grid">
             <div class="kpi-card highlight">
@@ -133,5 +132,6 @@
             }
         });
     </script>
+<script src="/public/assets/js/dashboardRH.js"></script>
 </body>
 </html>
