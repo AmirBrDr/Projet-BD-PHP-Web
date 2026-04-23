@@ -1,27 +1,39 @@
 // Fichier: public/assets/js/dashboardRH.js - Logique frontend et interactions.
-// dashboardRH JavaScript
-// TODO: Add functionality for dashboardRH
 
-const API_BASE = "/api";
+(() => {
+    const API_BASE = "/api";
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('dashboardRH page loaded');
-});
+    // Fonction générique pour appeler l'API
+    async function apiGet(path) {
+        const res = await fetch(`${API_BASE}${path}`);
+        return await res.json();
+    }
 
-async function getCo2Tot() {
-    const response = await fetch(API_BASE + "/modules/admin/dashboardRSE.php");
-    const data = await response.json();
-    return data.co2Tot;
-}
+    async function getCo2Tot() {
+        const data = await apiGet("/modules/admin/dashboardRH.php");
+        return data.co2Tot;
+    }
 
-async function getTauxParticipation() {
-    const response = await fetch(API_BASE + "/modules/admin/dashboardRSE.php");
-    const data = await response.json();
-    return data.tauxParticipation;
-}
+    async function getTauxParticipation() {
+        const data = await apiGet("/modules/admin/dashboardRH.php");
+        return data.tauxParticipation;
+    }
 
-async function getActionsValides() {
-    const response = await fetch(API_BASE + "/modules/admin/dashboardRSE.php");
-    const data = await response.json();
-    return data.actionsValides;
-}
+    async function getActionsValides() {
+        const data = await apiGet("/modules/admin/dashboardRH.php");
+        return data.actionsValides;
+    }
+
+    document.addEventListener("DOMContentLoaded", async function() {
+        console.log('dashboardRH page loaded');
+
+        const co2Tot = await getCo2Tot();
+        const tauxParticipation = await getTauxParticipation();
+        const actionsValides = await getActionsValides();
+
+        document.getElementById("co2").textContent = co2Tot;
+        document.getElementById("participation").textContent = tauxParticipation;
+        document.getElementById("actions").textContent = actionsValides;
+    });
+
+})(); // ← la fonction s'appelle elle-même ici

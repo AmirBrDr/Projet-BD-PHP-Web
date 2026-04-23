@@ -10,7 +10,7 @@
 </head>
 <body>
     <nav class="navbar">
-        <img src="../Images/logo.png" alt="GreenPulse" class="nav-logo">
+        <img src="../maquette/Images/logo.png" alt="GreenPulse" class="nav-logo">
         <div class="nav-links">
             <a href="dashboardRH.html" class="active">Dashboard RSE</a>
             <a href="gestionUtilisateurs.html">Utilisateurs & Équipes</a>
@@ -34,21 +34,9 @@
                 <button class="btn-secondary" onclick="alert('Export des données brutes...')"><i class="fas fa-file-csv"></i> Export CSV</button>
             </div>
         </header>
+        
     <script src="/public/assets/js/dashboardRH.js"></script>
 
-    <script>
-    document.addEventListener("DOMContentLoaded", async function() {
-
-        const co2Tot = await getCo2Tot();
-        const tauxParticipation = await getTauxParticipation();
-        const actionsValides = await getActionsValides();
-
-        document.getElementById("co2").textContent = co2Tot;
-        document.getElementById("participation").textContent = tauxParticipation;
-        document.getElementById("actions").textContent = actionsValides;
-
-    });
-    </script>
         <section class="kpi-grid">
             <div class="kpi-card highlight">
                 <div class="kpi-icon"><i class="fas fa-globe-europe"></i></div>
