@@ -27,10 +27,32 @@
 
     function actionButton(defi) {
         if (defi.statut === 'locked') {
-            return '<button class="step-button" type="button" disabled>Débloqué après l\'étape précédente</button>';
+            return '<button class="step-button" type="button" disabled>Bloqué par l\'équipe</button>';
         }
-        const label = defi.statut === 'completed' ? 'Voir ma réussite' : 'Contribuer à mon équipe';
+        const label = defi.statut === 'completed' ? 'Voir le défi' : 'Contribuer à mon équipe';
         return `<a class="step-link" href="detailDefi.html?id=${defi.id}">${label}</a>`;
+    }
+
+    function renderTeamProgress(data) {
+        const host = document.querySelector('[data-team-progress]');
+        if (!host) return;
+        const team = data.team;
+        const progress = data.progress || { completed: 0, total: 0 };
+        if (!team) {
+            host.innerHTML = '<span class="progress-pill">Aucune équipe détectée</span>';
+            return;
+        }
+
+        const completion = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;
+        host.innerHTML = `
+            <div class="progress-card">
+                <strong>${team.nom}</strong>
+                <span>${progress.completed}/${progress.total} défis terminés</span>
+            </div>
+            <div class="progress-card">
+                <strong>${team.membres} membres</strong>
+                <span>${completion}% du mois complété</span>
+            </div>`;
     }
 
     function renderTimeline() {
@@ -50,7 +72,11 @@
                         <span class="step-points">+${d.points} pts</span>
                     </div>
                     <p class="step-description">${d.description || ''}</p>
-                    <p class="step-progress">Niveau ${d.niveau} · ${d.co2} kg CO₂</p>
+                    <p class="step-progress">Niveau ${d.niveau} · ${d.co2} kg CO₂ · ${d.progress.validated_members}/${d.progress.total_members} membres validés</p>
+                    <div class="step-meta">
+                        <span class="theme-tag">${d.theme?.nom || 'Thème du mois'}</span>
+                        <span class="step-status">${d.statut === 'completed' ? 'Validé par l\'équipe' : d.statut === 'locked' ? 'Verrouillé' : 'Disponible'}</span>
+                    </div>
                     ${actionButton(d)}
                 </div>
             </article>`).join('');
@@ -74,10 +100,11 @@
 
             if (data.theme) {
                 const subtitle = document.querySelector('[data-theme-subtitle]');
-                if (subtitle) subtitle.textContent = 'Thème du mois : ' + data.theme.nom;
+                if (subtitle) subtitle.textContent = `Thème du mois : ${data.theme.nom}`;
             }
 
             allDefis = data.defis;
+            renderTeamProgress(data);
             renderTimeline();
         } catch (err) {
             console.error('Erreur défis:', err);

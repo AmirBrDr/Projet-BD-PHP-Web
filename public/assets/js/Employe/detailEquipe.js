@@ -16,6 +16,39 @@
         if (el) el.textContent = value;
     }
 
+    function renderChallengeProgress(progression) {
+        const host = document.querySelector('[data-challenge-progress]');
+        if (!host) return;
+        if (!progression.length) {
+            host.innerHTML = '<div class="progress-empty">Aucun défi mensuel trouvé.</div>';
+            return;
+        }
+
+        host.innerHTML = progression.map((item) => {
+            const validated = item.progress?.validated_names || [];
+            const pending = item.progress?.pending_names || [];
+            return `
+                <article class="progress-card ${item.statut}">
+                    <div class="progress-head">
+                        <div>
+                            <div class="progress-order">Défi ${item.ordre}</div>
+                            <h3 class="progress-title">${item.nom}</h3>
+                        </div>
+                        <span class="progress-state">${item.statut === 'completed' ? 'Terminé' : item.statut === 'locked' ? 'Bloqué' : 'En cours'}</span>
+                    </div>
+                    <p class="progress-copy">${item.description || ''}</p>
+                    <div class="progress-bar">
+                        <span style="width:${item.progress?.total_members ? Math.round((item.progress.validated_members / item.progress.total_members) * 100) : 0}%"></span>
+                    </div>
+                    <div class="progress-meta">${item.progress?.validated_members || 0}/${item.progress?.total_members || 0} membres validés</div>
+                    <div class="progress-lists">
+                        <div><strong>Validés</strong><br />${validated.length ? validated.join(', ') : 'Personne encore'}</div>
+                        <div><strong>En attente</strong><br />${pending.length ? pending.join(', ') : 'Toute l’équipe a validé'}</div>
+                    </div>
+                </article>`;
+        }).join('');
+    }
+
     function renderStats(equipe, nbMembres) {
         const host = document.querySelector('[data-team-stats]');
         if (!host) return;
@@ -65,7 +98,16 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
         const params = new URLSearchParams(window.location.search);
-        const teamId = parseInt(params.get('id') || '0', 10);
+        let teamId = params.get('id') || 'current';
+
+        try {
+            if (teamId === 'current' || teamId === '') {
+                const dashboard = await apiGet('/modules/employee/dashboard.php');
+                teamId = dashboard.team ? String(dashboard.team.id) : '';
+            }
+        } catch (_err) {
+            teamId = '';
+        }
 
         if (!teamId) {
             setText('[data-team-name]', 'Équipe introuvable');
@@ -85,6 +127,7 @@
 
             renderStats(equipe, membres.length);
             renderMembers(membres);
+            renderChallengeProgress(data.progression || []);
             renderAchievements(succes);
         } catch (err) {
             console.error('Erreur détail équipe:', err);

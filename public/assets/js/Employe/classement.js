@@ -13,15 +13,17 @@
 
     let allTeams = [];
     let myTeamId = 0;
-    let currentMetric = 'points';
+        // let currentMetric = 'points';
 
     function sorted() {
-        return [...allTeams].sort((a, b) => b[currentMetric] - a[currentMetric]);
+            return [...allTeams].sort((a, b) => {
+                if (b.points !== a.points) return b.points - a.points;
+                return b.co2 - a.co2;
+            });
     }
 
-    function formatMetric(team) {
-        if (currentMetric === 'co2') return `${team.co2.toLocaleString('fr-FR')} kg CO₂`;
-        return `${team.points.toLocaleString('fr-FR')} pts`;
+        function formatScore(team) {
+            return `${team.points.toLocaleString('fr-FR')} pts · ${team.co2.toLocaleString('fr-FR')} kg CO₂`;
     }
 
     function renderPodium() {
@@ -39,7 +41,7 @@
                 <div class="podium-medal">${medals[i]}</div>
                 <div class="podium-rank">${rank}</div>
                 <div class="podium-name">${team.nom}</div>
-                <div class="podium-score">${formatMetric(team)}</div>
+                    <div class="podium-score">${formatScore(team)}</div>
                 <div class="podium-members">${team.membres} membre${team.membres > 1 ? 's' : ''}</div>
             </article>`;
         }).join('');
@@ -62,7 +64,7 @@
                         <span class="team-name">${team.nom}${isSelf ? ' (Votre équipe)' : ''}</span><br />
                         <span class="team-meta">${team.membres} membre${team.membres > 1 ? 's' : ''}</span>
                     </span>
-                    <span class="team-score">${formatMetric(team)}</span>
+                        <span class="team-score">${formatScore(team)}</span>
                 </a>
             </li>`;
         }).join('');

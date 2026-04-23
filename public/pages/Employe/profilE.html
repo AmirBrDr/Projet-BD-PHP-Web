@@ -19,6 +19,7 @@
                     <a class="employee-tab" href="dashboardE.html">Dashboard</a>
                     <a class="employee-tab" href="defis.html">Defis</a>
                     <a class="employee-tab" href="classement.html">Classement</a>
+                    <a class="employee-tab" href="detailEquipe.html?id=current">Equipe</a>
                     <a class="employee-tab is-active" href="profilE.html">Mon profil</a>
                 </nav>
                 <div class="header-actions">
@@ -41,6 +42,22 @@
             <section class="stats-grid" data-profile-stats></section>
 
             <section class="profile-grid">
+                <article class="panel profile-card">
+                    <h2>Modifier mon profil</h2>
+                    <form data-profile-form>
+                        <label class="field-row" for="profilePrenom">
+                            <span>Prénom</span>
+                            <input id="profilePrenom" name="prenomUser" type="text" autocomplete="given-name" required />
+                        </label>
+                        <label class="field-row" for="profileNom">
+                            <span>Nom</span>
+                            <input id="profileNom" name="nomUser" type="text" autocomplete="family-name" required />
+                        </label>
+                        <button class="submit-btn" type="submit">Enregistrer les modifications</button>
+                    </form>
+                    <p class="feedback-msg" data-profile-feedback></p>
+                </article>
+
                 <article class="panel profile-card">
                     <h2>Mes badges</h2>
                     <ul class="badge-list" data-badge-list></ul>

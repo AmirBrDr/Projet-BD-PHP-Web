@@ -35,6 +35,25 @@
         return data;
     }
 
+    async function apiPost(path, payload) {
+        const res = await fetch(API_BASE + path, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token(),
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await parseApiResponse(res);
+        if (!res.ok) {
+            const message = data && data.message ? data.message : ('HTTP ' + res.status);
+            throw new Error(message);
+        }
+
+        return data;
+    }
+
     function renderEmptyProfile(message) {
         setInitials('G', 'P');
 
@@ -51,7 +70,7 @@
         renderBadges([]);
         renderHistory([]);
 
-        const feedback = document.querySelector('[data-pref-feedback]');
+        const feedback = document.querySelector('[data-profile-feedback]') || document.querySelector('[data-pref-feedback]');
         if (feedback) {
             feedback.className = 'feedback-msg';
             feedback.textContent = message;
@@ -118,8 +137,78 @@
         });
     }
 
+    function syncStoredUser(user) {
+        const raw = localStorage.getItem('gp_user');
+        let current = {};
+        if (raw) {
+            try {
+                current = JSON.parse(raw) || {};
+            } catch (_err) {
+                current = {};
+            }
+        }
+
+        const next = {
+            ...current,
+            nomUser: user.nomUser || current.nomUser || '',
+            prenomUser: user.prenomUser || current.prenomUser || '',
+            email: user.email || current.email || '',
+            role: user.role || current.role || '',
+            pdpUser: user.pdpUser ?? current.pdpUser ?? null,
+        };
+
+        localStorage.setItem('gp_user', JSON.stringify(next));
+    }
+
+    function bindProfileForm(initialUser) {
+        const form = document.querySelector('[data-profile-form]');
+        const feedback = document.querySelector('[data-profile-feedback]');
+        const prenomInput = document.getElementById('profilePrenom');
+        const nomInput = document.getElementById('profileNom');
+        if (!form || !feedback || !prenomInput || !nomInput) return;
+
+        if (initialUser) {
+            prenomInput.value = initialUser.prenom || '';
+            nomInput.value = initialUser.nom || '';
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            feedback.className = 'feedback-msg';
+            feedback.textContent = '';
+
+            const prenomUser = prenomInput.value.trim();
+            const nomUser = nomInput.value.trim();
+
+            if (!prenomUser || !nomUser) {
+                feedback.className = 'feedback-msg is-error';
+                feedback.textContent = 'Le nom et le prénom sont requis.';
+                return;
+            }
+
+            try {
+                const result = await apiPost('/auth/update-profile.php', { nomUser, prenomUser });
+                const updated = result.user || {};
+
+                syncStoredUser(updated);
+
+                const nameEl = document.querySelector('[data-user-name]');
+                const finalPrenom = updated.prenomUser || prenomUser;
+                const finalNom = updated.nomUser || nomUser;
+                if (nameEl) nameEl.textContent = `${finalPrenom} ${finalNom}`.trim();
+                setInitials(finalPrenom, finalNom);
+
+                feedback.className = 'feedback-msg is-success';
+                feedback.textContent = result.message || 'Profil mis à jour.';
+            } catch (err) {
+                feedback.className = 'feedback-msg is-error';
+                feedback.textContent = err?.message || 'Impossible de mettre à jour le profil.';
+            }
+        });
+    }
+
     function showWarning(message) {
-        const feedback = document.querySelector('[data-pref-feedback]');
+        const feedback = document.querySelector('[data-profile-feedback]') || document.querySelector('[data-pref-feedback]');
         if (!feedback) return;
         feedback.className = 'feedback-msg';
         feedback.textContent = message;
@@ -141,6 +230,7 @@
             const teamEl = document.querySelector('[data-profile-team]');
             if (teamEl) teamEl.textContent = data.equipe ? data.equipe.nom : 'Sans équipe';
 
+            bindProfileForm(data.user);
             renderStats(data.stats);
             renderBadges(data.badges);
             renderHistory(data.historique);
