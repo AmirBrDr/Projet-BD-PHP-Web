@@ -23,9 +23,10 @@ try {
     gp_send_json(401, ['message' => 'Token invalide']);
 }
 
-$body = gp_read_json_body();
-$nomUser = trim((string) ($body['nomUser'] ?? ''));
+$body       = gp_read_json_body();
+$nomUser    = trim((string) ($body['nomUser']    ?? ''));
 $prenomUser = trim((string) ($body['prenomUser'] ?? ''));
+$email      = trim((string) ($body['email']      ?? ''));
 
 if ($nomUser === '' || $prenomUser === '') {
     gp_send_json(400, ['message' => 'Nom et prénom sont requis']);
@@ -35,14 +36,30 @@ if (mb_strlen($nomUser) < 2 || mb_strlen($prenomUser) < 2) {
     gp_send_json(400, ['message' => 'Nom et prénom doivent contenir au moins 2 caractères']);
 }
 
+if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    gp_send_json(400, ['message' => 'Adresse email invalide']);
+}
+
 $pdo = gp_pdo($config);
 
-$stmt = $pdo->prepare("\n    UPDATE Utilisateur\n    SET nomUser = :nom, prenomUser = :prenom\n    WHERE Id_User = :id\n    RETURNING Id_User\n");
-$stmt->execute([
-    ':nom' => $nomUser,
-    ':prenom' => $prenomUser,
-    ':id' => $userId,
-]);
+if ($email !== '') {
+    $stmt = $pdo->prepare("SELECT 1 FROM Utilisateur WHERE email = :email AND Id_User != :id LIMIT 1");
+    $stmt->execute([':email' => $email, ':id' => $userId]);
+    if ($stmt->fetch()) {
+        gp_send_json(409, ['message' => 'Cet email est déjà utilisé']);
+    }
+    $stmt = $pdo->prepare("
+        UPDATE Utilisateur SET nomUser = :nom, prenomUser = :prenom, email = :email
+        WHERE Id_User = :id RETURNING Id_User
+    ");
+    $stmt->execute([':nom' => $nomUser, ':prenom' => $prenomUser, ':email' => $email, ':id' => $userId]);
+} else {
+    $stmt = $pdo->prepare("
+        UPDATE Utilisateur SET nomUser = :nom, prenomUser = :prenom
+        WHERE Id_User = :id RETURNING Id_User
+    ");
+    $stmt->execute([':nom' => $nomUser, ':prenom' => $prenomUser, ':id' => $userId]);
+}
 
 if (!$stmt->fetch()) {
     gp_send_json(404, ['message' => 'Utilisateur introuvable']);

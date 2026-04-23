@@ -19,115 +19,150 @@ if (gp_normalize_role($claims['role'] ?? '') !== 'employe') {
     gp_send_json(403, ['message' => 'Accès refusé']);
 }
 
-$pdo = gp_pdo($config);
+$pdo    = gp_pdo($config);
 $userId = (int) $claims['sub'];
 
-$stmt = $pdo->prepare("\n    SELECT emp.Id_equipe AS equipe_id, eq.nomEquipe\n    FROM Employe emp\n    LEFT JOIN Equipe eq ON eq.Id_equipe = emp.Id_equipe\n    WHERE emp.Id_Employe = :id\n    LIMIT 1\n");
+$stmt = $pdo->prepare("
+    SELECT emp.Id_equipe AS equipe_id, eq.nomEquipe
+    FROM Employe emp
+    LEFT JOIN Equipe eq ON eq.Id_equipe = emp.Id_equipe
+    WHERE emp.Id_Employe = :id
+    LIMIT 1
+");
 $stmt->execute([':id' => $userId]);
 $teamRow = $stmt->fetch();
-$teamId = $teamRow ? (int) $teamRow['equipe_id'] : 0;
+$teamId  = $teamRow ? (int) $teamRow['equipe_id'] : 0;
 
-$memberCount = 1;
-$validationMap = [];
+$memberCount    = 1;
+$validationMap  = [];   // defi_id -> count of team members who validated
+$validatedNames = [];   // defi_id -> ['Prénom N.', ...]
+$allMemberNames = [];   // 'Employe Id' -> 'Prénom N.'
 
 if ($teamId > 0) {
-    $stmt = $pdo->prepare("\n        SELECT COUNT(*) AS nb\n        FROM Employe e\n        JOIN Utilisateur u ON u.Id_User = e.Id_Employe\n        WHERE e.Id_equipe = :team\n          AND u.statutUser = 'actif'\n    ");
+    // Count active team members
+    $stmt = $pdo->prepare("
+        SELECT e.Id_Employe, u.prenomUser, u.nomUser
+        FROM Employe e
+        JOIN Utilisateur u ON u.Id_User = e.Id_Employe
+        WHERE e.Id_equipe = :team AND u.statutUser = 'actif'
+    ");
     $stmt->execute([':team' => $teamId]);
-    $countRow = $stmt->fetch();
-    $memberCount = max(1, (int) ($countRow['nb'] ?? 0));
+    $memberRows = $stmt->fetchAll();
+    $memberCount = max(1, count($memberRows));
+    foreach ($memberRows as $m) {
+        $allMemberNames[(int) $m['id_employe']] = $m['prenomuser'] . ' ' . substr($m['nomuser'], 0, 1) . '.';
+    }
 
-    $stmt = $pdo->prepare("\n        SELECT v.Id_defi, COUNT(DISTINCT v.Id_Employe) AS validated_members\n        FROM Valider v\n        JOIN Employe e ON e.Id_Employe = v.Id_Employe\n        JOIN Utilisateur u ON u.Id_User = e.Id_Employe\n        WHERE e.Id_equipe = :team\n          AND u.statutUser = 'actif'\n        GROUP BY v.Id_defi\n    ");
+    // Who validated which defi (at least one action)
+    $stmt = $pdo->prepare("
+        SELECT DISTINCT v.Id_defi, v.Id_Employe
+        FROM Valider v
+        JOIN Employe e ON e.Id_Employe = v.Id_Employe
+        WHERE e.Id_equipe = :team
+    ");
     $stmt->execute([':team' => $teamId]);
+    foreach ($stmt->fetchAll() as $row) {
+        $did = (int) $row['id_defi'];
+        $eid = (int) $row['id_employe'];
+        if (!isset($validationMap[$did])) $validationMap[$did] = 0;
+        $validationMap[$did]++;
+        $validatedNames[$did][] = $allMemberNames[$eid] ?? 'Membre';
+    }
 } else {
-    $stmt = $pdo->prepare("\n        SELECT v.Id_defi, COUNT(DISTINCT v.Id_Employe) AS validated_members\n        FROM Valider v\n        WHERE v.Id_Employe = :user\n        GROUP BY v.Id_defi\n    ");
+    // Solo (no team) — count self
+    $stmt = $pdo->prepare("
+        SELECT DISTINCT v.Id_defi FROM Valider v WHERE v.Id_Employe = :user
+    ");
     $stmt->execute([':user' => $userId]);
+    foreach ($stmt->fetchAll() as $row) {
+        $validationMap[(int) $row['id_defi']] = 1;
+    }
 }
 
-foreach ($stmt->fetchAll() as $row) {
-    $validationMap[(int) $row['id_defi']] = (int) $row['validated_members'];
-}
-
-$stmt = $pdo->query("\n    SELECT DISTINCT t.Id_thematique, t.nomTheme, t.descriptionTheme\n    FROM Thematique t\n    JOIN Regroupe r ON r.Id_thematique = t.Id_thematique\n    WHERE date_trunc('month', r.mois) = date_trunc('month', CURRENT_DATE)\n    ORDER BY t.nomTheme\n    LIMIT 1\n");
+// Current month theme
+$stmt = $pdo->query("
+    SELECT DISTINCT t.Id_thematique, t.nomTheme, t.descriptionTheme
+    FROM Thematique t
+    JOIN Regroupe r ON r.Id_thematique = t.Id_thematique
+    WHERE date_trunc('month', r.mois) = date_trunc('month', CURRENT_DATE)
+    ORDER BY t.nomTheme
+    LIMIT 1
+");
 $theme = $stmt->fetch();
 
 if (!$theme) {
     gp_send_json(200, [
-        'theme' => null,
-        'team' => $teamRow ? [
-            'id' => $teamId,
-            'nom' => $teamRow['nomequipe'],
-            'membres' => $memberCount,
-        ] : null,
-        'progress' => [
-            'completed' => 0,
-            'total' => 0,
-        ],
-        'defis' => [],
+        'theme'    => null,
+        'team'     => $teamRow ? ['id' => $teamId, 'nom' => $teamRow['nomequipe'], 'membres' => $memberCount] : null,
+        'progress' => ['completed' => 0, 'total' => 0],
+        'defis'    => [],
     ]);
 }
 
 $themeId = (int) $theme['id_thematique'];
 
-$stmt = $pdo->prepare("\n    SELECT d.Id_defi, d.nomDefi, d.descriptionDefi, d.nbPointsDefi, d.nbCO2Defi, d.niveauDefi,\n           r.ordre, r.Id_thematique, t.nomTheme\n    FROM Defi d\n    JOIN Regroupe r ON r.Id_defi = d.Id_defi\n    JOIN Thematique t ON t.Id_thematique = r.Id_thematique\n    WHERE date_trunc('month', r.mois) = date_trunc('month', CURRENT_DATE)\n      AND r.Id_thematique = :theme_id\n    ORDER BY r.ordre\n");
+$stmt = $pdo->prepare("
+    SELECT d.Id_defi, d.nomDefi, d.descriptionDefi, d.nbPointsDefi, d.nbCO2Defi, d.niveauDefi,
+           r.ordre, r.Id_thematique, t.nomTheme
+    FROM Defi d
+    JOIN Regroupe r ON r.Id_defi = d.Id_defi
+    JOIN Thematique t ON t.Id_thematique = r.Id_thematique
+    WHERE date_trunc('month', r.mois) = date_trunc('month', CURRENT_DATE)
+      AND r.Id_thematique = :theme_id
+    ORDER BY r.ordre
+");
 $stmt->execute([':theme_id' => $themeId]);
 $rows = $stmt->fetchAll();
 
-$themeUnlocked = true;
+$unlocked      = true;
 $completedCount = 0;
-$defis = [];
+$defis         = [];
 
 foreach ($rows as $row) {
-    $defiId = (int) $row['id_defi'];
-    $ordre = (int) $row['ordre'];
+    $defiId           = (int) $row['id_defi'];
     $validatedMembers = $validationMap[$defiId] ?? 0;
-    $completed = $validatedMembers >= $memberCount;
+    $completed        = $validatedMembers >= $memberCount;
 
     if ($completed) {
         $statut = 'completed';
         $completedCount++;
-        $themeUnlocked = true;
-    } elseif ($themeUnlocked || $ordre === 1) {
-        $statut = 'active';
-        $themeUnlocked = false;
+        $unlocked = true;
+    } elseif ($unlocked) {
+        $statut   = 'active';
+        $unlocked = false;
     } else {
         $statut = 'locked';
     }
 
+    $valNames = $validatedNames[$defiId] ?? [];
+    $pendNames = array_values(array_filter(
+        array_map(fn($name) => in_array($name, $valNames, true) ? null : $name, $allMemberNames),
+        fn($v) => $v !== null
+    ));
+
     $defis[] = [
-        'id' => $defiId,
-        'nom' => $row['nomdefi'],
+        'id'          => $defiId,
+        'nom'         => $row['nomdefi'],
         'description' => $row['descriptiondefi'],
-        'points' => (int) $row['nbpointsdefi'],
-        'co2' => (int) $row['nbco2defi'],
-        'niveau' => (int) $row['niveaudefi'],
-        'ordre' => $ordre,
-        'statut' => $statut,
-        'theme' => [
-            'id' => (int) $row['id_thematique'],
-            'nom' => $row['nomtheme'],
-        ],
-        'progress' => [
+        'points'      => (int) $row['nbpointsdefi'],
+        'co2'         => (int) $row['nbco2defi'],
+        'niveau'      => (int) $row['niveaudefi'],
+        'ordre'       => (int) $row['ordre'],
+        'statut'      => $statut,
+        'theme'       => ['id' => (int) $row['id_thematique'], 'nom' => $row['nomtheme']],
+        'progress'    => [
             'validated_members' => $validatedMembers,
-            'total_members' => $memberCount,
-            'completion_rate' => $memberCount > 0 ? (int) round(($validatedMembers / $memberCount) * 100) : 0,
+            'total_members'     => $memberCount,
+            'completion_rate'   => $memberCount > 0 ? (int) round(($validatedMembers / $memberCount) * 100) : 0,
+            'validated_names'   => $valNames,
+            'pending_names'     => $pendNames,
         ],
     ];
 }
 
 gp_send_json(200, [
-    'theme' => [
-        'id' => $themeId,
-        'nom' => $theme['nomtheme'],
-        'description' => $theme['descriptiontheme'],
-    ],
-    'team' => $teamRow ? [
-        'id' => $teamId,
-        'nom' => $teamRow['nomequipe'],
-        'membres' => $memberCount,
-    ] : null,
-    'progress' => [
-        'completed' => $completedCount,
-        'total' => count($defis),
-    ],
-    'defis' => $defis,
+    'theme'    => ['id' => $themeId, 'nom' => $theme['nomtheme'], 'description' => $theme['descriptiontheme']],
+    'team'     => $teamRow ? ['id' => $teamId, 'nom' => $teamRow['nomequipe'], 'membres' => $memberCount] : null,
+    'progress' => ['completed' => $completedCount, 'total' => count($defis)],
+    'defis'    => $defis,
 ]);

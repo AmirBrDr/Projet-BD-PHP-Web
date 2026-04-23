@@ -13,7 +13,7 @@
                 <div class="brand-block">
                     <div class="brand-name">GreenPulse</div>
                     <div class="brand-title">Mon profil</div>
-                    <div class="brand-subtitle">Informations personnelles, badges et preferences</div>
+                    <div class="brand-subtitle">Statistiques, badges et historique</div>
                 </div>
                 <nav class="employee-tabs" aria-label="Navigation employe">
                     <a class="employee-tab" href="dashboardE.html">Dashboard</a>
@@ -28,36 +28,27 @@
                 </div>
             </header>
 
-            <section class="panel profile-header">
+            <!-- Profile hero -->
+            <section class="panel profile-hero">
                 <div class="avatar-block">
                     <div class="avatar-circle" data-user-initials>GP</div>
                 </div>
                 <div class="identity-block">
                     <h1 data-user-name>Utilisateur</h1>
-                    <p data-user-email></p>
+                    <p class="profile-email" data-user-email></p>
                     <div class="team-chip" data-profile-team>Equipe non definie</div>
+                </div>
+                <div class="profile-actions">
+                    <button class="btn-edit-profile" type="button" data-open-edit-modal>Modifier le profil</button>
+                    <button class="btn-edit-pwd" type="button" data-open-pwd-modal>Changer le mot de passe</button>
                 </div>
             </section>
 
+            <!-- Stats -->
             <section class="stats-grid" data-profile-stats></section>
 
-            <section class="profile-grid">
-                <article class="panel profile-card">
-                    <h2>Modifier mon profil</h2>
-                    <form data-profile-form>
-                        <label class="field-row" for="profilePrenom">
-                            <span>Prénom</span>
-                            <input id="profilePrenom" name="prenomUser" type="text" autocomplete="given-name" required />
-                        </label>
-                        <label class="field-row" for="profileNom">
-                            <span>Nom</span>
-                            <input id="profileNom" name="nomUser" type="text" autocomplete="family-name" required />
-                        </label>
-                        <button class="submit-btn" type="submit">Enregistrer les modifications</button>
-                    </form>
-                    <p class="feedback-msg" data-profile-feedback></p>
-                </article>
-
+            <!-- Badges + historique -->
+            <div class="profile-grid">
                 <article class="panel profile-card">
                     <h2>Mes badges</h2>
                     <ul class="badge-list" data-badge-list></ul>
@@ -83,8 +74,66 @@
                     </form>
                     <p class="feedback-msg" data-pref-feedback></p>
                 </article>
-            </section>
+            </div>
         </main>
+
+        <!-- Modal: edit profile -->
+        <div class="modal-overlay hidden" id="modal-edit-profile" role="dialog" aria-modal="true" aria-labelledby="modal-edit-title">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h2 id="modal-edit-title">Modifier le profil</h2>
+                    <button class="modal-close" type="button" data-close-modal="modal-edit-profile" aria-label="Fermer">&times;</button>
+                </div>
+                <form data-edit-profile-form>
+                    <label class="field-row" for="editPrenom">
+                        <span>Prénom</span>
+                        <input id="editPrenom" name="prenomUser" type="text" autocomplete="given-name" required />
+                    </label>
+                    <label class="field-row" for="editNom">
+                        <span>Nom</span>
+                        <input id="editNom" name="nomUser" type="text" autocomplete="family-name" required />
+                    </label>
+                    <label class="field-row" for="editEmail">
+                        <span>Adresse email</span>
+                        <input id="editEmail" name="email" type="email" autocomplete="email" />
+                    </label>
+                    <p class="feedback-msg" data-edit-profile-feedback></p>
+                    <div class="modal-footer">
+                        <button class="submit-btn" type="submit">Enregistrer</button>
+                        <button class="btn-cancel" type="button" data-close-modal="modal-edit-profile">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal: change password -->
+        <div class="modal-overlay hidden" id="modal-edit-password" role="dialog" aria-modal="true" aria-labelledby="modal-pwd-title">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h2 id="modal-pwd-title">Changer le mot de passe</h2>
+                    <button class="modal-close" type="button" data-close-modal="modal-edit-password" aria-label="Fermer">&times;</button>
+                </div>
+                <form data-pwd-form>
+                    <label class="field-row" for="currentPwd">
+                        <span>Mot de passe actuel</span>
+                        <input id="currentPwd" name="current_password" type="password" required autocomplete="current-password" />
+                    </label>
+                    <label class="field-row" for="newPwd">
+                        <span>Nouveau mot de passe</span>
+                        <input id="newPwd" name="new_password" type="password" required autocomplete="new-password" minlength="8" />
+                    </label>
+                    <label class="field-row" for="confirmPwd">
+                        <span>Confirmer le nouveau mot de passe</span>
+                        <input id="confirmPwd" name="confirm_password" type="password" required autocomplete="new-password" minlength="8" />
+                    </label>
+                    <p class="feedback-msg" data-pwd-feedback></p>
+                    <div class="modal-footer">
+                        <button class="submit-btn" type="submit">Modifier</button>
+                        <button class="btn-cancel" type="button" data-close-modal="modal-edit-password">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <script src="../../assets/js/app-shell.js" defer></script>
         <script src="../../assets/js/Employe/profilE.js" defer></script>

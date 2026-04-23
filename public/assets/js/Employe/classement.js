@@ -13,7 +13,6 @@
 
     let allTeams = [];
     let myTeamId = 0;
-        // let currentMetric = 'points';
 
     function sorted() {
             return [...allTeams].sort((a, b) => {
@@ -70,20 +69,7 @@
         }).join('');
     }
 
-    function bindFilters() {
-        document.querySelectorAll('[data-metric]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentMetric = btn.dataset.metric || 'points';
-                document.querySelectorAll('[data-metric]').forEach(b => b.classList.remove('is-active'));
-                btn.classList.add('is-active');
-                renderPodium();
-                renderTeamList();
-            });
-        });
-    }
-
     document.addEventListener('DOMContentLoaded', async () => {
-        bindFilters();
         try {
             const data = await apiGet('/modules/employee/rankings.php');
             allTeams  = data.classement;

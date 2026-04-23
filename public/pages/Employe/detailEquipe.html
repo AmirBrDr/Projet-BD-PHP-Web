@@ -28,43 +28,49 @@
                 </div>
             </header>
 
-            <a class="back-link" href="classement.html">Retour au classement</a>
+            <a class="back-link" href="classement.html">&#8592; Retour au classement</a>
 
-            <section class="panel team-header" data-team-header>
-                <div>
+            <!-- Team hero -->
+            <section class="panel team-hero" data-team-header>
+                <div class="team-hero-main">
                     <p class="eyebrow" data-team-rank>Classement</p>
                     <h1 data-team-name>Equipe</h1>
-                    <p class="team-motto" data-team-motto></p>
                 </div>
-                <div class="score-pill">
-                    <span class="score-value" data-team-score>0</span>
-                    <span class="score-label">points</span>
-                </div>
+                <div class="team-hero-kpis" data-team-stats></div>
             </section>
 
-            <section class="team-stats-grid" data-team-stats></section>
+            <!-- Main grid: left = membres + progression, right = succes -->
+            <div class="team-main-grid">
 
-            <section class="panel challenge-progress-panel">
-                <div class="section-head">
-                    <div>
-                        <p class="eyebrow">Progression de l'équipe</p>
-                        <h2>Défis du mois</h2>
-                    </div>
+                <div class="team-left-col">
+                    <!-- Membres -->
+                    <article class="panel members-panel">
+                        <h2 class="section-title">Membres</h2>
+                        <ul class="members-list" data-members-list>
+                            <li class="member-row is-loading">Chargement...</li>
+                        </ul>
+                    </article>
+
+                    <!-- Progression défis du mois -->
+                    <article class="panel progression-panel">
+                        <h2 class="section-title">Defis du mois</h2>
+                        <div class="progression-list" data-challenge-progress>
+                            <div class="progression-empty">Chargement...</div>
+                        </div>
+                    </article>
                 </div>
-                <div class="challenge-progress-list" data-challenge-progress></div>
-            </section>
 
-            <section class="split-grid">
-                <article class="panel members-panel">
-                    <h2>Membres de l'equipe</h2>
-                    <ul class="members-list" data-members-list></ul>
-                </article>
+                <div class="team-right-col">
+                    <!-- Derniers succès -->
+                    <article class="panel succes-panel">
+                        <h2 class="section-title">Derniers succes</h2>
+                        <ul class="succes-list" data-achievements-list>
+                            <li class="succes-item is-loading">Chargement...</li>
+                        </ul>
+                    </article>
+                </div>
 
-                <article class="panel timeline-panel">
-                    <h2>Derniers succes</h2>
-                    <ul class="timeline-list" data-achievements-list></ul>
-                </article>
-            </section>
+            </div>
         </main>
 
         <script src="../../assets/js/app-shell.js" defer></script>

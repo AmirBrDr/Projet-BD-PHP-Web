@@ -16,39 +16,6 @@
         if (el) el.textContent = value;
     }
 
-    function renderChallengeProgress(progression) {
-        const host = document.querySelector('[data-challenge-progress]');
-        if (!host) return;
-        if (!progression.length) {
-            host.innerHTML = '<div class="progress-empty">Aucun défi mensuel trouvé.</div>';
-            return;
-        }
-
-        host.innerHTML = progression.map((item) => {
-            const validated = item.progress?.validated_names || [];
-            const pending = item.progress?.pending_names || [];
-            return `
-                <article class="progress-card ${item.statut}">
-                    <div class="progress-head">
-                        <div>
-                            <div class="progress-order">Défi ${item.ordre}</div>
-                            <h3 class="progress-title">${item.nom}</h3>
-                        </div>
-                        <span class="progress-state">${item.statut === 'completed' ? 'Terminé' : item.statut === 'locked' ? 'Bloqué' : 'En cours'}</span>
-                    </div>
-                    <p class="progress-copy">${item.description || ''}</p>
-                    <div class="progress-bar">
-                        <span style="width:${item.progress?.total_members ? Math.round((item.progress.validated_members / item.progress.total_members) * 100) : 0}%"></span>
-                    </div>
-                    <div class="progress-meta">${item.progress?.validated_members || 0}/${item.progress?.total_members || 0} membres validés</div>
-                    <div class="progress-lists">
-                        <div><strong>Validés</strong><br />${validated.length ? validated.join(', ') : 'Personne encore'}</div>
-                        <div><strong>En attente</strong><br />${pending.length ? pending.join(', ') : 'Toute l’équipe a validé'}</div>
-                    </div>
-                </article>`;
-        }).join('');
-    }
-
     function renderStats(equipe, nbMembres) {
         const host = document.querySelector('[data-team-stats]');
         if (!host) return;
@@ -81,18 +48,54 @@
             </li>`).join('');
     }
 
+    function renderProgression(progression) {
+        const host = document.querySelector('[data-challenge-progress]');
+        if (!host) return;
+        if (!progression.length) {
+            host.innerHTML = '<div class="progression-empty">Aucun défi mensuel trouvé.</div>';
+            return;
+        }
+        host.innerHTML = progression.map(item => {
+            const p  = item.progress || {};
+            const vn = p.validated_names || [];
+            const pn = p.pending_names   || [];
+            const pct = p.total_members
+                ? Math.round((p.validated_members / p.total_members) * 100)
+                : 0;
+            const stateLabel = item.statut === 'completed' ? 'Terminé' : item.statut === 'locked' ? 'Bloqué' : 'En cours';
+            return `
+                <div class="prog-card ${item.statut}">
+                    <div class="prog-head">
+                        <div>
+                            <div class="prog-order">Défi ${item.ordre}</div>
+                            <div class="prog-title">${item.nom}</div>
+                        </div>
+                        <span class="prog-state">${stateLabel}</span>
+                    </div>
+                    <div class="prog-bar-wrap">
+                        <div class="prog-bar-fill" style="width:${pct}%"></div>
+                    </div>
+                    <div class="prog-meta">${p.validated_members || 0}/${p.total_members || 0} membres validés</div>
+                    <div class="prog-members">
+                        ${vn.map(n => `<span class="member-chip validated">✓ ${n}</span>`).join('')}
+                        ${pn.map(n => `<span class="member-chip pending">⏳ ${n}</span>`).join('')}
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
     function renderAchievements(succes) {
         const host = document.querySelector('[data-achievements-list]');
         if (!host) return;
         if (!succes.length) {
-            host.innerHTML = '<li class="timeline-item" style="color:var(--shell-muted)">Aucun succès récent.</li>';
+            host.innerHTML = '<li class="succes-item" style="color:var(--shell-muted)">Aucun succès récent.</li>';
             return;
         }
         host.innerHTML = succes.map(s => `
-            <li class="timeline-item">
-                <strong>${s.defi}</strong><br />
-                <small>Par ${s.prenom} — ${new Date(s.date).toLocaleDateString('fr-FR')}</small><br />
-                <span class="timeline-points">+${s.points} pts</span>
+            <li class="succes-item">
+                <div class="succes-name">${s.defi}</div>
+                <div class="succes-meta">Par ${s.prenom} — ${new Date(s.date).toLocaleDateString('fr-FR')}</div>
+                <span class="succes-pts">+${s.points} pts</span>
             </li>`).join('');
     }
 
@@ -116,18 +119,14 @@
 
         try {
             const data = await apiGet('/modules/employee/team-detail.php?id=' + teamId);
-            const { equipe, membres, succes } = data;
+            const { equipe, membres, succes, progression } = data;
 
             setText('[data-team-rank]', `${equipe.rang}e du classement global`);
             setText('[data-team-name]', equipe.nom);
-            setText('[data-team-score]', equipe.points.toLocaleString('fr-FR'));
-
-            const mottoEl = document.querySelector('[data-team-motto]');
-            if (mottoEl) mottoEl.textContent = '';
 
             renderStats(equipe, membres.length);
             renderMembers(membres);
-            renderChallengeProgress(data.progression || []);
+            renderProgression(progression || []);
             renderAchievements(succes);
         } catch (err) {
             console.error('Erreur détail équipe:', err);

@@ -55,6 +55,16 @@
             </div>`;
     }
 
+    function renderMemberChips(progress) {
+        const validated = progress.validated_names || [];
+        const pending   = progress.pending_names   || [];
+        if (!validated.length && !pending.length) return '';
+        return `<div class="step-members">
+            ${validated.map(n => `<span class="member-chip validated">✓ ${n}</span>`).join('')}
+            ${pending.map(n => `<span class="member-chip pending">⏳ ${n}</span>`).join('')}
+        </div>`;
+    }
+
     function renderTimeline() {
         const host = document.querySelector('[data-timeline-list]');
         if (!host) return;
@@ -77,6 +87,7 @@
                         <span class="theme-tag">${d.theme?.nom || 'Thème du mois'}</span>
                         <span class="step-status">${d.statut === 'completed' ? 'Validé par l\'équipe' : d.statut === 'locked' ? 'Verrouillé' : 'Disponible'}</span>
                     </div>
+                    ${renderMemberChips(d.progress)}
                     ${actionButton(d)}
                 </div>
             </article>`).join('');
@@ -101,6 +112,8 @@
             if (data.theme) {
                 const subtitle = document.querySelector('[data-theme-subtitle]');
                 if (subtitle) subtitle.textContent = `Thème du mois : ${data.theme.nom}`;
+                const desc = document.querySelector('[data-theme-desc]');
+                if (desc) desc.textContent = data.theme.description || '';
             }
 
             allDefis = data.defis;
