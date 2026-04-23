@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../../bootstrap.php';
+require_once __DIR__ . '/../../bootstrap.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     gp_send_json(405, ['message' => 'Méthode non autorisée']);

@@ -3,12 +3,59 @@
     const API_BASE = '/api';
     const token = () => localStorage.getItem('gp_token');
 
+    async function parseApiResponse(res) {
+        const contentType = (res.headers.get('content-type') || '').toLowerCase();
+        const text = await res.text();
+        if (!text) return null;
+
+        // Some bad routes return HTML with 200; treat as non-JSON candidate.
+        if (!contentType.includes('application/json')) {
+            const preview = text.replace(/\s+/g, ' ').trim().slice(0, 140);
+            throw new Error('Reponse API non JSON: ' + preview);
+        }
+
+        try {
+            return JSON.parse(text);
+        } catch (_err) {
+            throw new Error('Format de reponse JSON invalide');
+        }
+    }
+
     async function apiGet(path) {
         const res = await fetch(API_BASE + path, {
             headers: { 'Authorization': 'Bearer ' + token() }
         });
-        if (!res.ok) throw new Error((await res.json()).message || res.status);
-        return res.json();
+
+        const data = await parseApiResponse(res);
+        if (!res.ok) {
+            const message = data && data.message ? data.message : ('HTTP ' + res.status);
+            throw new Error(message);
+        }
+
+        return data;
+    }
+
+    function renderEmptyProfile(message) {
+        setInitials('G', 'P');
+
+        const nameEl = document.querySelector('[data-user-name]');
+        if (nameEl) nameEl.textContent = 'Profil en attente';
+
+        const emailEl = document.querySelector('[data-user-email]');
+        if (emailEl) emailEl.textContent = 'Connectez-vous avec un compte existant.';
+
+        const teamEl = document.querySelector('[data-profile-team]');
+        if (teamEl) teamEl.textContent = 'Sans equipe';
+
+        renderStats({ points: 0, co2: 0, rang_perso: 0 });
+        renderBadges([]);
+        renderHistory([]);
+
+        const feedback = document.querySelector('[data-pref-feedback]');
+        if (feedback) {
+            feedback.className = 'feedback-msg';
+            feedback.textContent = message;
+        }
     }
 
     function setInitials(prenom, nom) {
@@ -71,12 +118,25 @@
         });
     }
 
+    function showWarning(message) {
+        const feedback = document.querySelector('[data-pref-feedback]');
+        if (!feedback) return;
+        feedback.className = 'feedback-msg';
+        feedback.textContent = message;
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
         bindPreferences();
         try {
             const data = await apiGet('/modules/employee/profile.php');
 
             setInitials(data.user.prenom, data.user.nom);
+
+            const nameEl = document.querySelector('[data-user-name]');
+            if (nameEl) nameEl.textContent = `${data.user.prenom} ${data.user.nom}`;
+
+            const emailEl = document.querySelector('[data-user-email]');
+            if (emailEl) emailEl.textContent = data.user.email;
 
             const teamEl = document.querySelector('[data-profile-team]');
             if (teamEl) teamEl.textContent = data.equipe ? data.equipe.nom : 'Sans équipe';
@@ -86,6 +146,15 @@
             renderHistory(data.historique);
         } catch (err) {
             console.error('Erreur profil:', err);
+
+            const message = String(err && err.message ? err.message : 'Erreur profil');
+            if (message === 'Profil introuvable' || message.includes('HTTP 404')) {
+                renderEmptyProfile('Aucun profil trouve. Cree un utilisateur puis reconnecte-toi.');
+                return;
+            }
+
+            // Keep shell-initialized identity fields instead of replacing them with placeholders.
+            showWarning('Impossible de charger toutes les donnees du profil pour le moment.');
         }
     });
 })();
