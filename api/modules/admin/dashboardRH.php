@@ -21,11 +21,29 @@ FROM Message m
 
 $sql_actions_Validees = "SELECT COUNT(*) AS actionsValides FROM Valider";
 
+$sql_taux_engagement = "SELECT
+    e.departementEmploye                                AS departement,
+    COUNT(DISTINCT e.Id_Employe)                        AS total_employes,
+    COUNT(DISTINCT v.Id_Employe)                        AS employes_actifs,
+    ROUND(
+        COUNT(DISTINCT v.Id_Employe) * 100.0
+        / COUNT(DISTINCT e.Id_Employe)
+    , 1)                                                AS taux_engagement
+FROM Employe e
+LEFT JOIN Valider v
+    ON v.Id_Employe = e.Id_Employe
+LEFT JOIN Utilisateur u
+    ON u.Id_User = e.Id_Employe
+WHERE u.statutUser = 'actif'
+GROUP BY e.departementEmploye
+ORDER BY taux_engagement DESC";
+
 // Tableau des requêtes
 $queries = [
     'co2tot' => $sql_co2,
     'tauxparticipation' => $sql_participation,
-    'actionsvalides' => $sql_actions_Validees
+    'actionsvalides' => $sql_actions_Validees,
+    'taux_engagement' => $sql_taux_engagement
 ];
 
 $results = [];
@@ -41,6 +59,8 @@ foreach ($queries as $key => $sql) {
     $results[$key] = $data[$key];
 }
 
+
+
 // Réponse JSON
 http_response_code(200);
 echo json_encode([
@@ -48,5 +68,6 @@ echo json_encode([
     "module" => "admin",
     "co2Tot" => $results["co2tot"],
     "tauxParticipation" => $results["tauxparticipation"]."%",
-    "actionsValides" => $results["actionsvalides"]
+    "actionsValides" => $results["actionsvalides"],
+    "taux_engagement" => $results["taux_engagement"]."%"
 ]);
