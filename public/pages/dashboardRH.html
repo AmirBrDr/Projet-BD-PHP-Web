@@ -1,83 +1,137 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>GreenPulse - Espace RH</title>
-        <link rel="stylesheet" href="../assets/css/app-shell.css" />
-    </head>
-    <body class="app-page" data-required-role="admin">
-        <main class="app-shell">
-            <header class="app-header">
-                <div class="brand-block">
-                    <div class="brand-name">GreenPulse</div>
-                    <div class="brand-title">Espace RH</div>
-                    <div class="brand-subtitle">Pilotage des utilisateurs, équipes et accès</div>
-                </div>
-                <div class="header-actions">
-                    <div class="role-pill">Rôle: <strong data-user-role>ADMIN</strong></div>
-                    <button class="logout-btn" type="button" data-logout>Déconnexion</button>
-                </div>
-            </header>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenPulse - Admin RH | Dashboard RSE</title>
+    <link rel="stylesheet" href="/public/assets/css/dashboardRH.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <img src="/maquette/Images/logo.png" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardRH.html" class="active">Dashboard RSE</a>
+            <a href="gestionUtilisateurs.html">Utilisateurs & Équipes</a>
+            <a href="parametresRH.html">Paramètres Globaux</a>
+            <a href="compteRH.html">Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge admin">Admin RH</div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
 
-            <section class="hero">
-                <div class="panel hero-copy">
-                    <p class="eyebrow">Administration du compte</p>
-                    <h1>Supervisez les comptes et préparez les accès par rôle.</h1>
-                    <p>
-                        Bonjour <strong data-user-name></strong>, cette zone est pensée pour le suivi des
-                        utilisateurs, la gestion des profils et le contrôle des autorisations.
-                    </p>
-                </div>
 
-                <aside class="panel profile-card">
-                    <div class="profile-label">Session active</div>
-                    <div class="profile-name" data-user-name>Utilisateur</div>
-                    <div class="profile-email" data-user-email></div>
-                    <div class="status-pill">Connecté le <strong data-today></strong></div>
-                </aside>
+    <main class="dashboard-main">
+        <header class="admin-header">
+            <div>
+                <h1>Bilan Carbone & Engagement RSE</h1>
+                <p>Analyse globale des performances environnementales de l'entreprise.</p>
+            </div>
+            <div class="header-btns">
+                <button class="btn-secondary" onclick="alert('Génération du rapport PDF en cours...')"><i class="fas fa-file-pdf"></i> Rapport PDF</button>
+                <button class="btn-secondary" onclick="exportCSV(window.dashboardData, window.co2ParCategorie, window.engagementParDept)"><i class="fas fa-file-csv"></i> Export CSV</button>
+            </div>
+        </header>
+
+        <section class="kpi-grid">
+            <div class="kpi-card highlight">
+                <div class="kpi-icon"><i class="fas fa-globe-europe"></i></div>
+                <div class="kpi-data">
+                    <span class="kpi-value" id = "co2"> </span> <small>kg</small></span>
+                    <span class="kpi-label">CO₂ Total Évité</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                <div class="kpi-data">
+                    <span class="kpi-value" id = "participation"> </span>
+                    <span class="kpi-label">Taux de Participation Global</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon"><i class="fas fa-check-double"></i></div>
+                <div class="kpi-data">
+                    <span class="kpi-value" id = "actions" >  </span>
+                    <span class="kpi-label">Actions Validées</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="charts-layout">
+            <section class="chart-section">
+                <h2><i class="fas fa-chart-pie"></i> Répartition des réductions CO₂</h2>
+                <div class="chart-container">
+                    <canvas id="co2Chart"></canvas>
+                </div>
             </section>
 
-            <section class="stats-grid" aria-label="Indicateurs RH">
-                <article class="panel stat-card">
-                    <div class="stat-kicker">Utilisateurs</div>
-                    <div class="stat-value">0</div>
-                    <div class="stat-copy">Liste des comptes à intégrer ensuite depuis l’API utilisateur.</div>
-                </article>
-                <article class="panel stat-card">
-                    <div class="stat-kicker">Équipes</div>
-                    <div class="stat-value">0</div>
-                    <div class="stat-copy">Vous pourrez brancher ici la supervision des équipes.</div>
-                </article>
-                <article class="panel stat-card">
-                    <div class="stat-kicker">Accès</div>
-                    <div class="stat-value">OK</div>
-                    <div class="stat-copy">La page vérifie maintenant que seul un compte admin y accède.</div>
-                </article>
+            <section class="chart-section">
+                <h2><i class="fas fa-chart-bar"></i> Taux d'engagement par Département</h2>
+                <div class="chart-container">
+                    <canvas id="engagementChart"></canvas>
+                </div>
             </section>
+        </div>
+    </main>
 
-            <section class="action-grid">
-                <article class="panel action-card">
-                    <h2>Actions de gestion</h2>
-                    <p>Base prête pour lister, modifier ou suspendre les comptes RH.</p>
-                    <ul class="action-list">
-                        <li>Créer un utilisateur</li>
-                        <li>Consulter les rôles</li>
-                        <li>Suivre les entreprises</li>
-                    </ul>
-                </article>
-                <article class="panel action-card">
-                    <h2>Flux à connecter</h2>
-                    <p>Cette structure vous laisse brancher ensuite les modules de gestion des employés.</p>
-                    <ul class="action-list">
-                        <li>Statistiques RH</li>
-                        <li>Paramètres du compte</li>
-                        <li>Modération</li>
-                    </ul>
-                </article>
-            </section>
-        </main>
+    <script>
+        // Graphique 1 : Répartition CO2 (Doughnut)
+        const ctxCo2 = document.getElementById('co2Chart').getContext('2d');
+        new Chart(ctxCo2, {
+            type: 'doughnut',
+            data: {
+                labels: ['Mobilité (55%)', 'Énergie (25%)', 'Déchets (15%)', 'Alimentation (5%)'],
+                datasets: [{
+                    data: [6847, 3112, 1867, 624],
+                    backgroundColor: ['#94BB39', '#2A997F', '#298E77', '#1B2D31'],
+                    borderColor: '#1B2D31',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { color: '#ffffff', font: { size: 13 } } }
+                }
+            }
+        });
 
-        <script src="../assets/js/app-shell.js" defer></script>
-    </body>
-    </html>
+        // Graphique 2 : Engagement par département (Bar)
+        const ctxEngagement = document.getElementById('engagementChart').getContext('2d');
+        new Chart(ctxEngagement, {
+            type: 'bar',
+            data: {
+                labels: ['IT', 'Marketing', 'RH', 'Compta', 'Logistique'],
+                datasets: [{
+                    label: 'Taux de participation (%)',
+                    data: [92, 85, 78, 65, 55],
+                    backgroundColor: 'rgba(148, 187, 57, 0.8)',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        max: 100,
+                        grid: { color: 'rgba(255,255,255,0.1)' },
+                        ticks: { color: '#a0b1b5' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#a0b1b5' }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+<script src="/public/assets/js/dashboardRH.js"></script>
+</body>
+</html>
