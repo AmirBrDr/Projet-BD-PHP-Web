@@ -1,13 +1,155 @@
-/* dashboardE Styles */
-/* TODO: Add styles for dashboardE */
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+.employee-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
 }
 
-h1 {
-    color: #333;
-    font-size: 2em;
+.reply-form {
+    display: grid;
+    gap: 12px;
+}
+
+.reply-form label {
+    display: grid;
+    gap: 6px;
+}
+
+.reply-form label span {
+    font-size: 12px;
+    color: var(--shell-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.reply-form select,
+.reply-form textarea {
+    width: 100%;
+    border: 1px solid var(--shell-border);
+    background: rgba(6, 16, 30, 0.9);
+    border-radius: 10px;
+    color: var(--shell-text);
+    font-size: 14px;
+    padding: 9px 10px;
+}
+
+.reply-form textarea {
+    resize: vertical;
+}
+
+.primary-btn {
+    justify-self: start;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(90deg, var(--shell-accent-2), var(--shell-accent));
+    color: #05111f;
+}
+
+.panel-copy {
+    margin: 0;
+    color: var(--shell-muted);
+    font-size: 13px;
+}
+
+.reply-list {
+    margin-top: 10px;
+    display: grid;
+    gap: 10px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.reply-card {
+    border: 1px solid var(--shell-border);
+    border-radius: 14px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    display: grid;
+    gap: 8px;
+}
+
+.reply-card h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.reply-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    border-radius: 999px;
+    border: 1px solid var(--shell-border);
+    background: rgba(255, 255, 255, 0.06);
+    padding: 4px 9px;
+    font-size: 12px;
+}
+
+.chip.status-pending {
+    color: #ffd58f;
+    border-color: rgba(255, 189, 89, 0.6);
+}
+
+.chip.status-approved {
+    color: #9ff4c8;
+    border-color: rgba(43, 212, 124, 0.6);
+}
+
+.chip.status-rejected {
+    color: #ffb3b3;
+    border-color: rgba(255, 110, 110, 0.6);
+}
+
+.reply-content,
+.comment-content {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.comment-content {
+    color: var(--shell-muted);
+    border-left: 3px solid rgba(255, 255, 255, 0.14);
+    padding-left: 8px;
+}
+
+.inline-alert {
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+}
+
+.inline-alert.success {
+    background: rgba(40, 190, 120, 0.16);
+    border: 1px solid rgba(80, 220, 160, 0.5);
+    color: #c6ffe3;
+}
+
+.inline-alert.error {
+    background: rgba(255, 60, 60, 0.12);
+    border: 1px solid rgba(255, 120, 120, 0.4);
+    color: #ffd5d5;
+}
+
+.empty-state {
+    border: 1px dashed var(--shell-border);
+    border-radius: 12px;
+    padding: 14px;
+    color: var(--shell-muted);
+    font-size: 13px;
+}
+
+.page-note.error {
+    color: #ff9f9f;
+}
+
+@media (max-width: 900px) {
+    .employee-grid {
+        grid-template-columns: 1fr;
+    }
 }

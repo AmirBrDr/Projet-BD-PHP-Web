@@ -29,6 +29,7 @@ DROP FUNCTION  IF EXISTS fn_check_role_exclusivity()              CASCADE;
 DROP TABLE IF EXISTS Recevoir      CASCADE;
 DROP TABLE IF EXISTS Obtenir_Eq    CASCADE;
 DROP TABLE IF EXISTS Obtenir_Em    CASCADE;
+DROP TABLE IF EXISTS Reponse_Defi  CASCADE;
 DROP TABLE IF EXISTS Valider       CASCADE;
 DROP TABLE IF EXISTS Faire_partie  CASCADE;
 DROP TABLE IF EXISTS Regroupe      CASCADE;
@@ -194,6 +195,24 @@ CREATE TABLE Faire_partie (
     Id_defi    INT CONSTRAINT fk_FP_Defi     REFERENCES Defi(Id_defi),
     Id_actions INT CONSTRAINT fk_FP_Actions  REFERENCES Actions(Id_actions),
     CONSTRAINT pk_Faire_partie PRIMARY KEY (Id_defi, Id_actions)
+);
+
+-- Reponse_Defi : reponses employees en attente de moderation animateur
+CREATE TABLE Reponse_Defi (
+    Id_reponse             SERIAL       CONSTRAINT pk_Reponse_Defi PRIMARY KEY,
+    Id_defi                INT          CONSTRAINT nn_Reponse_Defi_Defi NOT NULL
+                                        CONSTRAINT fk_Reponse_Defi_Defi REFERENCES Defi(Id_defi),
+    Id_Employe             INT          CONSTRAINT nn_Reponse_Defi_Employe NOT NULL
+                                        CONSTRAINT fk_Reponse_Defi_Employe REFERENCES Employe(Id_Employe),
+    reponse_text           TEXT         CONSTRAINT nn_Reponse_Defi_Text NOT NULL,
+    statut_reponse         VARCHAR(20)  DEFAULT 'pending'
+                                        CONSTRAINT nn_Reponse_Defi_Statut NOT NULL
+                                        CONSTRAINT ck_Reponse_Defi_Statut CHECK (statut_reponse IN ('pending', 'approved', 'rejected')),
+    commentaire_animateur  TEXT,
+    date_reponse           TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+                                        CONSTRAINT nn_Reponse_Defi_Date NOT NULL,
+    date_traitement        TIMESTAMP,
+    Id_Animateur_traitement INT         CONSTRAINT fk_Reponse_Defi_Animateur REFERENCES Animateur(Id_Animateur)
 );
 
 -- Valider : validation d'une action d'un défi par un employé

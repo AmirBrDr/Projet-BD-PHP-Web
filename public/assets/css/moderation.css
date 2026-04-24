@@ -1,13 +1,185 @@
-/* moderation Styles */
-/* TODO: Add styles for moderation */
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+.nav-links {
+    display: flex;
+    gap: 8px;
 }
 
-h1 {
-    color: #333;
-    font-size: 2em;
+.nav-links a {
+    padding: 8px 14px;
+    border-radius: 10px;
+    color: var(--shell-muted);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s, background 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--shell-accent);
+    background: rgba(43, 212, 124, 0.1);
+}
+
+.page-intro {
+    padding: 22px;
+}
+
+.page-intro h1 {
+    margin: 0 0 8px;
+    font-size: clamp(24px, 3vw, 32px);
+}
+
+.page-intro p {
+    margin: 0;
+    color: var(--shell-muted);
+    line-height: 1.5;
+}
+
+.page-alert {
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: rgba(255, 60, 60, 0.12);
+    border: 1px solid rgba(255, 120, 120, 0.4);
+    color: #ffd5d5;
+    font-size: 13px;
+}
+
+.panel {
+    padding: 18px;
+}
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.panel-head h2 {
+    margin: 0;
+    font-size: 19px;
+}
+
+.filters-row {
+    display: flex;
+    gap: 8px;
+}
+
+.filters-row select {
+    width: 100%;
+    border: 1px solid var(--shell-border);
+    background: rgba(6, 16, 30, 0.9);
+    border-radius: 10px;
+    color: var(--shell-text);
+    font-size: 14px;
+    padding: 9px 10px;
+}
+
+.reply-list {
+    display: grid;
+    gap: 10px;
+    max-height: 700px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.reply-card {
+    border: 1px solid var(--shell-border);
+    border-radius: 14px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    display: grid;
+    gap: 8px;
+}
+
+.reply-card h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.reply-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--shell-muted);
+    font-size: 12px;
+}
+
+.chip {
+    border-radius: 999px;
+    border: 1px solid var(--shell-border);
+    background: rgba(255, 255, 255, 0.06);
+    padding: 4px 9px;
+}
+
+.status-pending {
+    color: #ffd58f;
+    border-color: rgba(255, 189, 89, 0.6);
+}
+
+.status-approved {
+    color: #9ff4c8;
+    border-color: rgba(43, 212, 124, 0.6);
+}
+
+.status-rejected {
+    color: #ffb3b3;
+    border-color: rgba(255, 110, 110, 0.6);
+}
+
+.reply-text,
+.comment-box {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--shell-text);
+}
+
+.comment-box {
+    color: var(--shell-muted);
+    border-left: 3px solid rgba(255, 255, 255, 0.14);
+    padding-left: 8px;
+}
+
+.card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.small-btn {
+    border: 1px solid var(--shell-border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--shell-text);
+    border-radius: 8px;
+    padding: 7px 9px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.small-btn:hover {
+    border-color: var(--shell-accent);
+}
+
+.small-btn.approve {
+    border-color: rgba(43, 212, 124, 0.55);
+}
+
+.small-btn.reject {
+    border-color: rgba(255, 120, 120, 0.55);
+}
+
+.empty-state {
+    border: 1px dashed var(--shell-border);
+    border-radius: 12px;
+    padding: 14px;
+    color: var(--shell-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 1000px) {
+    .filters-row {
+        flex-direction: column;
+        width: min(260px, 100%);
+    }
 }

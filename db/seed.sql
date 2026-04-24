@@ -1,4 +1,16 @@
 -- Nettoyage complet
+DELETE FROM Recevoir;
+DELETE FROM Obtenir_Eq;
+DELETE FROM Obtenir_Em;
+DELETE FROM Valider;
+DELETE FROM Reponse_Defi;
+DELETE FROM Message;
+DO $$
+BEGIN
+	IF to_regclass('public.defi_proposition_acteur') IS NOT NULL THEN
+		EXECUTE 'DELETE FROM defi_proposition_acteur';
+	END IF;
+END $$;
 DELETE FROM Faire_partie;
 DELETE FROM Forum;
 DELETE FROM Regroupe;
@@ -10,6 +22,98 @@ ALTER SEQUENCE defi_id_defi_seq RESTART WITH 1;
 ALTER SEQUENCE thematique_id_thematique_seq RESTART WITH 1;
 ALTER SEQUENCE actions_id_actions_seq RESTART WITH 1;
 ALTER SEQUENCE forum_id_forum_seq RESTART WITH 1;
+DO $$
+BEGIN
+	IF to_regclass('public.reponse_defi_id_reponse_seq') IS NOT NULL THEN
+		EXECUTE 'ALTER SEQUENCE reponse_defi_id_reponse_seq RESTART WITH 1';
+	END IF;
+END $$;
+
+-- Comptes de base pour tester le flux employe -> moderation
+-- Mot de passe commun: password
+DO $$
+DECLARE
+	v_ent_id INT;
+	v_anim_id INT;
+	v_emp1_id INT;
+	v_emp2_id INT;
+BEGIN
+	SELECT Id_Entreprise
+	INTO v_ent_id
+	FROM Entreprise
+	ORDER BY Id_Entreprise
+	LIMIT 1;
+
+	IF v_ent_id IS NULL THEN
+		INSERT INTO Entreprise (nomEntreprise, secteurEntreprise)
+		VALUES ('GreenPulse Demo', 'Services')
+		RETURNING Id_Entreprise INTO v_ent_id;
+	END IF;
+
+	SELECT a.Id_Animateur
+	INTO v_anim_id
+	FROM Animateur a
+	ORDER BY a.Id_Animateur
+	LIMIT 1;
+
+	IF v_anim_id IS NULL THEN
+		INSERT INTO Utilisateur (nomUser, prenomUser, email, statutUser, mdp, Id_Entreprise)
+		VALUES (
+			'Animateur',
+			'Demo',
+			'animateur.demo@greenpulse.local',
+			'actif',
+			'$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+			v_ent_id
+		)
+		RETURNING Id_User INTO v_anim_id;
+
+		INSERT INTO Animateur (Id_Animateur) VALUES (v_anim_id);
+	END IF;
+
+	SELECT e.Id_Employe
+	INTO v_emp1_id
+	FROM Employe e
+	ORDER BY e.Id_Employe
+	LIMIT 1;
+
+	IF v_emp1_id IS NULL THEN
+		INSERT INTO Utilisateur (nomUser, prenomUser, email, statutUser, mdp, Id_Entreprise)
+		VALUES (
+			'Employe',
+			'One',
+			'employe.one@greenpulse.local',
+			'actif',
+			'$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+			v_ent_id
+		)
+		RETURNING Id_User INTO v_emp1_id;
+
+		INSERT INTO Employe (Id_Employe, Id_equipe) VALUES (v_emp1_id, NULL);
+	END IF;
+
+	SELECT e.Id_Employe
+	INTO v_emp2_id
+	FROM Employe e
+	WHERE e.Id_Employe <> v_emp1_id
+	ORDER BY e.Id_Employe
+	LIMIT 1;
+
+	IF v_emp2_id IS NULL THEN
+		INSERT INTO Utilisateur (nomUser, prenomUser, email, statutUser, mdp, Id_Entreprise)
+		VALUES (
+			'Employe',
+			'Two',
+			'employe.two@greenpulse.local',
+			'actif',
+			'$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+			v_ent_id
+		)
+		RETURNING Id_User INTO v_emp2_id;
+
+		INSERT INTO Employe (Id_Employe, Id_equipe) VALUES (v_emp2_id, NULL);
+	END IF;
+END $$;
 
 -- Thematiques
 INSERT INTO Thematique (nomTheme, descriptionTheme) VALUES 
@@ -19,19 +123,35 @@ INSERT INTO Thematique (nomTheme, descriptionTheme) VALUES
 ('Alimentation', 'Manger plus responsable');
 
 -- Defis
-INSERT INTO Defi (nomDefi, descriptionDefi, nbPointsDefi, nbCO2Defi, niveauDefi, Id_Animateur) VALUES
-('Zero Voiture', 'Venez au travail sans voiture cette semaine', 100, 15, 1, 1),
-('Covoiturage Express', 'Organisez un covoiturage avec un collegue', 75, 10, 2, 1),
-('Velo Challenge', 'Venez au bureau a velo 3 jours de suite', 150, 20, 3, 1),
-('Eteins la lumiere', 'Eteignez les lumieres en quittant une piece', 50, 8, 1, 1),
-('Mode Veille Interdit', 'Ne laissez aucun appareil en veille le soir', 60, 10, 2, 1),
-('Thermostat Eco', 'Reduisez le chauffage de 1 degre cette semaine', 80, 12, 3, 1),
-('Lunch zero dechet', 'Apportez votre repas sans emballage plastique', 75, 5, 1, 1),
-('Semaine sans plastique', 'Aucun plastique usage unique cette semaine', 120, 8, 2, 1),
-('Tri Master', 'Triez correctement vos dechets pendant 5 jours', 90, 6, 3, 1),
-('Repas Veggie', 'Mangez vegetarien le midi toute la semaine', 80, 12, 1, 1),
-('Local et Saison', 'Achetez uniquement des produits locaux de saison', 100, 15, 2, 1),
-('Zero Gaspi', 'Ne jetez aucun aliment cette semaine', 110, 10, 3, 1);
+INSERT INTO Defi (nomDefi, descriptionDefi, nbPointsDefi, nbCO2Defi, niveauDefi, Id_Animateur)
+SELECT
+	data.nomDefi,
+	data.descriptionDefi,
+	data.nbPointsDefi,
+	data.nbCO2Defi,
+	data.niveauDefi,
+	anim.Id_Animateur
+FROM (
+	VALUES
+		('Zero Voiture', 'Venez au travail sans voiture cette semaine', 100, 15, 1),
+		('Covoiturage Express', 'Organisez un covoiturage avec un collegue', 75, 10, 2),
+		('Velo Challenge', 'Venez au bureau a velo 3 jours de suite', 150, 20, 3),
+		('Eteins la lumiere', 'Eteignez les lumieres en quittant une piece', 50, 8, 1),
+		('Mode Veille Interdit', 'Ne laissez aucun appareil en veille le soir', 60, 10, 2),
+		('Thermostat Eco', 'Reduisez le chauffage de 1 degre cette semaine', 80, 12, 3),
+		('Lunch zero dechet', 'Apportez votre repas sans emballage plastique', 75, 5, 1),
+		('Semaine sans plastique', 'Aucun plastique usage unique cette semaine', 120, 8, 2),
+		('Tri Master', 'Triez correctement vos dechets pendant 5 jours', 90, 6, 3),
+		('Repas Veggie', 'Mangez vegetarien le midi toute la semaine', 80, 12, 1),
+		('Local et Saison', 'Achetez uniquement des produits locaux de saison', 100, 15, 2),
+		('Zero Gaspi', 'Ne jetez aucun aliment cette semaine', 110, 10, 3)
+) AS data (nomDefi, descriptionDefi, nbPointsDefi, nbCO2Defi, niveauDefi)
+CROSS JOIN (
+	SELECT Id_Animateur
+	FROM Animateur
+	ORDER BY Id_Animateur
+	LIMIT 1
+) AS anim;
 
 -- Actions
 INSERT INTO Actions (nomAction, descriptionAction) VALUES
@@ -136,3 +256,67 @@ INSERT INTO Regroupe (Id_defi, Id_thematique, mois, ordre) VALUES
 (10, 4, DATE_TRUNC('month', CURRENT_DATE), 1),
 (11, 4, DATE_TRUNC('month', CURRENT_DATE), 2),
 (12, 4, DATE_TRUNC('month', CURRENT_DATE), 3);
+
+-- Reponses de demonstration pour la moderation
+INSERT INTO Reponse_Defi (Id_defi, Id_Employe, reponse_text, statut_reponse, commentaire_animateur, date_reponse)
+SELECT
+	d.Id_defi,
+	e.Id_Employe,
+	'J ai pris le velo 3 jours cette semaine pour venir au bureau.',
+	'pending',
+	NULL,
+	CURRENT_TIMESTAMP - INTERVAL '1 day'
+FROM (SELECT Id_defi FROM Defi ORDER BY Id_defi ASC LIMIT 1) d
+CROSS JOIN (SELECT Id_Employe FROM Employe ORDER BY Id_Employe ASC LIMIT 1) e;
+
+INSERT INTO Reponse_Defi (
+	Id_defi,
+	Id_Employe,
+	reponse_text,
+	statut_reponse,
+	commentaire_animateur,
+	date_reponse,
+	date_traitement,
+	Id_Animateur_traitement
+)
+SELECT
+	d.Id_defi,
+	e.Id_Employe,
+	'J ai remplace les bouteilles plastiques par une gourde reutilisable.',
+	'approved',
+	'Super initiative, continue comme ca.',
+	CURRENT_TIMESTAMP - INTERVAL '2 days',
+	CURRENT_TIMESTAMP - INTERVAL '1 day',
+	a.Id_Animateur
+FROM (SELECT Id_defi FROM Defi ORDER BY Id_defi ASC OFFSET 1 LIMIT 1) d
+CROSS JOIN (
+	SELECT Id_Employe
+	FROM Employe
+	ORDER BY Id_Employe ASC
+	OFFSET 1
+	LIMIT 1
+) e
+CROSS JOIN (SELECT Id_Animateur FROM Animateur ORDER BY Id_Animateur ASC LIMIT 1) a;
+
+INSERT INTO Reponse_Defi (
+	Id_defi,
+	Id_Employe,
+	reponse_text,
+	statut_reponse,
+	commentaire_animateur,
+	date_reponse,
+	date_traitement,
+	Id_Animateur_traitement
+)
+SELECT
+	d.Id_defi,
+	e.Id_Employe,
+	'J ai essaye mais je nai pas encore termine le defi complet.',
+	'rejected',
+	'Merci pour lessai, ajoute des details et renvoie une preuve plus complete.',
+	CURRENT_TIMESTAMP - INTERVAL '3 days',
+	CURRENT_TIMESTAMP - INTERVAL '2 days',
+	a.Id_Animateur
+FROM (SELECT Id_defi FROM Defi ORDER BY Id_defi ASC OFFSET 2 LIMIT 1) d
+CROSS JOIN (SELECT Id_Employe FROM Employe ORDER BY Id_Employe ASC LIMIT 1) e
+CROSS JOIN (SELECT Id_Animateur FROM Animateur ORDER BY Id_Animateur ASC LIMIT 1) a;
