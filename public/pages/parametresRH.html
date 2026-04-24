@@ -3,14 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - parametresRH</title>
+    <title>GreenPulse - Admin RH | Paramètres Globaux</title>
     <link rel="stylesheet" href="../assets/css/parametresRH.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>parametresRH</h1>
-        <p>Page en développement...</p>
+    <nav class="navbar">
+        <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo">
+        <div class="nav-links">
+            <a href="dashboardRH.html">Dashboard RSE</a>
+            <a href="gestionUtilisateurs.html">Utilisateurs & Équipes</a>
+            <a href="parametresRH.html" class="active">Paramètres Globaux</a>
+            <a href="compteRH.html">Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge admin">Admin RH</div>
+            <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </nav>
+
+    <main class="param-main">
+        <header class="admin-header">
+            <div>
+                <h1>Paramètres Globaux & Gamification</h1>
+                <p>Définissez les règles du jeu, les catégories et la communication automatisée.</p>
+            </div>
+            <button id="saveSettingsBtn" class="btn-primary"><i class="fas fa-save"></i> Sauvegarder tout</button>
+        </header>
+
+        <div id="settingsFeedback" class="feedback"></div>
+
+        <div class="param-grid">
+            <div class="param-col">
+                <section class="param-box">
+                    <h2><i class="fas fa-tags"></i> Catégories Globales</h2>
+                    <p class="box-desc">Ces thématiques seront disponibles pour les Animateurs DD.</p>
+                    
+                    <ul id="categoryList" class="item-list"></ul>
+                    <button id="addCategoryBtn" class="btn-add-dashed">+ Ajouter une catégorie</button>
+                </section>
+
+                <section class="param-box">
+                    <h2><i class="fas fa-bullhorn"></i> Règles de Communication</h2>
+                    <p class="box-desc">Gérez la pression e-mail envoyée aux collaborateurs.</p>
+
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <strong>Rappels de participation</strong>
+                            <small>Si inactif depuis 3 jours</small>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-group mt-15">
+                        <label>Fréquence des relances</label>
+                        <select>
+                            <option>1 fois par semaine</option>
+                            <option selected>1 fois toutes les deux semaines</option>
+                        </select>
+                    </div>
+                </section>
+            </div>
+
+            <div class="param-col">
+                <section class="param-box">
+                    <div class="box-header-flex">
+                        <h2><i class="fas fa-medal"></i> Catalogue des Badges</h2>
+                        <button id="addBadgeBtn" class="btn-small"><i class="fas fa-plus"></i> Nouveau Badge</button>
+                    </div>
+                    <p class="box-desc">Gérez les icônes et définissez les conditions d'obtention.</p>
+
+                    <div id="badgeList" class="badge-list"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div id="modalBadge" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-award"></i> Configurer un Badge</h3>
+            <p class="modal-desc">Définissez la récompense et téléchargez son icône.</p>
+            
+            <div class="form-group">
+                <label>Nom du badge</label>
+                <input id="badgeName" type="text" placeholder="Ex: Maître Composteur">
+            </div>
+
+            <div class="form-group">
+                <label>Icône du badge (PNG/SVG)</label>
+                <div class="icon-upload-zone" onclick="document.querySelector('#modalBadge input[type=file]').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Cliquez ou glissez une image ici</p>
+                </div>
+                <input type="file" accept="image/png, image/svg+xml" class="file-hidden" style="display: none;">
+                <input id="badgeIcon" type="hidden" value="">
+                <div class="icon-preview-container" style="display:none;">
+                    <img id="previewIcon" src="" alt="Aperçu" style="width: 60px; height: 60px; margin-top: 15px;">
+                    <button type="button" class="btn-icon delete" onclick="document.getElementById('previewIcon').parentElement.style.display='none'; document.querySelector('#modalBadge input[type=file]').value=''; document.getElementById('badgeIcon').value='';"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Conditions d'obtention</label>
+                <div class="condition-row-modal">
+                    <select id="badgeConditionType">
+                        <option>Défis "Mobilité"</option>
+                        <option>Défis "Énergie"</option>
+                        <option>Défis "Déchets"</option>
+                        <option>Points Totaux (Global)</option>
+                    </select>
+                    <span>>=</span>
+                    <input id="badgeConditionValue" type="number" value="5" placeholder="Qté">
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel">Annuler</button>
+                <button type="button" class="btn-confirm">Enregistrer le badge</button>
+            </div>
+        </div>
     </div>
+
+    <div id="modalThematique" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-tags"></i> Détails de la Catégorie</h3>
+            <p class="modal-desc">Consultez et modifiez les informations de cette catégorie.</p>
+            
+            <div class="form-group">
+                <label>Nom de la catégorie</label>
+                <input id="thematiqueNom" type="text" placeholder="Nom de la catégorie">
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="thematiqueDesc" placeholder="Description (optionnelle)" style="min-height: 80px; resize: vertical;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Défis associés</label>
+                <div id="thematiquDefis" style="max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 10px;"></div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel">Annuler</button>
+                <button type="button" class="btn-confirm">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../assets/js/parametresRH.js"></script>
 </body>
 </html>

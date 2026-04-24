@@ -19,4 +19,12 @@ PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -c "CREATE 
 echo "Application du schéma..."
 PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f db/schema.sql
 
+echo "Application des migrations..."
+for migration in db/migrations/*.sql; do
+	if [ -f "$migration" ]; then
+		echo " - $(basename "$migration")"
+		PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "$migration"
+	fi
+done
+
 echo "✓ Base de données initialisée avec succès!"

@@ -84,7 +84,7 @@ CREATE TABLE Badge (
     Id_Badge         SERIAL        CONSTRAINT pk_Badge PRIMARY KEY,
     nomBadge         VARCHAR(100)  CONSTRAINT nn_nom_Badge NOT NULL,
     descriptionBadge TEXT,
-    iconeBadge       VARCHAR(255)
+    iconeBadge       TEXT
 );
 
 CREATE TABLE Notification (
