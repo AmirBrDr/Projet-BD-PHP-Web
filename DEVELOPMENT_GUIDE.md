@@ -198,6 +198,9 @@ nano api/config.local.php
 php -S localhost:8000 -t public/
 ```
 
+> Si vous utilisez le serveur PHP intégré depuis `public/`, démarrez-le avec :
+> `php -S localhost:8000`
+
 Accédez à : `http://localhost:8000`
 
 ---

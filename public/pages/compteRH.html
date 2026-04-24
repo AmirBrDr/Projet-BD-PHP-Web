@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GreenPulse - Compte Admin RH</title>
+        <link rel="stylesheet" href="../assets/css/app-shell.css" />
+        <link rel="stylesheet" href="../assets/css/profil.css" />
+    </head>
+    <body class="app-page" data-required-role="admin">
+        <main class="app-shell">
+            <header class="app-header">
+                <div class="brand-block">
+                    <div class="brand-name">GreenPulse</div>
+                    <div class="brand-title">Compte Admin</div>
+                    <div class="brand-subtitle">Gestion de votre profil et sécurité</div>
+                </div>
+                <div class="header-actions">
+                    <div class="role-pill">Rôle: <strong data-user-role>ADMIN</strong></div>
+                    <button class="logout-btn" type="button" data-logout>Déconnexion</button>
+                </div>
+            </header>
+
+            <!-- Profile Header Section -->
+            <section class="hero">
+                <div class="panel profile-header-card">
+                    <div class="profile-avatar admin-avatar">
+                        <img id="avatar-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                        <i id="avatar-icon" class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h1 data-user-name>Utilisateur</h1>
+                        <div class="info-row">
+                            <span class="label">Rôle :</span>
+                            <span class="badge-role admin" data-user-role-display>Administrateur RH</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">E-mail :</span>
+                            <span data-user-email>utilisateur@entreprise.fr</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Département :</span>
+                            <span data-user-department>Ressources Humaines</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Management Grid -->
+            <section class="profile-grid">
+                <!-- Security Parameters Section -->
+                <section class="panel profile-section">
+                    <h2><i class="fas fa-user-edit"></i> Mes paramètres de sécurité</h2>
+                    <form class="profile-form" id="security-params-form" method="POST">
+                        <div class="form-group">
+                            <label for="profile-pic-input">Photo de profil</label>
+                            <input type="file" id="profile-pic-input" name="avatar" accept="image/*" style="padding: 8px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="display-name">Nom d'affichage</label>
+                            <input type="text" id="display-name" name="displayName" placeholder="Votre nom complet">
+                        </div>
+                        <div class="form-group">
+                            <label for="recovery-email">Email de contact (Récupération)</label>
+                            <input type="email" id="recovery-email" name="recoveryEmail" placeholder="Email alternatif">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">Nouveau mot de passe</label>
+                            <input type="password" id="new-password" name="newPassword" placeholder="••••••••••••">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Confirmer le mot de passe</label>
+                            <input type="password" id="confirm-password" name="confirmPassword" placeholder="••••••••••••">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Mettre à jour mon profil
+                        </button>
+                    </form>
+                </section>
+
+                <!-- Account Security Section -->
+                <section class="panel profile-section">
+                    <h2><i class="fas fa-shield-alt"></i> Sécurité du compte</h2>
+                    <div class="security-info-container">
+                        <!-- Last Password Change -->
+                        <div class="security-item">
+                            <div class="security-icon">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <div class="security-details">
+                                <strong>Dernier changement de mot de passe</strong>
+                                <small id="last-pwd-change">Il y a 45 jours (Recommandé: tous les 90 jours)</small>
+                            </div>
+                        </div>
+
+                        <!-- Last Login -->
+                        <div class="security-item">
+                            <div class="security-icon">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                            <div class="security-details">
+                                <strong>Dernière connexion système</strong>
+                                <small id="last-login">Aujourd'hui à 08:45 depuis IP 192.168.1.42</small>
+                            </div>
+                        </div>
+
+                        <!-- Two-Factor Authentication -->
+                        <div class="security-item">
+                            <div class="security-icon warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="security-details">
+                                <strong>Authentification à double facteur (2FA)</strong>
+                                <small id="twofa-status">Désactivée - <a href="#" data-toggle-2fa>Configurer maintenant</a></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Sessions -->
+                    <div class="sessions-container" style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem;">
+                        <h3><i class="fas fa-history"></i> Sessions actives</h3>
+                        <div id="sessions-list" class="sessions-list">
+                            <p class="loading">Chargement des sessions...</p>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Notifications Area -->
+            <div id="notifications" class="notifications"></div>
+        </main>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+        <script src="../assets/js/profil.js"></script>
+    </body>
+</html>

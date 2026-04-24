@@ -47,6 +47,30 @@ try {
         gp_send_json(403, ['message' => 'Compte sans rôle associé']);
     }
 
+    // Mettre à jour la date de dernière connexion
+    $stmt = $pdo->prepare('UPDATE utilisateur SET derniereconnexion = CURRENT_TIMESTAMP WHERE id_user = :id');
+    $stmt->execute([':id' => $idUser]);
+
+    // Enregistrer la session
+    $ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+    // Si c'est une liste d'IPs (proxy), prendre la première
+    if (strpos($ipAddress, ',') !== false) {
+        $ips = explode(',', $ipAddress);
+        $ipAddress = trim($ips[0]);
+    }
+    
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
+    
+    $stmt = $pdo->prepare('
+        INSERT INTO Session (id_user, adresse_ip, user_agent, active)
+        VALUES (:user_id, :ip, :agent, true)
+    ');
+    $stmt->execute([
+        ':user_id' => $idUser,
+        ':ip' => $ipAddress,
+        ':agent' => $userAgent,
+    ]);
+
     $token = gp_jwt_sign([
         'sub' => (string)$idUser,
         'email' => (string)$user['email'],
