@@ -27,4 +27,12 @@ for migration in db/migrations/*.sql; do
 	fi
 done
 
+# Apply seed data if present
+if [ -f db/seed.sql ]; then
+    echo "Application du seed (db/seed.sql)..."
+    PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f db/seed.sql
+else
+    echo "Aucun fichier de seed (db/seed.sql) trouve."
+fi
+
 echo "✓ Base de données initialisée avec succès!"
