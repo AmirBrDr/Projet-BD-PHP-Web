@@ -6,30 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GreenPulse - Gestion des defis</title>
     <link rel="stylesheet" href="../assets/css/app-shell.css" />
+    <link rel="stylesheet" href="../assets/css/unified-navbar.css" />
     <link rel="stylesheet" href="../assets/css/defis.css" />
     <link rel="stylesheet" href="../assets/css/gestionDefis.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
 
 <body class="app-page" data-required-role="animateur">
+    <nav class="navbar">
+        <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo" />
+        <div class="nav-links">
+            <a href="parametresAnimateur.html">Dashboard</a>
+            <a class="active" href="gestionDefis.html">Gestion des defis</a>
+            <a href="moderation.html">Moderation</a>
+            <a href="statistiques.html">Statistiques</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge animateur">Animateur DD</div>
+            <button type="button" class="logout-btn" data-logout title="Deconnexion"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </nav>
     <main class="app-shell">
-        <header class="app-header">
-            <div class="brand-block">
-                <div class="brand-name">GreenPulse</div>
-                <div class="brand-title">Gestion des defis</div>
-                <div class="brand-subtitle">Vue des defis du mois avec creation/modification en modal</div>
-            </div>
-            <div class="header-actions">
-                <nav class="nav-links" aria-label="Navigation animateur">
-                    <a href="parametresAnimateur.html">Dashboard</a>
-                    <a class="active" href="gestionDefis.html">Gestion des defis</a>
-                    <a href="moderation.html">Moderation</a>
-                    <a href="defis.html">Defis du mois</a>
-                </nav>
-                <div class="role-pill">Role: <strong data-user-role>ANIMATEUR</strong></div>
-                <button class="logout-btn" type="button" data-logout>Deconnexion</button>
-            </div>
-        </header>
-
         <section class="parcours-header manage-header">
             <div>
                 <h2 class="parcours-title">Gestion des defis</h2>

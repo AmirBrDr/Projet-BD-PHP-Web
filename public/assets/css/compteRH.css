@@ -1,0 +1,237 @@
+:root {
+    --bg-color: #1B2D31;
+    --green-light: #94BB39;
+    --green-main: #2A997F;
+    --white: #ffffff;
+    --text-muted: #a0b1b5;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --btn-gray: #e1e1e1;
+    --admin-red: #e74c3c;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--white);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+}
+
+/* --- MAIN CONTAINER --- */
+.admin-main {
+    padding: 40px 5%;
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+/* --- PAGE HEADER (matches dashboardRH / gestionUtilisateurs) --- */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+.admin-header h1 { margin: 0; font-size: 2rem; }
+.admin-header p { color: var(--text-muted); margin-top: 5px; }
+
+.header-btns { display: flex; gap: 15px; }
+.btn-secondary {
+    background: var(--btn-gray);
+    color: #1B2D31;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-secondary:hover { background: white; transform: translateY(-2px); }
+
+/* --- PROFILE HEADER CARD --- */
+.profile-header-card {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 30px;
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.profile-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+.profile-avatar.admin-avatar {
+    background: rgba(231, 76, 60, 0.1);
+    border: 3px solid var(--admin-red);
+    color: var(--admin-red);
+}
+
+/* hide the <img> inside avatar, only show the <i> icon */
+.profile-avatar img { display: none; }
+
+.profile-info h1 { margin: 0 0 10px 0; font-size: 1.8rem; }
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    margin: 4px 0;
+    font-size: 0.95rem;
+}
+.info-row .label { color: var(--text-muted); }
+.info-row span:not(.label):not(.badge-role) { color: var(--white); font-weight: 500; }
+
+/* --- BADGE ROLES --- */
+.badge-role {
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+.badge-role.admin {
+    background: rgba(231, 76, 60, 0.18);
+    color: #ff8a7f;
+    border: 1px solid var(--admin-red);
+}
+
+/* --- PROFILE GRID (two columns like dashboardRH charts) --- */
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+/* --- PANEL / SECTION BOXES --- */
+.profile-section {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.profile-section h2 {
+    font-size: 1.2rem;
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: var(--white);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 15px;
+}
+
+/* --- FORM --- */
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.form-group label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="file"] {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 12px;
+    border-radius: 6px;
+    color: white;
+    font-size: 0.95rem;
+}
+.form-group input:focus { border-color: var(--green-light); outline: none; }
+
+.btn {
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.95rem;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-primary {
+    background: var(--green-main);
+    color: white;
+}
+.btn-primary:hover { background: #238a6e; }
+
+/* --- SECURITY ITEMS --- */
+.security-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.security-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    border-left: 3px solid var(--green-main);
+}
+.security-item:last-of-type { border-left-color: #f39c12; }
+
+.security-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--green-light);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.security-icon.warning { color: #f39c12; }
+
+.security-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.security-details strong { font-size: 0.95rem; }
+.security-details small { color: var(--text-muted); font-size: 0.8rem; }
+.security-details small a { color: #f39c12; text-decoration: underline; font-weight: bold; }
+
+/* --- SESSIONS --- */
+.sessions-container h3 {
+    font-size: 1rem;
+    margin: 0 0 15px 0;
+    color: var(--white);
+}
+.sessions-list { display: flex; flex-direction: column; gap: 10px; }
+.loading { color: var(--text-muted); font-size: 0.9rem; margin: 0; }
+
+/* --- NOTIFICATIONS --- */
+.notifications { position: fixed; bottom: 20px; right: 20px; z-index: 999; }
+
+/* --- RESPONSIVE --- */
+@media (max-width: 900px) {
+    .profile-grid { grid-template-columns: 1fr; }
+    .profile-header-card { flex-direction: column; align-items: flex-start; }
+    .admin-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+}

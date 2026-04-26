@@ -5,29 +5,26 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>GreenPulse - Profil Employe</title>
         <link rel="stylesheet" href="../assets/css/app-shell.css" />
+        <link rel="stylesheet" href="../assets/css/unified-navbar.css" />
         <link rel="stylesheet" href="../assets/css/profil.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     </head>
     <body class="app-page" data-required-role="employe">
+        <nav class="navbar">
+            <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo" />
+            <div class="nav-links">
+                <a href="dashboardE.html">Dashboard</a>
+                <a href="defis.html">Defis</a>
+                <a href="classement.html">Classement</a>
+                <a href="detailEquipe.html?id=current">Equipe</a>
+                <a class="active" href="profil.html">Mon profil</a>
+            </div>
+            <div class="nav-right">
+                <div class="role-badge employe">Employe</div>
+                <button type="button" class="logout-btn" data-logout title="Deconnexion"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </nav>
         <main class="app-shell employee-layout">
-            <header class="app-header">
-                <div class="brand-block">
-                    <div class="brand-name">GreenPulse</div>
-                    <div class="brand-title">Mon profil</div>
-                    <div class="brand-subtitle">Statistiques, badges et historique</div>
-                </div>
-                <nav class="employee-tabs" aria-label="Navigation employe">
-                    <a class="employee-tab" href="dashboardE.html">Dashboard</a>
-                    <a class="employee-tab" href="defis.html">Defis</a>
-                    <a class="employee-tab" href="classement.html">Classement</a>
-                    <a class="employee-tab" href="detailEquipe.html?id=current">Equipe</a>
-                    <a class="employee-tab is-active" href="profil.html">Mon profil</a>
-                </nav>
-                <div class="header-actions">
-                    <div class="role-pill">Role: <strong data-user-role>EMPLOYE</strong></div>
-                    <button class="logout-btn" type="button" data-logout>Deconnexion</button>
-                </div>
-            </header>
-
             <!-- Profile hero -->
             <section class="panel profile-hero">
                 <div class="avatar-block">
