@@ -1,122 +1,83 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - Détail du défi</title>
-    <link rel="stylesheet" href="../assets/css/app-shell.css">
-    <link rel="stylesheet" href="../assets/css/detailDefi.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body class="app-page" data-required-role="animateur">
-
-    <div class="app-shell">
-
-        <!-- HEADER -->
-        <header class="app-header">
-            <div class="brand-block">
-                <div class="brand-left">
-                    <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo">
-                    <div>
-                        <span class="brand-name">GreenPulse</span>
-                        <span class="brand-title">Détail du défi</span>
-                    </div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GreenPulse - Detail Defi</title>
+        <link rel="stylesheet" href="../assets/css/app-shell.css" />
+        <link rel="stylesheet" href="../assets/css/detailDefi.css" />
+    </head>
+    <body class="app-page" data-required-role="employe">
+        <main class="app-shell employee-layout">
+            <header class="app-header">
+                <div class="brand-block">
+                    <div class="brand-name">GreenPulse</div>
+                    <div class="brand-title">Detail du defi</div>
+                    <div class="brand-subtitle">Validez vos actions et suivez les retours</div>
                 </div>
-            </div>
-            <div class="header-actions">
-                <div class="nav-links">
-                    <a href="statistiques.html">Statistiques</a>
-                    <a href="defis.html">Défis du mois</a>
-                    <a href="moderation.html">Modération</a>
-                    <a href="parametresAnimateur.html">Paramètres</a>
+                <nav class="employee-tabs" aria-label="Navigation employe">
+                    <a class="employee-tab" href="dashboardE.html">Dashboard</a>
+                    <a class="employee-tab is-active" href="defis.html">Defis</a>
+                    <a class="employee-tab" href="classement.html">Classement</a>
+                    <a class="employee-tab" href="detailEquipe.html?id=current">Equipe</a>
+                    <a class="employee-tab" href="profil.html">Mon profil</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="role-pill">Role: <strong data-user-role>EMPLOYE</strong></div>
+                    <button class="logout-btn" type="button" data-logout>Deconnexion</button>
                 </div>
-                <span class="role-pill">Rôle : <strong>Animateur DD</strong></span>
-                <button class="logout-btn" data-logout title="Déconnexion">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-            </div>
-        </header>
+            </header>
 
-        <!-- BOUTON RETOUR -->
-        <div class="back-bar">
-            <a href="defis.html" class="btn-back">
-                <i class="fas fa-arrow-left"></i> Retour aux défis
-            </a>
-        </div>
+            <a class="back-link" href="defis.html">Retour aux defis</a>
 
-        <!-- CHARGEMENT -->
-        <div class="loading-state" id="loading">
-            <i class="fas fa-spinner fa-spin"></i> Chargement...
-        </div>
-
-        <!-- CONTENU PRINCIPAL -->
-        <div id="contenu" class="hidden" style="display:flex; flex-direction:column; gap:18px;">
-
-
-            <!-- HERO DU DÉFI -->
-            <section class="defi-hero">
-                <div class="defi-hero-left">
-                    <span class="defi-theme-badge" id="hero-theme"></span>
-                    <h1 class="defi-nom" id="hero-nom"></h1>
-                    <p class="defi-desc" id="hero-desc"></p>
-                    <div class="defi-stats-row">
-                        <div class="stat-pill">
-                            <i class="fas fa-star"></i>
-                            <span id="hero-pts"></span> pts
-                        </div>
-                        <div class="stat-pill">
-                            <i class="fas fa-leaf"></i>
-                            <span id="hero-co2"></span> kg CO₂
-                        </div>
-                        <div class="stat-pill">
-                            <i class="fas fa-layer-group"></i>
-                            Niveau <span id="hero-niveau"></span>
-                        </div>
-                        <div class="stat-pill">
-                            <i class="fas fa-users"></i>
-                            <span id="hero-participants"></span> participant(s)
-                        </div>
-                    </div>
+            <section class="panel challenge-head" data-challenge-head>
+                <p class="eyebrow" data-challenge-theme>Theme du mois</p>
+                <h1 data-challenge-title>Defi</h1>
+                <p data-challenge-description>Description du defi.</p>
+                <div class="head-metrics">
+                    <span class="metric-chip" data-challenge-points>+0 pts</span>
+                    <span class="metric-chip" data-challenge-co2>0 kg CO2</span>
+                    <span class="metric-chip" data-challenge-progress>0% equipe</span>
                 </div>
             </section>
 
-            <!-- GRILLE : ACTIONS + FORUM -->
-            <div class="detail-grid">
+            <section class="detail-grid">
+                <article class="panel submission-panel">
+                    <h2>Valider une action</h2>
+                    <form class="submission-form" data-submission-form>
+                        <div class="action-options" data-action-options></div>
+                        <label class="input-label" for="proofText">Commentaire de preuve</label>
+                        <textarea
+                            id="proofText"
+                            name="proofText"
+                            rows="4"
+                            maxlength="300"
+                            placeholder="Decrivez votre action du jour..."
+                            required
+                        ></textarea>
+                        <button class="submit-btn" type="submit">Soumettre pour validation</button>
+                    </form>
+                    <p class="feedback-msg" data-form-feedback></p>
+                </article>
 
-                <!-- ACTIONS DU DÉFI -->
-                <section class="panel actions-panel">
-                    <h2 class="panel-title">
-                        <i class="fas fa-tasks"></i> Actions du défi
-                    </h2>
-                    <div id="actions-list" class="actions-list"></div>
-                </section>
+                <aside class="panel side-panel">
+                    <h2>Forum du defi</h2>
+                    <ul class="forum-list" data-forum-list></ul>
+                    <form class="forum-form" data-forum-form>
+                        <textarea name="message" rows="3" maxlength="500" placeholder="Partagez un conseil..."></textarea>
+                        <button class="submit-btn" type="submit">Publier</button>
+                    </form>
+                    <p class="feedback-msg" data-forum-feedback></p>
+                </aside>
+            </section>
 
-                <!-- FORUM -->
-                <section class="panel forum-panel">
-                    <h2 class="panel-title">
-                        <i class="fas fa-comments"></i> Forum du défi
-                    </h2>
-                    <div id="forum-messages" class="forum-messages"></div>
-                    <div id="forum-vide" class="forum-vide hidden">
-                        <i class="fas fa-comment-slash"></i>
-                        <p>Aucun message pour l'instant.</p>
-                    </div>
-                </section>
+            <section class="panel history-panel">
+                <h2>Mes dernieres soumissions</h2>
+                <ul class="history-list" data-history-list></ul>
+            </section>
+        </main>
 
-            </div>
-
-        </div>
-
-        <!-- ERREUR -->
-        <div id="erreur" class="erreur-state hidden">
-            <i class="fas fa-exclamation-triangle"></i>
-            <p id="erreur-msg"></p>
-            <a href="defis.html" class="btn-back">Retour aux défis</a>
-        </div>
-
-    </div>
-
-    <script src="../assets/js/app-shell.js" defer></script>
-    <script src="../assets/js/detailDefi.js" defer></script>
-</body>
+        <script src="../asse../app-shell.js" defer></script>
+        <script src="../asse../detailDefi.js" defer></script>
+    </body>
 </html>

@@ -1,74 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - Défis du mois</title>
-    <link rel="stylesheet" href="../assets/css/app-shell.css">
-    <link rel="stylesheet" href="../assets/css/defis.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body class="app-page" data-required-role="animateur">
-
-    <div class="app-shell">
-
-    <header class="app-header">
-        <div class="brand-block">
-            <div class="brand-left">
-                <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo">
-                <div>
-                    <span class="brand-name">GreenPulse</span>
-                    <span class="brand-title">Détail du défi</span>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GreenPulse - Defis Employe</title>
+        <link rel="stylesheet" href="../assets/css/app-shell.css" />
+        <link rel="stylesheet" href="../assets/css/defis.css" />
+    </head>
+    <body class="app-page" data-required-role="employe">
+        <main class="app-shell employee-layout">
+            <header class="app-header">
+                <div class="brand-block">
+                    <div class="brand-name">GreenPulse</div>
+                    <div class="brand-title">Parcours des defis</div>
+                    <div class="brand-subtitle" data-theme-subtitle>Chargement...</div>
                 </div>
-            </div>
-        </div>
-        <div class="header-actions">
-            <div class="nav-links">
-                <a href="statistiques.html">Statistiques</a>
-                <a href="defis.html">Défis du mois</a>
-                <a href="moderation.html">Modération</a>
-                <a href="parametresAnimateur.html">Paramètres</a>
-            </div>
-            <span class="role-pill">Rôle : <strong>Animateur DD</strong></span>
-            <button class="logout-btn" data-logout title="Déconnexion">
-                <i class="fas fa-sign-out-alt"></i>
-            </button>
-        </div>
-    </header>
+                <nav class="employee-tabs" aria-label="Navigation employe">
+                    <a class="employee-tab" href="dashboardE.html">Dashboard</a>
+                    <a class="employee-tab is-active" href="defis.html">Defis</a>
+                    <a class="employee-tab" href="classement.html">Classement</a>
+                    <a class="employee-tab" href="detailEquipe.html?id=current">Equipe</a>
+                    <a class="employee-tab" href="profil.html">Mon profil</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="role-pill">Role: <strong data-user-role>EMPLOYE</strong></div>
+                    <button class="logout-btn" type="button" data-logout>Deconnexion</button>
+                </div>
+            </header>
 
-        <!-- TITRE SECTION -->
-        <section class="parcours-header">
-            <h2 class="parcours-title">
-                <i class="fas fa-leaf"></i> Le Parcours Éco-Responsable
-            </h2>
-            <p class="parcours-subtitle">
-                Progressez étape par étape. Validez un défi pour débloquer le suivant.
-            </p>
-        </section>
+            <section class="panel page-intro">
+                <p class="eyebrow">Progression collective</p>
+                <h1>Le parcours eco-responsable de votre equipe</h1>
+                <p>
+                    Debloquez chaque etape dans l'ordre. Chaque validation individuelle fait progresser
+                    l'equipe complete.
+                </p>
+                <div class="team-progress-banner" data-team-progress></div>
+                <div class="filter-row" role="group" aria-label="Filtres des defis">
+                    <button class="filter-btn is-active" type="button" data-filter="all">Tous</button>
+                    <button class="filter-btn" type="button" data-filter="active">En cours</button>
+                    <button class="filter-btn" type="button" data-filter="completed">Termines</button>
+                    <button class="filter-btn" type="button" data-filter="locked">Verrouilles</button>
+                </div>
+            </section>
 
-        <!-- FILTRE THÉMATIQUE -->
-        <div class="filter-bar">
-            <select id="filtreTheme">
-                <option value="all">Toutes les thématiques</option>
-            </select>
-        </div>
-
-        <!-- LISTE DES DÉFIS -->
-        <main class="parcours-list" id="parcours-list">
-            <div class="loading-state">
-                <i class="fas fa-spinner fa-spin"></i> Chargement des défis...
-            </div>
+            <section class="timeline-container panel" aria-label="Timeline des defis">
+                <div class="timeline-list" data-timeline-list>
+                    <article class="challenge-step is-loading">Chargement des etapes...</article>
+                </div>
+            </section>
         </main>
 
-        <!-- ÉTAT VIDE -->
-        <div class="empty-state hidden" id="empty-state">
-            <i class="fas fa-seedling"></i>
-            <p>Aucun défi programmé ce mois-ci.</p>
-        </div>
-
-    </div>
-
-    <script src="../assets/js/app-shell.js" defer></script>
-    <script src="../assets/js/defis.js" defer></script>
-</body>
+        <script src="../asse../app-shell.js" defer></script>
+        <script src="../asse../defis.js" defer></script>
+    </body>
 </html>

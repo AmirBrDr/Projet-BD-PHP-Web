@@ -1,257 +1,98 @@
+// Fichier: public/assets/js/Employe/dashboardE.js - Logique frontend et interactions.
 (() => {
-    const token = localStorage.getItem("gp_token") || "";
+    const API_BASE = '/api';
+    const token = () => localStorage.getItem('gp_token');
 
-    const elements = {
-        kpiTotalReplies: document.getElementById("kpi-total-replies"),
-        kpiPendingReplies: document.getElementById("kpi-pending-replies"),
-        kpiApprovedReplies: document.getElementById("kpi-approved-replies"),
-        replyForm: document.getElementById("reply-form"),
-        replyChallenge: document.getElementById("reply-challenge"),
-        replyText: document.getElementById("reply-text"),
-        replyFormAlert: document.getElementById("reply-form-alert"),
-        approvedRepliesList: document.getElementById("approved-replies-list"),
-        allRepliesList: document.getElementById("all-replies-list"),
-        dashboardAlert: document.getElementById("dashboard-employee-alert"),
-    };
-
-    function escapeHtml(value) {
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/\"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+    async function apiGet(path) {
+        const res = await fetch(API_BASE + path, {
+            headers: { 'Authorization': 'Bearer ' + token() }
+        });
+        if (!res.ok) throw new Error((await res.json()).message || res.status);
+        return res.json();
     }
 
-    function setFormAlert(message, type) {
-        if (!elements.replyFormAlert) {
-            return;
-        }
-
-        if (!message) {
-            elements.replyFormAlert.hidden = true;
-            elements.replyFormAlert.className = "inline-alert";
-            elements.replyFormAlert.textContent = "";
-            return;
-        }
-
-        elements.replyFormAlert.hidden = false;
-        elements.replyFormAlert.className = `inline-alert ${type || ""}`.trim();
-        elements.replyFormAlert.textContent = message;
+    function setText(selector, value) {
+        const el = document.querySelector(selector);
+        if (el) el.textContent = value;
     }
 
-    function setDashboardAlert(message) {
-        if (!elements.dashboardAlert) {
-            return;
-        }
-
-        if (!message) {
-            elements.dashboardAlert.textContent = "";
-            elements.dashboardAlert.classList.remove("error");
-            return;
-        }
-
-        elements.dashboardAlert.textContent = message;
-        elements.dashboardAlert.classList.add("error");
+    function renderList(selector, items, formatter) {
+        const host = document.querySelector(selector);
+        if (!host) return;
+        host.innerHTML = items.length ? items.map(formatter).join('') :
+            '<li style="color:var(--shell-muted);font-style:italic">Aucun élément.</li>';
     }
 
-    async function apiRequest(action, options = {}) {
-        const params = new URLSearchParams({ action, ...(options.params || {}) });
-        const url = `/api/modules/employee/?${params.toString()}`;
-        const requestOptions = {
-            method: options.method || "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
+    function initChart(co2Mensuel) {
+        const canvas = document.getElementById('co2Chart');
+        if (!canvas || !window.Chart) return;
+        new window.Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: co2Mensuel.map(r => r.mois),
+                datasets: [{
+                    label: 'kg CO₂ évités',
+                    data: co2Mensuel.map(r => r.co2),
+                    borderColor: '#94bb39',
+                    backgroundColor: 'rgba(148, 187, 57, 0.15)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#94bb39',
+                }]
             },
-        };
-
-        if (options.body) {
-            requestOptions.headers["Content-Type"] = "application/json";
-            requestOptions.body = JSON.stringify(options.body);
-        }
-
-        const response = await fetch(url, requestOptions);
-
-        let data = null;
-        try {
-            data = await response.json();
-        } catch (_error) {
-            data = null;
-        }
-
-        if (!response.ok) {
-            throw new Error(data?.message || `Erreur HTTP ${response.status}`);
-        }
-
-        return data;
-    }
-
-    function statusLabel(status) {
-        const labels = {
-            pending: "En attente",
-            approved: "Approuvee",
-            rejected: "Refusee",
-        };
-        return labels[status] || status || "-";
-    }
-
-    function formatDate(isoString) {
-        if (!isoString) {
-            return "";
-        }
-        const date = new Date(isoString);
-        if (Number.isNaN(date.getTime())) {
-            return "";
-        }
-        return new Intl.DateTimeFormat("fr-FR", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        }).format(date);
-    }
-
-    function renderChallenges(challenges) {
-        if (!elements.replyChallenge) {
-            return;
-        }
-
-        elements.replyChallenge.innerHTML = "";
-
-        if (!challenges || challenges.length === 0) {
-            const option = document.createElement("option");
-            option.value = "";
-            option.textContent = "Aucun defi disponible";
-            elements.replyChallenge.appendChild(option);
-            return;
-        }
-
-        challenges.forEach((challenge) => {
-            const option = document.createElement("option");
-            option.value = String(challenge.id_defi);
-            option.textContent = `${challenge.nomdefi} - ${challenge.nomtheme || "Sans theme"}`;
-            elements.replyChallenge.appendChild(option);
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(255,255,255,0.07)' },
+                        ticks: { color: 'rgba(255,255,255,0.55)' },
+                        beginAtZero: true,
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: 'rgba(255,255,255,0.55)' },
+                    }
+                }
+            }
         });
     }
 
-    function renderReplies(listElement, replies, emptyMessage) {
-        if (!listElement) {
-            return;
-        }
-
-        if (!replies || replies.length === 0) {
-            listElement.innerHTML = `<div class="empty-state">${escapeHtml(emptyMessage)}</div>`;
-            return;
-        }
-
-        listElement.innerHTML = replies
-            .map((reply) => {
-                const statusClass = `status-${reply.statut_reponse || "pending"}`;
-                return `
-                    <article class="reply-card">
-                        <h3>${escapeHtml(reply.nomdefi || "Defi")}</h3>
-                        <div class="reply-meta">
-                            <span class="chip">Theme: ${escapeHtml(reply.nomtheme || "-")}</span>
-                            <span class="chip ${statusClass}">${escapeHtml(statusLabel(reply.statut_reponse))}</span>
-                            <span class="chip">Date: ${escapeHtml(formatDate(reply.date_reponse))}</span>
-                        </div>
-                        <p class="reply-content">${escapeHtml(reply.reponse_text || "")}</p>
-                        ${reply.commentaire_animateur ? `<p class="comment-content">Commentaire animateur: ${escapeHtml(reply.commentaire_animateur)}</p>` : ""}
-                    </article>
-                `;
-            })
-            .join("");
-    }
-
-    async function loadChallenges() {
-        const response = await apiRequest("challenges");
-        renderChallenges(response?.data || []);
-    }
-
-    async function loadRepliesAndSummary() {
-        const [summaryRes, repliesRes] = await Promise.all([
-            apiRequest("dashboard_summary"),
-            apiRequest("my_replies"),
-        ]);
-
-        const summary = summaryRes?.data?.summary || {};
-        const approvedFromSummary = summaryRes?.data?.approved || [];
-        const allReplies = repliesRes?.data || [];
-
-        if (elements.kpiTotalReplies) {
-            elements.kpiTotalReplies.textContent = String(summary.total_replies ?? 0);
-        }
-        if (elements.kpiPendingReplies) {
-            elements.kpiPendingReplies.textContent = String(summary.pending_count ?? 0);
-        }
-        if (elements.kpiApprovedReplies) {
-            elements.kpiApprovedReplies.textContent = String(summary.approved_count ?? 0);
-        }
-
-        const approvedWithStatus = approvedFromSummary.map((item) => ({
-            ...item,
-            statut_reponse: "approved",
-            nomtheme: item.nomtheme || "-",
-        }));
-
-        renderReplies(elements.approvedRepliesList, approvedWithStatus, "Aucune reponse approuvee pour le moment.");
-        renderReplies(elements.allRepliesList, allReplies, "Aucune reponse envoyee.");
-    }
-
-    async function submitReply(event) {
-        event.preventDefault();
-        setFormAlert("", "");
-        setDashboardAlert("");
-
-        const idDefi = Number(elements.replyChallenge?.value || 0);
-        const reponse = elements.replyText?.value?.trim() || "";
-
-        if (idDefi <= 0) {
-            setFormAlert("Selectionnez un defi.", "error");
-            return;
-        }
-        if (!reponse) {
-            setFormAlert("Votre reponse est obligatoire.", "error");
-            return;
-        }
-
+    document.addEventListener('DOMContentLoaded', async () => {
         try {
-            await apiRequest("reply_create", {
-                method: "POST",
-                body: {
-                    idDefi,
-                    reponse,
-                },
-            });
+            const data = await apiGet('/modules/employee/dashboard.php');
 
-            if (elements.replyText) {
-                elements.replyText.value = "";
+            setText('[data-stat-points]', data.stats.points.toLocaleString('fr-FR'));
+            setText('[data-stat-co2]', data.stats.co2 + ' kg');
+            setText('[data-stat-badges]', String(data.stats.badges));
+
+            if (data.team) {
+                setText('[data-team-name]', data.team.nom);
+                setText('[data-team-rank]', `Classement : ${data.team.rang}e`);
+                const detailLink = document.querySelector('a[href*="detailEquipe"]');
+                if (detailLink) detailLink.href = `detailEquipe.html?id=${data.team.id}`;
             }
 
-            setFormAlert("Reponse envoyee a l'animateur avec succes.", "success");
-            await loadRepliesAndSummary();
-        } catch (error) {
-            setFormAlert(error?.message || "Envoi impossible.", "error");
+            renderList('[data-challenge-list]', data.challenges, (d) => {
+                const icon = d.fait ? '✓' : '○';
+                const cls  = d.fait ? 'task-item is-done' : 'task-item';
+                return `<li class="${cls}">
+                    <strong>${icon} ${d.nom}</strong>
+                    <span style="float:right;color:#94bb39">${d.points} pts</span>
+                </li>`;
+            });
+
+            renderList('[data-notification-list]', data.notifications, (n) => {
+                return `<li class="feed-item">
+                    <strong>${n.titre}</strong><br />
+                    <small>${new Date(n.date).toLocaleDateString('fr-FR')}</small>
+                </li>`;
+            });
+
+            initChart(data.co2_mensuel);
+        } catch (err) {
+            console.error('Erreur dashboard:', err);
         }
-    }
-
-    async function init() {
-        if (!token) {
-            setDashboardAlert("Session invalide. Merci de vous reconnecter.");
-            return;
-        }
-
-        elements.replyForm?.addEventListener("submit", submitReply);
-
-        try {
-            await loadChallenges();
-            await loadRepliesAndSummary();
-            setDashboardAlert("");
-        } catch (error) {
-            setDashboardAlert(error?.message || "Impossible de charger le dashboard employe.");
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", init);
+    });
 })();

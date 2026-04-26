@@ -1,16 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - classement</title>
-    <link rel="stylesheet" href="../assets/css/classement.css">
-</head>
-<body>
-    <div class="container">
-        <h1>classement</h1>
-        <p>Page en développement...</p>
-    </div>
-    <script src="../assets/js/classement.js"></script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GreenPulse - Classement Equipes</title>
+        <link rel="stylesheet" href="../assets/css/app-shell.css" />
+        <link rel="stylesheet" href="../assets/css/classement.css" />
+    </head>
+    <body class="app-page" data-required-role="employe">
+        <main class="app-shell employee-layout">
+            <header class="app-header">
+                <div class="brand-block">
+                    <div class="brand-name">GreenPulse</div>
+                    <div class="brand-title">Classement des equipes</div>
+                    <div class="brand-subtitle">Podium global et suivi par indicateur</div>
+                </div>
+                <nav class="employee-tabs" aria-label="Navigation employe">
+                    <a class="employee-tab" href="dashboardE.html">Dashboard</a>
+                    <a class="employee-tab" href="defis.html">Defis</a>
+                    <a class="employee-tab is-active" href="classement.html">Classement</a>
+                    <a class="employee-tab" href="detailEquipe.html?id=current">Equipe</a>
+                    <a class="employee-tab" href="profil.html">Mon profil</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="role-pill">Role: <strong data-user-role>EMPLOYE</strong></div>
+                    <button class="logout-btn" type="button" data-logout>Deconnexion</button>
+                </div>
+            </header>
+
+            <section class="panel ranking-header">
+                <h1>Classement global</h1>
+                <p>Points cumules et CO2 evite par equipe.</p>
+            </section>
+
+            <section class="podium" data-podium></section>
+
+            <section class="panel list-panel">
+                <div class="list-head">
+                    <h2>Classement complet</h2>
+                    <span class="teams-count" data-teams-count>0 equipes</span>
+                </div>
+                <ul class="team-list" data-team-list>
+                    <li class="team-row is-loading">Chargement du classement...</li>
+                </ul>
+            </section>
+        </main>
+
+        <script src="../asse../app-shell.js" defer></script>
+        <script src="../asse../classement.js" defer></script>
+    </body>
 </html>

@@ -1,119 +1,128 @@
-// ============================================================
-// Fichier: public/assets/js/defis.js
-// Logique de la page Défis du mois (Animateur)
-// ============================================================
+// Fichier: public/assets/js/Employe/defis.js - Logique frontend et interactions.
+(() => {
+    const API_BASE = '/api';
+    const token = () => localStorage.getItem('gp_token');
 
-const API_URL = '/api/modules/challenges/?action=list_month';
-
-// --- Éléments DOM ---
-const parcoursEl  = document.getElementById('parcours-list');
-const emptyEl     = document.getElementById('empty-state');
-const filtreEl    = document.getElementById('filtreTheme');
-const moisLabelEl = document.getElementById('mois-label');
-
-let tousLesDefis = [];
-
-// --- Affiche le mois courant dans le header ---
-function afficherMois() {
-    const now = new Date();
-    const label = now.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
-    if (moisLabelEl) {
-        moisLabelEl.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    async function apiGet(path) {
+        const res = await fetch(API_BASE + path, {
+            headers: { 'Authorization': 'Bearer ' + token() }
+        });
+        if (!res.ok) throw new Error((await res.json()).message || res.status);
+        return res.json();
     }
-}
 
-// --- Construit une carte défi ---
-function creerCarteDefi(defi, index) {
-    const card = document.createElement('div');
-    card.className = `defi-card ${index === 0 ? 'actif' : ''}`;
-    card.dataset.theme = defi.nomtheme || '';
+    let allDefis = [];
+    let currentFilter = 'all';
 
-    card.innerHTML = `
-        <div class="defi-ordre">${defi.ordre}</div>
-        <div class="defi-body">
-            <span class="defi-theme-badge">
-                <i class="fas fa-tag"></i> ${defi.nomtheme ?? 'Thématique'}
-            </span>
-            <h3 class="defi-nom">${defi.nomdefi}</h3>
-            <p class="defi-desc">${defi.descriptiondefi ?? 'Aucune description.'}</p>
-            <div class="defi-meta">
-                <span><i class="fas fa-star"></i> ${defi.nbpointsdefi} pts</span>
-                <span><i class="fas fa-leaf"></i> ${defi.nbco2defi} kg CO₂</span>
-                <span><i class="fas fa-layer-group"></i> Niveau ${defi.niveaudefi}</span>
+    function filtered() {
+        if (currentFilter === 'all') return allDefis;
+        return allDefis.filter(d => d.statut === currentFilter);
+    }
+
+    function bulletLabel(defi) {
+        if (defi.statut === 'completed') return '✓';
+        if (defi.statut === 'locked') return '🔒';
+        return String(defi.ordre);
+    }
+
+    function actionButton(defi) {
+        if (defi.statut === 'locked') {
+            return '<button class="step-button" type="button" disabled>Bloqué par l\'équipe</button>';
+        }
+        const label = defi.statut === 'completed' ? 'Voir le défi' : 'Contribuer à mon équipe';
+        return `<a class="step-link" href="detailDefi.html?id=${defi.id}">${label}</a>`;
+    }
+
+    function renderTeamProgress(data) {
+        const host = document.querySelector('[data-team-progress]');
+        if (!host) return;
+        const team = data.team;
+        const progress = data.progress || { completed: 0, total: 0 };
+        if (!team) {
+            host.innerHTML = '<span class="progress-pill">Aucune équipe détectée</span>';
+            return;
+        }
+
+        const completion = progress.total > 0 ? Math.round((progress.completed / progress.total) * 100) : 0;
+        host.innerHTML = `
+            <div class="progress-card">
+                <strong>${team.nom}</strong>
+                <span>${progress.completed}/${progress.total} défis terminés</span>
             </div>
-        </div>
-        <div class="defi-action">
-            <a href="detailDefi.html?id=${defi.id_defi}" class="btn-detail">
-                <i class="fas fa-arrow-right"></i> Voir le défi
-            </a>
-            <span class="participants-count">
-                <i class="fas fa-users"></i> ${defi.nb_participants} participant(s)
-            </span>
-        </div>
-    `;
-
-    return card;
-}
-
-// --- Affiche les défis dans la page ---
-function afficherDefis(defis) {
-    parcoursEl.innerHTML = '';
-
-    if (defis.length === 0) {
-        emptyEl.classList.remove('hidden');
-        return;
+            <div class="progress-card">
+                <strong>${team.membres} membres</strong>
+                <span>${completion}% du mois complété</span>
+            </div>`;
     }
 
-    emptyEl.classList.add('hidden');
-    defis.forEach((defi, index) => {
-        parcoursEl.appendChild(creerCarteDefi(defi, index));
+    function renderMemberChips(progress) {
+        const validated = progress.validated_names || [];
+        const pending   = progress.pending_names   || [];
+        if (!validated.length && !pending.length) return '';
+        return `<div class="step-members">
+            ${validated.map(n => `<span class="member-chip validated">✓ ${n}</span>`).join('')}
+            ${pending.map(n => `<span class="member-chip pending">⏳ ${n}</span>`).join('')}
+        </div>`;
+    }
+
+    function renderTimeline() {
+        const host = document.querySelector('[data-timeline-list]');
+        if (!host) return;
+        const list = filtered();
+        if (!list.length) {
+            host.innerHTML = '<article class="challenge-step"><div class="step-card"><p>Aucun défi pour ce filtre.</p></div></article>';
+            return;
+        }
+        host.innerHTML = list.map(d => `
+            <article class="challenge-step ${d.statut}">
+                <div class="step-bullet">${bulletLabel(d)}</div>
+                <div class="step-card">
+                    <div class="step-head">
+                        <h2 class="step-title">${d.nom}</h2>
+                        <span class="step-points">+${d.points} pts</span>
+                    </div>
+                    <p class="step-description">${d.description || ''}</p>
+                    <p class="step-progress">Niveau ${d.niveau} · ${d.co2} kg CO₂ · ${d.progress.validated_members}/${d.progress.total_members} membres validés</p>
+                    <div class="step-meta">
+                        <span class="theme-tag">${d.theme?.nom || 'Thème du mois'}</span>
+                        <span class="step-status">${d.statut === 'completed' ? 'Validé par l\'équipe' : d.statut === 'locked' ? 'Verrouillé' : 'Disponible'}</span>
+                    </div>
+                    ${renderMemberChips(d.progress)}
+                    ${actionButton(d)}
+                </div>
+            </article>`).join('');
+    }
+
+    function bindFilters() {
+        document.querySelectorAll('[data-filter]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentFilter = btn.dataset.filter || 'all';
+                document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('is-active'));
+                btn.classList.add('is-active');
+                renderTimeline();
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        bindFilters();
+        try {
+            const data = await apiGet('/modules/employee/challenges.php');
+
+            if (data.theme) {
+                const subtitle = document.querySelector('[data-theme-subtitle]');
+                if (subtitle) subtitle.textContent = `Thème du mois : ${data.theme.nom}`;
+                const desc = document.querySelector('[data-theme-desc]');
+                if (desc) desc.textContent = data.theme.description || '';
+            }
+
+            allDefis = data.defis;
+            renderTeamProgress(data);
+            renderTimeline();
+        } catch (err) {
+            console.error('Erreur défis:', err);
+            const host = document.querySelector('[data-timeline-list]');
+            if (host) host.innerHTML = '<article class="challenge-step is-loading">Impossible de charger les défis.</article>';
+        }
     });
-}
-
-// --- Peuple le filtre thématique ---
-function peuplerFiltreTheme(defis) {
-    const themes = [...new Set(defis.map(d => d.nomtheme).filter(Boolean))];
-    themes.forEach(theme => {
-        const opt = document.createElement('option');
-        opt.value = theme;
-        opt.textContent = theme;
-        filtreEl.appendChild(opt);
-    });
-}
-
-// --- Filtre par thématique ---
-filtreEl.addEventListener('change', () => {
-    const val = filtreEl.value;
-    if (val === 'all') {
-        afficherDefis(tousLesDefis);
-    } else {
-        afficherDefis(tousLesDefis.filter(d => d.nomtheme === val));
-    }
-});
-
-// --- Charge les défis depuis l'API ---
-async function chargerDefis() {
-    try {
-        const res = await fetch(API_URL);
-        if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
-
-        const json = await res.json();
-        tousLesDefis = json.data ?? [];
-
-        peuplerFiltreTheme(tousLesDefis);
-        afficherDefis(tousLesDefis);
-
-    } catch (err) {
-        parcoursEl.innerHTML = `
-            <div class="loading-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                Impossible de charger les défis : ${err.message}
-            </div>
-        `;
-        console.error('Erreur chargement défis :', err);
-    }
-}
-
-// --- Init ---
-afficherMois();
-chargerDefis();
+})();

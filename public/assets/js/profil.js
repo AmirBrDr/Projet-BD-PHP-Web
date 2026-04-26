@@ -1,524 +1,300 @@
-/**
- * File: public/assets/js/profil.js
- * Profile page management - handles user profile, security settings, and password changes
- */
+// Fichier: public/assets/js/Employe/profilE.js - Logique frontend et interactions.
+(() => {
+    const API_BASE = '/api';
+    const token = () => localStorage.getItem('gp_token');
 
-const API_BASE = '/api';
-const STORAGE_KEY = 'gp_token';
-
-class ProfileManager {
-    constructor() {
-        this.userId = null;
-        this.userRole = null;
-        this.token = localStorage.getItem(STORAGE_KEY);
-        this.init();
+    async function parseApiResponse(res) {
+        const contentType = (res.headers.get('content-type') || '').toLowerCase();
+        const text = await res.text();
+        if (!text) return null;
+        if (!contentType.includes('application/json')) {
+            throw new Error('Réponse API non JSON: ' + text.slice(0, 120));
+        }
+        try {
+            return JSON.parse(text);
+        } catch (_) {
+            throw new Error('Format JSON invalide');
+        }
     }
 
-    init() {
-        if (!this.token) {
-            this.redirect('/');
+    async function apiGet(path) {
+        const res = await fetch(API_BASE + path, {
+            headers: { 'Authorization': 'Bearer ' + token() }
+        });
+        const data = await parseApiResponse(res);
+        if (!res.ok) throw new Error(data?.message || 'HTTP ' + res.status);
+        return data;
+    }
+
+    async function apiPost(path, payload) {
+        const res = await fetch(API_BASE + path, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
+            body: JSON.stringify(payload),
+        });
+        const data = await parseApiResponse(res);
+        if (!res.ok) throw new Error(data?.message || 'HTTP ' + res.status);
+        return data;
+    }
+
+    // ── Helpers ──
+
+    function setInitials(prenom, nom) {
+        const el = document.querySelector('[data-user-initials]');
+        if (!el) return;
+        el.textContent = ((prenom || 'G').charAt(0) + (nom || 'P').charAt(0)).toUpperCase();
+    }
+
+    function renderStats(stats) {
+        const host = document.querySelector('[data-profile-stats]');
+        if (!host) return;
+        const items = [
+            { label: 'Points personnels', value: (stats.points || 0).toLocaleString('fr-FR') },
+            { label: 'CO₂ évité', value: (stats.co2 || 0) + ' kg' },
+            { label: 'Classement individuel', value: (stats.rang_perso || 0) + 'e' },
+        ];
+        host.innerHTML = items.map(item => `
+            <article class="stat-card panel">
+                <div class="stat-label">${item.label}</div>
+                <div class="stat-value">${item.value}</div>
+            </article>`).join('');
+    }
+
+    function renderBadges(badges) {
+        const host = document.querySelector('[data-badge-list]');
+        if (!host) return;
+        if (!badges.length) {
+            host.innerHTML = '<li class="badge-item" style="color:var(--shell-muted)">Aucun badge encore. Complétez des défis !</li>';
             return;
         }
-
-        this.setupEventListeners();
-        this.loadProfile();
-        this.loadSecurityInfo();
-        this.loadSessions();
+        host.innerHTML = badges.map(b => `
+            <li class="badge-item">
+                <strong>${b.nom}</strong>
+                <small>${new Date(b.date).toLocaleDateString('fr-FR')}</small>
+            </li>`).join('');
     }
 
-    setupEventListeners() {
-        // Security parameters form
-        const securityForm = document.getElementById('security-params-form');
-        if (securityForm) {
-            securityForm.addEventListener('submit', (e) => this.handleSecurityParamsSubmit(e));
-        }
-
-        // Profile picture upload
-        const profilePicInput = document.getElementById('profile-pic-input');
-        if (profilePicInput) {
-            profilePicInput.addEventListener('change', (e) => this.handleProfilePictureUpload(e));
-        }
-
-        // 2FA toggle
-        const toggle2FA = document.querySelector('[data-toggle-2fa]');
-        if (toggle2FA) {
-            toggle2FA.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.handleToggle2FA();
-            });
-        }
-
-        // Logout button
-        const logoutBtn = document.querySelector('[data-logout]');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => this.logout());
-        }
-    }
-
-    async loadProfile() {
-        try {
-            const response = await fetch(`${API_BASE}/profile`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                if (response.status === 401) {
-                    this.redirect('/');
-                    return;
-                }
-                throw new Error('Erreur lors du chargement du profil');
-            }
-
-            const data = await response.json();
-            const profile = data.profile;
-
-            this.userId = profile.idUser;
-            this.userRole = profile.role;
-
-            // Populate profile info
-            document.querySelector('[data-user-name]').textContent = `${profile.prenomUser} ${profile.nomUser}`;
-            document.querySelector('[data-user-email]').textContent = profile.email;
-            document.querySelector('[data-user-role]').textContent = this.formatRole(profile.role);
-            document.querySelector('[data-user-role-display]').textContent = this.getRoleLabel(profile.role);
-            document.querySelector('[data-user-department]').textContent = profile.departementEmploye || 'Non renseigné';
-
-            // Populate form fields
-            document.getElementById('display-name').value = `${profile.prenomUser} ${profile.nomUser}`;
-            document.getElementById('recovery-email').value = profile.email;
-
-            // Mettre à jour l'image de profil si elle existe
-            if (profile.pdpUser) {
-                const avatarImg = document.getElementById('avatar-img');
-                if (avatarImg) {
-                    avatarImg.src = profile.pdpUser + '?t=' + Date.now();
-                    avatarImg.style.display = 'block';
-                }
-                // Masquer l'icône
-                const avatarIcon = document.getElementById('avatar-icon');
-                if (avatarIcon) {
-                    avatarIcon.style.display = 'none';
-                }
-            }
-        } catch (error) {
-            console.error('Erreur:', error);
-            this.showNotification('Erreur lors du chargement du profil', 'error');
-        }
-    }
-
-    async loadSecurityInfo() {
-        try {
-            const response = await fetch(`${API_BASE}/profile/security?action=info`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Erreur lors du chargement des infos de sécurité');
-            }
-
-            const data = await response.json();
-            const security = data.security;
-
-            // Update security info display
-            const lastPwdEl = document.getElementById('last-pwd-change');
-            if (lastPwdEl) {
-                lastPwdEl.textContent = `Il y a ${security.daysSincePasswordChange} jours (Recommandé: tous les 90 jours)`;
-            }
-
-            const lastLoginEl = document.getElementById('last-login');
-            if (lastLoginEl && security.lastLogin) {
-                const date = new Date(security.lastLogin);
-                lastLoginEl.textContent = `${date.toLocaleDateString('fr-FR')} à ${date.toLocaleTimeString('fr-FR')}`;
-            }
-
-            const twoFAEl = document.getElementById('twofa-status');
-            if (twoFAEl) {
-                if (security.twoFactorEnabled) {
-                    twoFAEl.innerHTML = 'Activée - <a href="#" data-toggle-2fa>Désactiver</a>';
-                } else {
-                    twoFAEl.innerHTML = 'Désactivée - <a href="#" data-toggle-2fa>Configurer maintenant</a>';
-                }
-                const toggle2FABtn = document.querySelector('[data-toggle-2fa]');
-                if (toggle2FABtn) {
-                    toggle2FABtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        this.handleToggle2FA();
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Erreur:', error);
-        }
-    }
-
-    async loadSessions() {
-        try {
-            const response = await fetch(`${API_BASE}/profile/security?action=sessions`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Erreur lors du chargement des sessions');
-            }
-
-            const data = await response.json();
-            const sessions = data.sessions || [];
-
-            const sessionsList = document.getElementById('sessions-list');
-            if (sessionsList) {
-                if (sessions.length === 0) {
-                    sessionsList.innerHTML = '<p class="no-data">Aucune session active</p>';
-                } else {
-                    sessionsList.innerHTML = sessions.map(session => {
-                        const date = new Date(session.derniere_activite);
-                        return `
-                            <div class="session-item">
-                                <div class="session-info">
-                                    <div class="session-device">
-                                        <i class="fas fa-desktop"></i> ${this.parseUserAgent(session.user_agent)}
-                                    </div>
-                                    <div class="session-ip">IP: ${session.ip_address}</div>
-                                    <div class="session-time">${date.toLocaleDateString('fr-FR')} à ${date.toLocaleTimeString('fr-FR')}</div>
-                                </div>
-                                <button type="button" class="btn btn-sm btn-danger" data-logout-session="${session.id_session}">
-                                    Terminer
-                                </button>
-                            </div>
-                        `;
-                    }).join('');
-
-                    // Add event listeners for logout buttons
-                    sessionsList.querySelectorAll('[data-logout-session]').forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            const sessionId = e.target.dataset.logoutSession;
-                            this.handleLogoutSession(sessionId);
-                        });
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Erreur:', error);
-        }
-    }
-
-    async handleSecurityParamsSubmit(e) {
-        e.preventDefault();
-
-        const displayName = document.getElementById('display-name').value.trim();
-        const recoveryEmail = document.getElementById('recovery-email').value.trim();
-        const newPassword = document.getElementById('new-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-
-        // Validation
-        if (!displayName) {
-            this.showNotification('Veuillez entrer un nom d\'affichage', 'error');
+    function renderHistory(history) {
+        const host = document.querySelector('[data-history-list]');
+        if (!host) return;
+        if (!history.length) {
+            host.innerHTML = '<li class="history-item" style="color:var(--shell-muted)">Aucun défi terminé pour l\'instant.</li>';
             return;
         }
+        host.innerHTML = history.map(h => `
+            <li class="history-item">
+                <strong>${h.nom}</strong><br />
+                <small>${new Date(h.date).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</small>
+            </li>`).join('');
+    }
 
-        if (!recoveryEmail || !this.validateEmail(recoveryEmail)) {
-            this.showNotification('Veuillez entrer un email valide', 'error');
-            return;
+    function syncStoredUser(user) {
+        let current = {};
+        try { current = JSON.parse(localStorage.getItem('gp_user') || '{}'); } catch (_) {}
+        localStorage.setItem('gp_user', JSON.stringify({
+            ...current,
+            nomUser:    user.nomUser    || current.nomUser    || '',
+            prenomUser: user.prenomUser || current.prenomUser || '',
+            email:      user.email      || current.email      || '',
+            role:       user.role       || current.role       || '',
+            pdpUser:    user.pdpUser    ?? current.pdpUser    ?? null,
+        }));
+    }
+
+    // ── Modal helpers ──
+
+    function openModal(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+        // Clear feedbacks on close
+        el?.querySelectorAll('.feedback-msg').forEach(f => { f.textContent = ''; f.className = 'feedback-msg'; });
+    }
+
+    function bindModalTriggers() {
+        document.querySelector('[data-open-edit-modal]')?.addEventListener('click', () => openModal('modal-edit-profile'));
+        document.querySelector('[data-open-pwd-modal]')?.addEventListener('click', () => openModal('modal-edit-password'));
+
+        document.querySelectorAll('[data-close-modal]').forEach(btn => {
+            btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+        });
+
+        // Close on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeModal(overlay.id);
+            });
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id));
+            }
+        });
+    }
+
+    // ── Edit profile modal ──
+
+    function bindEditModal(initialUser) {
+        const form     = document.querySelector('[data-edit-profile-form]');
+        const feedback = document.querySelector('[data-edit-profile-feedback]');
+        if (!form || !feedback) return;
+
+        if (initialUser) {
+            const prenomInput = form.querySelector('[name=prenomUser]');
+            const nomInput    = form.querySelector('[name=nomUser]');
+            const emailInput  = form.querySelector('[name=email]');
+            if (prenomInput) prenomInput.value = initialUser.prenom || '';
+            if (nomInput)    nomInput.value    = initialUser.nom    || '';
+            if (emailInput)  emailInput.value  = initialUser.email  || '';
         }
 
-        if (newPassword || confirmPassword) {
-            if (!newPassword || !confirmPassword) {
-                this.showNotification('Veuillez confirmer le mot de passe', 'error');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            feedback.className = 'feedback-msg';
+            feedback.textContent = '';
+
+            const fd        = new FormData(form);
+            const prenomUser = fd.get('prenomUser')?.trim() || '';
+            const nomUser    = fd.get('nomUser')?.trim()    || '';
+            const email      = fd.get('email')?.trim()      || '';
+
+            if (!prenomUser || !nomUser) {
+                feedback.className = 'feedback-msg is-error';
+                feedback.textContent = 'Prénom et nom sont requis.';
+                return;
+            }
+
+            const btn = form.querySelector('[type=submit]');
+            btn.disabled = true;
+            try {
+                const payload = { nomUser, prenomUser };
+                if (email) payload.email = email;
+                const result = await apiPost('/auth/update-profile.php', payload);
+                const updated = result.user || {};
+
+                syncStoredUser(updated);
+
+                const finalPrenom = updated.prenomUser || prenomUser;
+                const finalNom    = updated.nomUser    || nomUser;
+                const finalEmail  = updated.email      || email;
+
+                const nameEl  = document.querySelector('[data-user-name]');
+                const emailEl = document.querySelector('[data-user-email]');
+                if (nameEl)  nameEl.textContent  = `${finalPrenom} ${finalNom}`.trim();
+                if (emailEl) emailEl.textContent = finalEmail;
+                setInitials(finalPrenom, finalNom);
+
+                feedback.className = 'feedback-msg is-success';
+                feedback.textContent = result.message || 'Profil mis à jour.';
+
+                setTimeout(() => closeModal('modal-edit-profile'), 1400);
+            } catch (err) {
+                feedback.className = 'feedback-msg is-error';
+                feedback.textContent = err?.message || 'Impossible de mettre à jour le profil.';
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    }
+
+    // ── Change password modal ──
+
+    function bindPasswordModal() {
+        const form     = document.querySelector('[data-pwd-form]');
+        const feedback = document.querySelector('[data-pwd-feedback]');
+        if (!form || !feedback) return;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            feedback.className = 'feedback-msg';
+            feedback.textContent = '';
+
+            const fd              = new FormData(form);
+            const currentPassword = fd.get('current_password')?.trim() || '';
+            const newPassword     = fd.get('new_password')?.trim()     || '';
+            const confirmPassword = fd.get('confirm_password')?.trim() || '';
+
+            if (!currentPassword || !newPassword) {
+                feedback.className = 'feedback-msg is-error';
+                feedback.textContent = 'Tous les champs sont requis.';
                 return;
             }
             if (newPassword !== confirmPassword) {
-                this.showNotification('Les mots de passe ne correspondent pas', 'error');
+                feedback.className = 'feedback-msg is-error';
+                feedback.textContent = 'Les nouveaux mots de passe ne correspondent pas.';
                 return;
             }
             if (newPassword.length < 8) {
-                this.showNotification('Le mot de passe doit faire au moins 8 caractères', 'error');
+                feedback.className = 'feedback-msg is-error';
+                feedback.textContent = 'Le mot de passe doit contenir au moins 8 caractères.';
                 return;
             }
-        }
+
+            const btn = form.querySelector('[type=submit]');
+            btn.disabled = true;
+            try {
+                const result = await apiPost('/auth/update-password.php', { current_password: currentPassword, new_password: newPassword });
+                feedback.className = 'feedback-msg is-success';
+                feedback.textContent = result.message || 'Mot de passe mis à jour.';
+                form.reset();
+                setTimeout(() => closeModal('modal-edit-password'), 1400);
+            } catch (err) {
+                feedback.className = 'feedback-msg is-error';
+                feedback.textContent = err?.message || 'Impossible de changer le mot de passe.';
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    }
+
+    // ── Preferences ──
+
+    function bindPreferences() {
+        const form     = document.querySelector('[data-preference-form]');
+        const feedback = document.querySelector('[data-pref-feedback]');
+        if (!form || !feedback) return;
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            feedback.className = 'feedback-msg is-success';
+            feedback.textContent = 'Préférences enregistrées.';
+        });
+    }
+
+    // ── Init ──
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        bindModalTriggers();
+        bindPasswordModal();
+        bindPreferences();
 
         try {
-            // Update profile info
-            const nameParts = displayName.split(' ').filter(p => p.trim() !== '');
-            let prenomUser = nameParts[0] || '';
-            let nomUser = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+            const data = await apiGet('/modules/employee/profile.php');
 
-            const updateData = {
-                prenomUser,
-                nomUser,
-                email: recoveryEmail,
-            };
+            setInitials(data.user.prenom, data.user.nom);
 
-            // If password change requested, do it first before profile update
-            if (newPassword) {
-                const currentPassword = prompt('Veuillez entrer votre mot de passe actuel pour confirmer:');
-                if (!currentPassword) {
-                    this.showNotification('Changement de mot de passe annulé', 'info');
-                    return;
-                }
+            const nameEl  = document.querySelector('[data-user-name]');
+            const emailEl = document.querySelector('[data-user-email]');
+            const teamEl  = document.querySelector('[data-profile-team]');
+            if (nameEl)  nameEl.textContent  = `${data.user.prenom} ${data.user.nom}`;
+            if (emailEl) emailEl.textContent = data.user.email;
+            if (teamEl)  teamEl.textContent  = data.equipe ? data.equipe.nom : 'Sans équipe';
 
-                console.log('Envoi changement mot de passe...');
-                const pwdResponse = await fetch(`${API_BASE}/profile/security?action=change-password`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${this.token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        currentPassword,
-                        newPassword,
-                    }),
-                });
-
-                console.log('Réponse changement mot de passe:', pwdResponse.status, pwdResponse.statusText);
-                
-                if (!pwdResponse.ok) {
-                    const errorData = await pwdResponse.json();
-                    console.error('Erreur API:', errorData);
-                    throw new Error(errorData.message || 'Erreur lors du changement de mot de passe');
-                }
-                
-                console.log('Mot de passe changé avec succès!');
-
-                // Clear password fields
-                document.getElementById('new-password').value = '';
-                document.getElementById('confirm-password').value = '';
-                
-                this.showNotification('Mot de passe changé avec succès', 'success');
+            bindEditModal(data.user);
+            renderStats(data.stats);
+            renderBadges(data.badges);
+            renderHistory(data.historique);
+        } catch (err) {
+            console.error('Erreur profil:', err);
+            const message = String(err?.message || 'Erreur profil');
+            if (message.includes('404') || message.includes('introuvable')) {
+                document.querySelector('[data-user-name]').textContent = 'Profil non trouvé';
             }
-
-            // Then update profile
-            console.log('Envoi mise à jour profil...');
-            const response = await fetch(`${API_BASE}/profile`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updateData),
-            });
-
-            console.log('Réponse mise à jour profil:', response.status, response.statusText);
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Erreur API:', errorData);
-                throw new Error(errorData.message || 'Erreur lors de la mise à jour');
-            }
-
-            console.log('Profil mis à jour avec succès!');
-            this.showNotification('Profil mis à jour avec succès', 'success');
-            this.loadProfile();
-            this.loadSecurityInfo();
-        } catch (error) {
-            console.error('Erreur:', error);
-            this.showNotification(error.message, 'error');
         }
-    }
-
-    async handleToggle2FA() {
-        if (!confirm('Êtes-vous sûr de vouloir ' + (document.getElementById('twofa-status').innerHTML.includes('Activée') ? 'désactiver' : 'activer') + ' l\'authentification à deux facteurs?')) {
-            return;
-        }
-
-        try {
-            const isCurrentlyEnabled = document.getElementById('twofa-status').innerHTML.includes('Activée');
-            
-            const response = await fetch(`${API_BASE}/profile/security?action=toggle-2fa`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    enable: !isCurrentlyEnabled,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Erreur lors de la modification du 2FA');
-            }
-
-            const data = await response.json();
-            
-            if (data.secret_generated) {
-                alert(`Secret généré: ${data.secret}\n\nScannez ce code avec votre application authenticator (Google Authenticator, Microsoft Authenticator, Authy, etc.)`);
-            }
-
-            this.showNotification('Authentification à deux facteurs mise à jour', 'success');
-            this.loadSecurityInfo();
-        } catch (error) {
-            console.error('Erreur:', error);
-            this.showNotification(error.message, 'error');
-        }
-    }
-
-    async handleLogoutSession(sessionId) {
-        if (!confirm('Êtes-vous sûr de vouloir terminer cette session?')) {
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE}/profile/security?action=logout-session`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    sessionId: parseInt(sessionId),
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Erreur lors de la fermeture de la session');
-            }
-
-            this.showNotification('Session terminée avec succès', 'success');
-            this.loadSessions();
-        } catch (error) {
-            console.error('Erreur:', error);
-            this.showNotification(error.message, 'error');
-        }
-    }
-
-    logout() {
-        localStorage.removeItem(STORAGE_KEY);
-        this.redirect('/');
-    }
-
-    redirect(path) {
-        window.location.href = path;
-    }
-
-    showNotification(message, type = 'info') {
-        const notificationsEl = document.getElementById('notifications');
-        if (!notificationsEl) return;
-
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.innerHTML = `
-            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
-            ${message}
-            <button type="button" class="close-btn">&times;</button>
-        `;
-
-        notificationsEl.appendChild(notification);
-
-        const closeBtn = notification.querySelector('.close-btn');
-        closeBtn.addEventListener('click', () => notification.remove());
-
-        setTimeout(() => notification.remove(), 5000);
-    }
-
-    validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
-    }
-
-    formatRole(role) {
-        const roles = {
-            'admin': 'ADMIN',
-            'employe': 'EMPLOYÉ',
-            'animateur': 'ANIMATEUR',
-        };
-        return roles[role] || role.toUpperCase();
-    }
-
-    getRoleLabel(role) {
-        const labels = {
-            'admin': 'Administrateur RH',
-            'employe': 'Employé',
-            'animateur': 'Animateur',
-        };
-        return labels[role] || role;
-    }
-
-    parseUserAgent(userAgent) {
-        // Simple UA parsing
-        if (userAgent.includes('Chrome')) return 'Chrome';
-        if (userAgent.includes('Firefox')) return 'Firefox';
-        if (userAgent.includes('Safari')) return 'Safari';
-        if (userAgent.includes('Edge')) return 'Edge';
-        return 'Navigateur inconnu';
-    }
-
-    async handleProfilePictureUpload(e) {
-        const file = e.target.files[0];
-        if (!file) {
-            return;
-        }
-
-        // Vérifier que c'est une image
-        if (!file.type.startsWith('image/')) {
-            this.showNotification('❌ Veuillez sélectionner une image valide', 'error');
-            e.target.value = '';
-            return;
-        }
-
-        // Vérifier la taille (5MB max)
-        if (file.size > 5 * 1024 * 1024) {
-            this.showNotification('❌ L\'image doit faire moins de 5MB', 'error');
-            e.target.value = '';
-            return;
-        }
-
-        try {
-            const formData = new FormData();
-            formData.append('avatar', file);
-
-            const response = await fetch(`${API_BASE}/profile`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`,
-                },
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Erreur lors de l\'upload');
-            }
-
-            const data = await response.json();
-            this.showNotification('✅ Photo de profil mise à jour avec succès', 'success');
-            
-            // Mettre à jour l'image affichée immédiatement
-            const avatarImg = document.getElementById('avatar-img');
-            if (avatarImg && data.avatar) {
-                avatarImg.src = data.avatar + '?t=' + Date.now();
-                avatarImg.style.display = 'block';
-            }
-            
-            // Masquer l'icône
-            const avatarIcon = document.getElementById('avatar-icon');
-            if (avatarIcon) {
-                avatarIcon.style.display = 'none';
-            }
-            
-            // Réinitialiser l'input
-            e.target.value = '';
-            
-            // Recharger le profil pour actualiser les données
-            setTimeout(() => this.loadProfile(), 500);
-        } catch (error) {
-            console.error('Erreur upload:', error);
-            this.showNotification('❌ Erreur lors de l\'upload: ' + error.message, 'error');
-            e.target.value = '';
-        }
-    }
-}
-
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    new ProfileManager();
-});
+    });
+})();
