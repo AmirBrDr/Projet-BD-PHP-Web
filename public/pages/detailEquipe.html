@@ -1,16 +1,79 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - detailEquipe</title>
-    <link rel="stylesheet" href="../assets/css/detailEquipe.css">
-</head>
-<body>
-    <div class="container">
-        <h1>detailEquipe</h1>
-        <p>Page en développement...</p>
-    </div>
-    <script src="../assets/js/detailEquipe.js"></script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GreenPulse - Detail Equipe</title>
+        <link rel="stylesheet" href="../assets/css/app-shell.css" />
+        <link rel="stylesheet" href="../assets/css/detailEquipe.css" />
+    </head>
+    <body class="app-page" data-required-role="employe">
+        <main class="app-shell employee-layout">
+            <header class="app-header">
+                <div class="brand-block">
+                    <div class="brand-name">GreenPulse</div>
+                    <div class="brand-title">Detail equipe</div>
+                    <div class="brand-subtitle">Performance collective et membres actifs</div>
+                </div>
+                <nav class="employee-tabs" aria-label="Navigation employe">
+                    <a class="employee-tab" href="dashboardE.html">Dashboard</a>
+                    <a class="employee-tab" href="defis.html">Defis</a>
+                    <a class="employee-tab" href="classement.html">Classement</a>
+                    <a class="employee-tab is-active" href="detailEquipe.html?id=current">Equipe</a>
+                    <a class="employee-tab" href="profil.html">Mon profil</a>
+                </nav>
+                <div class="header-actions">
+                    <div class="role-pill">Role: <strong data-user-role>EMPLOYE</strong></div>
+                    <button class="logout-btn" type="button" data-logout>Deconnexion</button>
+                </div>
+            </header>
+
+            <a class="back-link" href="classement.html">&#8592; Retour au classement</a>
+
+            <!-- Team hero -->
+            <section class="panel team-hero" data-team-header>
+                <div class="team-hero-main">
+                    <p class="eyebrow" data-team-rank>Classement</p>
+                    <h1 data-team-name>Equipe</h1>
+                </div>
+                <div class="team-hero-kpis" data-team-stats></div>
+            </section>
+
+            <!-- Main grid: left = membres + progression, right = succes -->
+            <div class="team-main-grid">
+
+                <div class="team-left-col">
+                    <!-- Membres -->
+                    <article class="panel members-panel">
+                        <h2 class="section-title">Membres</h2>
+                        <ul class="members-list" data-members-list>
+                            <li class="member-row is-loading">Chargement...</li>
+                        </ul>
+                    </article>
+
+                    <!-- Progression défis du mois -->
+                    <article class="panel progression-panel">
+                        <h2 class="section-title">Defis du mois</h2>
+                        <div class="progression-list" data-challenge-progress>
+                            <div class="progression-empty">Chargement...</div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="team-right-col">
+                    <!-- Derniers succès -->
+                    <article class="panel succes-panel">
+                        <h2 class="section-title">Derniers succes</h2>
+                        <ul class="succes-list" data-achievements-list>
+                            <li class="succes-item is-loading">Chargement...</li>
+                        </ul>
+                    </article>
+                </div>
+
+            </div>
+        </main>
+
+        <script src="../asse../app-shell.js" defer></script>
+        <script src="../asse../detailEquipe.js" defer></script>
+    </body>
 </html>

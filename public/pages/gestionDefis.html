@@ -1,16 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenPulse - gestionDefis</title>
-    <link rel="stylesheet" href="../assets/css/gestionDefis.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GreenPulse - Gestion des defis</title>
+    <link rel="stylesheet" href="../assets/css/app-shell.css" />
+    <link rel="stylesheet" href="../assets/css/defis.css" />
+    <link rel="stylesheet" href="../assets/css/gestionDefis.css" />
 </head>
-<body>
-    <div class="container">
-        <h1>gestionDefis</h1>
-        <p>Page en développement...</p>
+
+<body class="app-page" data-required-role="animateur">
+    <main class="app-shell">
+        <header class="app-header">
+            <div class="brand-block">
+                <div class="brand-name">GreenPulse</div>
+                <div class="brand-title">Gestion des defis</div>
+                <div class="brand-subtitle">Vue des defis du mois avec creation/modification en modal</div>
+            </div>
+            <div class="header-actions">
+                <nav class="nav-links" aria-label="Navigation animateur">
+                    <a href="parametresAnimateur.html">Dashboard</a>
+                    <a class="active" href="gestionDefis.html">Gestion des defis</a>
+                    <a href="moderation.html">Moderation</a>
+                    <a href="defis.html">Defis du mois</a>
+                </nav>
+                <div class="role-pill">Role: <strong data-user-role>ANIMATEUR</strong></div>
+                <button class="logout-btn" type="button" data-logout>Deconnexion</button>
+            </div>
+        </header>
+
+        <section class="parcours-header manage-header">
+            <div>
+                <h2 class="parcours-title">Gestion des defis</h2>
+                <p class="parcours-subtitle">
+                    Cette page charge la vue des defis comme la page Defis du mois, avec actions CRUD.
+                </p>
+            </div>
+            <div class="header-tools">
+                <a class="ghost-link" href="defis.html">Voir la page defis</a>
+                <button id="open-create-modal-btn" class="primary-btn" type="button">Creer un defi</button>
+            </div>
+        </section>
+
+        <section class="panel page-intro">
+            <h1>Postuler et gerer les defis</h1>
+            <p>
+                La moderation des reponses employe est disponible sur la page Moderation.
+            </p>
+        </section>
+
+        <div id="page-alert" class="page-alert" hidden></div>
+
+        <div class="filter-bar">
+            <select id="filtreTheme">
+                <option value="all">Toutes les thematiques</option>
+            </select>
+            <button id="refresh-challenges-btn" class="ghost-btn" type="button">Actualiser</button>
+        </div>
+
+        <main class="parcours-list" id="challenge-list">
+            <div class="loading-state">Chargement des defis...</div>
+        </main>
+
+        <div class="empty-state hidden" id="empty-state">
+            <p>Aucun defi pour le moment.</p>
+        </div>
+
+    </main>
+
+    <div id="challenge-modal-overlay" class="modal-overlay hidden" aria-hidden="true">
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="challenge-form-title">
+            <div class="modal-head">
+                <h2 id="challenge-form-title">Creer un defi</h2>
+                <button id="close-modal-btn" class="icon-btn" type="button" aria-label="Fermer">x</button>
+            </div>
+
+            <form id="challenge-form" class="challenge-form" novalidate>
+                <div class="form-grid">
+                    <label>
+                        <span>Nom du defi</span>
+                        <input id="challenge-name" type="text" required />
+                    </label>
+                    <label>
+                        <span>Thematique</span>
+                        <select id="challenge-theme" required></select>
+                    </label>
+                    <label>
+                        <span>Mois</span>
+                        <input id="challenge-month" type="month" required />
+                    </label>
+                    <label>
+                        <span>Ordre</span>
+                        <input id="challenge-order" type="number" min="1" required />
+                    </label>
+                    <label>
+                        <span>Points</span>
+                        <input id="challenge-points" type="number" min="1" required />
+                    </label>
+                    <label>
+                        <span>CO2 evite (kg)</span>
+                        <input id="challenge-co2" type="number" min="0" required />
+                    </label>
+                    <label>
+                        <span>Niveau</span>
+                        <input id="challenge-level" type="number" min="1" required />
+                    </label>
+                    <label>
+                        <span>Nom du forum</span>
+                        <input id="challenge-forum-name" type="text" placeholder="Forum - Nom du defi" />
+                    </label>
+                </div>
+
+                <label>
+                    <span>Description du defi</span>
+                    <textarea id="challenge-description" rows="3"></textarea>
+                </label>
+
+                <label>
+                    <span>Description du forum</span>
+                    <textarea id="challenge-forum-description" rows="2"></textarea>
+                </label>
+
+                <div class="actions-head">
+                    <h3>Actions du defi</h3>
+                    <button id="add-action-btn" class="ghost-btn" type="button">Ajouter une action</button>
+                </div>
+                <div id="actions-container" class="actions-container"></div>
+
+                <div class="form-actions">
+                    <button id="cancel-edit-btn" class="ghost-btn" type="button">Annuler</button>
+                    <button id="submit-challenge-btn" class="primary-btn" type="submit">Creer le defi</button>
+                </div>
+            </form>
+
+            <div id="challenge-form-alert" class="inline-alert" hidden></div>
+        </section>
     </div>
-    <script src="../assets/js/gestionDefis.js"></script>
+
+    <script src="../assets/js/app-shell.js" defer></script>
+    <script src="../assets/js/dialog-runtime.js" defer></script>
+    <script src="../assets/js/gestionDefis.js" defer></script>
 </body>
+
 </html>

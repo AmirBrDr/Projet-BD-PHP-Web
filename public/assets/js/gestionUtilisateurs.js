@@ -1,5 +1,17 @@
 // Fichier: public/assets/js/gestionUtilisateurs.js - Logique frontend et interactions.
 (() => {
+    const askConfirm = (message, options = {}) => {
+        if (typeof window.gpConfirm === "function") {
+            return window.gpConfirm(message, options);
+        }
+
+        if (window.GPDialog && typeof window.GPDialog.confirm === "function") {
+            return window.GPDialog.confirm({ message, ...options });
+        }
+
+        throw new Error("Modal de confirmation indisponible.");
+    };
+
     // Configuration de l'API et de la pagination
     const API_USERS = "/api/modules/users/user-management.php";
     const API_TEAMS = "/api/modules/teams/team-management.php";
@@ -363,7 +375,14 @@
 
     // Supprime un utilisateur après confirmation
     async function deleteUser(userId) {
-        if (!window.confirm("Supprimer cet utilisateur ? Cette action est irréversible.")) {
+        const confirmed = await askConfirm("Supprimer cet utilisateur ? Cette action est irreversible.", {
+            title: "Suppression utilisateur",
+            confirmText: "Supprimer",
+            cancelText: "Annuler",
+            tone: "danger",
+        });
+
+        if (!confirmed) {
             return;
         }
 

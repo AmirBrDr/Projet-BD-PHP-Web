@@ -19,4 +19,20 @@ PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -c "CREATE 
 echo "Application du schéma..."
 PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f db/schema.sql
 
+echo "Application des migrations..."
+for migration in db/migrations/*.sql; do
+	if [ -f "$migration" ]; then
+		echo " - $(basename "$migration")"
+		PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "$migration"
+	fi
+done
+
+# Apply seed data if present
+if [ -f db/seed.sql ]; then
+    echo "Application du seed (db/seed.sql)..."
+    PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f db/seed.sql
+else
+    echo "Aucun fichier de seed (db/seed.sql) trouve."
+fi
+
 echo "✓ Base de données initialisée avec succès!"

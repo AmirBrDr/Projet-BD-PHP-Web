@@ -1,6 +1,3 @@
-# Script PowerShell pour initialiser PostgreSQL et la base GreenPulse
-# Usage: .\db\init-postgres.ps1
-
 param(
     [string]$DbHost = "localhost",
     [int]$DbPort = 5432,
@@ -9,46 +6,51 @@ param(
     [string]$DbPass = ""
 )
 
-Write-Host "=== Initialisation de la base de données GreenPulse ===" -ForegroundColor Green
+# Chemin vers psql (PostgreSQL 18)
+$PsqlPath = "C:\Program Files\PostgreSQL\18\bin\psql.exe"
 
-# Construire la chaîne de connexion
-$ConnStr = "Server=$DbHost;Port=$DbPort;User Id=$DbUser"
-if ($DbPass) {
-    $ConnStr += ";Password=$DbPass"
+if (!(Test-Path $PsqlPath)) {
+    Write-Host "psql introuvable a cet emplacement :" -ForegroundColor Red
+    Write-Host $PsqlPath
+    exit 1
 }
 
+Write-Host "=== Initialisation GreenPulse ===" -ForegroundColor Green
+
 try {
-    Write-Host "Vérification de la connection PostgreSQL..."
-    $TempConnStr = "$ConnStr;Database=postgres"
-    
+    Write-Host "Verification PostgreSQL..."
+
     # Vérifier si la base existe
-    Write-Host "Vérification de la base de données '$DbName'..."
+    Write-Host "Verification de la base '$DbName'..."
     $CheckDbCmd = "SELECT 1 FROM pg_database WHERE datname = '$DbName'"
-    $Result = & psql -h $DbHost -p $DbPort -U $DbUser -d postgres -tc $CheckDbCmd 2>&1
-    
-    if ($Result -notMatch "1") {
-        Write-Host "Création de la base de données '$DbName'..."
-        & psql -h $DbHost -p $DbPort -U $DbUser -d postgres -c "CREATE DATABASE $DbName;" 2>&1 | Out-Null
-        Write-Host "✓ Base créée" -ForegroundColor Green
-    } else {
-        Write-Host "✓ Base existante détectée" -ForegroundColor Green
+
+    $Result = & $PsqlPath -h $DbHost -p $DbPort -U $DbUser -d postgres -tc $CheckDbCmd 2>&1
+
+    if (-not ($Result -match "1")) {
+        Write-Host "Creation de la base..."
+        & $PsqlPath -h $DbHost -p $DbPort -U $DbUser -d postgres -c "CREATE DATABASE $DbName;" | Out-Null
+        Write-Host "Base creee" -ForegroundColor Green
     }
-    
-    # Appliquer le schéma
-    Write-Host "Application du schéma..."
-    $SchemaPath = Join-Path (Get-Location) "db\schema.sql"
+    else {
+        Write-Host "Base deja existante" -ForegroundColor Green
+    }
+
+    # Appliquer le schema
+    Write-Host "Application du schema..."
+    $SchemaPath = Join-Path (Get-Location) "schema.sql"
+
     if (Test-Path $SchemaPath) {
-        & psql -h $DbHost -p $DbPort -U $DbUser -d $DbName -f $SchemaPath 2>&1 | Out-Null
-        Write-Host "✓ Schéma appliqué avec succès" -ForegroundColor Green
-    } else {
-        Write-Host "✗ Fichier schema.sql non trouvé" -ForegroundColor Red
+        & $PsqlPath -h $DbHost -p $DbPort -U $DbUser -d $DbName -f $SchemaPath | Out-Null
+        Write-Host "Schema applique" -ForegroundColor Green
     }
-    
-    Write-Host "`n✓ Initialisation terminée!" -ForegroundColor Green
-    Write-Host "Vous pouvez maintenant relancer votre application."
-    
-} catch {
-    Write-Host "✗ Erreur: $_" -ForegroundColor Red
-    Write-Host "`nAssurez-vous que PostgreSQL est installé et en cours d'exécution." -ForegroundColor Yellow
+    else {
+        Write-Host "Fichier schema.sql introuvable" -ForegroundColor Red
+    }
+
+    Write-Host ""
+    Write-Host "Initialisation terminee" -ForegroundColor Green
+}
+catch {
+    Write-Host "Erreur: $_" -ForegroundColor Red
     exit 1
 }
