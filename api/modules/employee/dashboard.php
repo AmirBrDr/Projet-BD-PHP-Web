@@ -94,9 +94,39 @@ $stmt = $pdo->prepare("\n    SELECT n.nomNotif, n.dateNotif, n.lienRedirection\n
 $stmt->execute([':id' => $userId]);
 $notifs = $stmt->fetchAll();
 
-$stmt = $pdo->prepare("\n    SELECT TO_CHAR(date_trunc('month', v.date_validation), 'Mon') AS mois,\n           SUM(d.nbCO2Defi) AS co2\n    FROM Valider v\n    JOIN Defi d ON d.Id_defi = v.Id_defi\n    WHERE v.Id_Employe = :id\n      AND v.date_validation >= CURRENT_DATE - INTERVAL '6 months'\n    GROUP BY date_trunc('month', v.date_validation)\n    ORDER BY date_trunc('month', v.date_validation)\n");
+$stmt = $pdo->prepare("
+    SELECT
+        TO_CHAR(date_trunc('month', v.date_validation), 'M Y') AS mois_key,
+        COALESCE(SUM(d.nbCO2Defi), 0) AS co2
+    FROM Valider v
+    JOIN Defi d ON d.Id_defi = v.Id_defi
+    WHERE v.Id_Employe = :id
+      AND v.date_validation >= CURRENT_DATE - INTERVAL '6 months'
+    GROUP BY date_trunc('month', v.date_validation)
+    ORDER BY date_trunc('month', v.date_validation)
+");
 $stmt->execute([':id' => $userId]);
-$co2Mensuel = $stmt->fetchAll();
+$co2Rows = $stmt->fetchAll();
+
+// Construire une map mois_key => co2 depuis les données réelles
+$co2Map = [];
+foreach ($co2Rows as $row) {
+    $co2Map[$row['mois_key']] = (int) $row['co2'];
+}
+
+// Toujours générer le squelette de 6 mois et y injecter les vraies valeurs
+$co2Mensuel = [];
+$hasCo2Data  = false;
+for ($i = 5; $i >= 0; $i--) {
+    $dt      = new DateTimeImmutable("first day of -$i month");
+    $key     = $dt->format('n Y');   // même format que TO_CHAR 'M Y' ('4 2026', etc.)
+    $co2Val  = $co2Map[$key] ?? 0;
+    if ($co2Val > 0) $hasCo2Data = true;
+    $co2Mensuel[] = [
+        'mois' => $dt->format('M Y'),
+        'co2'  => $co2Val,
+    ];
+}
 
 gp_send_json(200, [
     'stats' => [
@@ -129,4 +159,5 @@ gp_send_json(200, [
         'mois' => $r['mois'],
         'co2'  => (int) $r['co2'],
     ], $co2Mensuel),
+    'has_co2_data' => $hasCo2Data,
 ]);

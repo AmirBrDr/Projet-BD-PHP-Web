@@ -23,21 +23,37 @@
             '<li style="color:var(--shell-muted);font-style:italic">Aucun élément.</li>';
     }
 
-    function initChart(co2Mensuel) {
+    function initChart(co2Mensuel, hasData) {
         const canvas = document.getElementById('co2Chart');
         if (!canvas || !window.Chart) return;
+
+        // Afficher un badge discret si aucune donnée réelle
+        if (!hasData) {
+            const wrap = canvas.closest('.chart-container') || canvas.parentElement;
+            const badge = document.createElement('div');
+            badge.style.cssText = [
+                'position:absolute', 'inset:0', 'display:flex',
+                'align-items:center', 'justify-content:center',
+                'pointer-events:none',
+            ].join(';');
+            badge.innerHTML = '<span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:999px;padding:.35rem 1rem;font-size:.8rem;color:rgba(255,255,255,0.45)">Aucune validation enregistrée ce semestre</span>';
+            wrap.style.position = 'relative';
+            wrap.appendChild(badge);
+        }
+
         new window.Chart(canvas, {
             type: 'line',
             data: {
                 labels: co2Mensuel.map(r => r.mois),
                 datasets: [{
-                    label: 'kg CO₂ évités',
+                    label: 'kg CO\u2082 évités',
                     data: co2Mensuel.map(r => r.co2),
                     borderColor: '#94bb39',
                     backgroundColor: 'rgba(148, 187, 57, 0.15)',
                     fill: true,
                     tension: 0.4,
                     pointBackgroundColor: '#94bb39',
+                    pointRadius: co2Mensuel.map(r => r.co2 > 0 ? 4 : 0),
                 }]
             },
             options: {
@@ -49,6 +65,7 @@
                         grid: { color: 'rgba(255,255,255,0.07)' },
                         ticks: { color: 'rgba(255,255,255,0.55)' },
                         beginAtZero: true,
+                        suggestedMax: hasData ? undefined : 10,
                     },
                     x: {
                         grid: { display: false },
@@ -90,7 +107,7 @@
                 </li>`;
             });
 
-            initChart(data.co2_mensuel);
+            initChart(data.co2_mensuel, data.has_co2_data === true);
         } catch (err) {
             console.error('Erreur dashboard:', err);
         }
