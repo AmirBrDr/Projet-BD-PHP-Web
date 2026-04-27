@@ -3,7 +3,7 @@
 // Logique de la page Statistiques (Animateur)
 // ============================================================
 
-const API_URL = '/api/modules/statistics/';
+const API_URL = '/api/modules/statistics/index.php';
 
 // --- Éléments DOM ---
 const loadingEl  = document.getElementById('loading');
