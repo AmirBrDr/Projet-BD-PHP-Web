@@ -41,16 +41,17 @@
             <section class="detail-grid">
                 <article class="panel submission-panel">
                     <h2>Valider une action</h2>
-                    <form class="submission-form" data-submission-form>
+                    <form class="submission-form" data-submission-form enctype="multipart/form-data">
                         <div class="action-options" data-action-options></div>
-                        <label class="input-label" for="proofText">Commentaire de preuve</label>
+                        <label class="input-label" for="proofPhoto">Photo de preuve (optionnel)</label>
+                        <input id="proofPhoto" name="preuvePhoto" type="file" accept="image/jpeg,image/png,image/webp" class="file-input" />
+                        <label class="input-label" for="proofText">Commentaire (optionnel si photo fournie)</label>
                         <textarea
                             id="proofText"
                             name="proofText"
-                            rows="4"
+                            rows="3"
                             maxlength="300"
                             placeholder="Decrivez votre action du jour..."
-                            required
                         ></textarea>
                         <button class="submit-btn" type="submit">Soumettre pour validation</button>
                     </form>

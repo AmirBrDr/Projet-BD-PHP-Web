@@ -45,6 +45,62 @@
         el.textContent = ((prenom || 'G').charAt(0) + (nom || 'P').charAt(0)).toUpperCase();
     }
 
+    function renderAvatar(photoPath, prenom, nom) {
+        // Avatar principal (page)
+        const photoEl    = document.querySelector('[data-avatar-photo]');
+        const initialsEl = document.querySelector('[data-user-initials]');
+        // Avatar dans la modale
+        const modalPhotoEl    = document.querySelector('[data-modal-avatar-photo]');
+        const modalInitialsEl = document.querySelector('[data-modal-initials]');
+
+        const initStr = ((prenom || 'G').charAt(0) + (nom || 'P').charAt(0)).toUpperCase();
+
+        if (photoPath) {
+            if (photoEl)    { photoEl.src = photoPath; photoEl.classList.remove('hidden'); }
+            if (initialsEl)      initialsEl.classList.add('hidden');
+            if (modalPhotoEl)    { modalPhotoEl.src = photoPath; modalPhotoEl.classList.remove('hidden'); }
+            if (modalInitialsEl) modalInitialsEl.classList.add('hidden');
+        } else {
+            if (photoEl)    photoEl.classList.add('hidden');
+            if (initialsEl) { initialsEl.classList.remove('hidden'); setInitials(prenom, nom); }
+            if (modalPhotoEl)    modalPhotoEl.classList.add('hidden');
+            if (modalInitialsEl) { modalInitialsEl.classList.remove('hidden'); modalInitialsEl.textContent = initStr; }
+        }
+    }
+
+    function bindPhotoUpload() {
+        const wrap     = document.querySelector('[data-modal-avatar-wrap]');
+        const input    = document.querySelector('[data-modal-photo-input]');
+        const feedback = document.querySelector('[data-photo-feedback]');
+        if (!wrap || !input) return;
+
+        wrap.addEventListener('click', () => input.click());
+
+        input.addEventListener('change', async () => {
+            if (!input.files || !input.files[0]) return;
+            const fd = new FormData();
+            fd.append('photo', input.files[0]);
+            if (feedback) { feedback.className = 'feedback-msg'; feedback.textContent = 'Upload en cours...'; }
+            try {
+                const res = await fetch(API_BASE + '/auth/upload-photo.php', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token() },
+                    body: fd,
+                });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.message || 'HTTP ' + res.status);
+                renderAvatar(json.photo, null, null);
+                if (feedback) { feedback.className = 'feedback-msg is-success'; feedback.textContent = 'Photo mise à jour.'; }
+                let current = {};
+                try { current = JSON.parse(localStorage.getItem('gp_user') || '{}'); } catch (_) {}
+                localStorage.setItem('gp_user', JSON.stringify({ ...current, pdpUser: json.photo }));
+            } catch (err) {
+                if (feedback) { feedback.className = 'feedback-msg is-error'; feedback.textContent = err.message || 'Erreur upload.'; }
+            }
+            input.value = '';
+        });
+    }
+
     function renderStats(stats) {
         const host = document.querySelector('[data-profile-stats]');
         if (!host) return;
@@ -69,6 +125,7 @@
         }
         host.innerHTML = badges.map(b => `
             <li class="badge-item">
+                <span class="badge-icon">${b.icone || ''}</span>
                 <strong>${b.nom}</strong>
                 <small>${new Date(b.date).toLocaleDateString('fr-FR')}</small>
             </li>`).join('');
@@ -276,7 +333,8 @@
         try {
             const data = await apiGet('/modules/employee/profile.php');
 
-            setInitials(data.user.prenom, data.user.nom);
+            renderAvatar(data.user.photo, data.user.prenom, data.user.nom);
+            bindPhotoUpload();
 
             const nameEl  = document.querySelector('[data-user-name]');
             const emailEl = document.querySelector('[data-user-email]');

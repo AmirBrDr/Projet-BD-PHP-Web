@@ -3,6 +3,10 @@
     margin: 0 auto;
 }
 
+.hidden {
+    display: none !important;
+}
+
 .employee-tabs {
     display: inline-flex;
     flex-wrap: wrap;
@@ -36,6 +40,78 @@
 
 .avatar-block {
     flex-shrink: 0;
+    position: relative;
+}
+
+.avatar-wrapper {
+    position: relative;
+    width: 84px;
+    height: 84px;
+}
+
+.avatar-photo {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(148, 187, 57, 0.4);
+}
+
+/* ── Modal avatar section ── */
+.modal-photo-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-avatar-wrap {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.modal-avatar-wrap .avatar-circle {
+    width: 80px;
+    height: 80px;
+    font-size: 22px;
+}
+
+.modal-avatar-wrap .avatar-photo {
+    width: 80px;
+    height: 80px;
+}
+
+.avatar-photo-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.52);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.18s;
+}
+
+.avatar-photo-overlay i {
+    color: #fff;
+    font-size: 18px;
+}
+
+.modal-avatar-wrap:hover .avatar-photo-overlay {
+    opacity: 1;
+}
+
+.photo-hint {
+    margin: 0;
+    font-size: 12px;
+    color: var(--shell-muted);
 }
 
 .avatar-circle {
@@ -170,11 +246,19 @@
 
 .badge-item {
     display: flex;
-    justify-content: space-between;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
+}
+
+.badge-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    min-width: 24px;
+    text-align: center;
 }
 
 .badge-item strong {
+    flex: 1;
     color: #94bb39;
 }
 

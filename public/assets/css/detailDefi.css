@@ -96,6 +96,8 @@
     padding: 12px;
     cursor: pointer;
     transition: 0.2s ease;
+    color: var(--shell-text);
+    text-align: left;
 }
 
 .option-card.is-selected {
@@ -150,7 +152,16 @@ textarea {
     color: #9fe768;
 }
 
-.forum-list,
+.forum-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
 .history-list {
     list-style: none;
     margin: 0;
@@ -192,6 +203,28 @@ textarea {
 
 .forum-form textarea {
     font-size: 13px;
+}
+
+.file-input {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 10px;
+    color: var(--shell-text);
+    width: 100%;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.file-input::file-selector-button {
+    background: rgba(148, 187, 57, 0.18);
+    border: 1px solid rgba(148, 187, 57, 0.35);
+    border-radius: 6px;
+    color: #b7d96a;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-right: 10px;
 }
 
 @media (max-width: 980px) {

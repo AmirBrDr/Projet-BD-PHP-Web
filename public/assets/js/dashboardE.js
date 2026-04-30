@@ -107,7 +107,7 @@
                 </li>`;
             });
 
-            initChart(data.co2_mensuel, data.has_co2_data === true);
+            initChart(data.co2_mensuel, (data.co2_mensuel || []).some(r => r.co2 > 0));
         } catch (err) {
             console.error('Erreur dashboard:', err);
         }

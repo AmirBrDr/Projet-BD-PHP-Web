@@ -32,7 +32,7 @@ if ($nomUser === '' || $prenomUser === '') {
     gp_send_json(400, ['message' => 'Nom et prénom sont requis']);
 }
 
-if (mb_strlen($nomUser) < 2 || mb_strlen($prenomUser) < 2) {
+if (strlen($nomUser) < 2 || strlen($prenomUser) < 2) {
     gp_send_json(400, ['message' => 'Nom et prénom doivent contenir au moins 2 caractères']);
 }
 
