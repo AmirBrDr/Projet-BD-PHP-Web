@@ -28,7 +28,10 @@
             <!-- Profile hero -->
             <section class="panel profile-hero">
                 <div class="avatar-block">
-                    <div class="avatar-circle" data-user-initials>GP</div>
+                    <div class="avatar-wrapper">
+                        <img class="avatar-photo hidden" data-avatar-photo src="" alt="" />
+                        <div class="avatar-circle" data-user-initials>GP</div>
+                    </div>
                 </div>
                 <div class="identity-block">
                     <h1 data-user-name>Utilisateur</h1>
@@ -80,6 +83,16 @@
                 <div class="modal-header">
                     <h2 id="modal-edit-title">Modifier le profil</h2>
                     <button class="modal-close" type="button" data-close-modal="modal-edit-profile" aria-label="Fermer">&times;</button>
+                </div>
+                <div class="modal-photo-section">
+                    <div class="modal-avatar-wrap" data-modal-avatar-wrap title="Changer la photo de profil">
+                        <img class="avatar-photo hidden" data-modal-avatar-photo src="" alt="" />
+                        <div class="avatar-circle" data-modal-initials>GP</div>
+                        <div class="avatar-photo-overlay"><i class="fas fa-camera"></i></div>
+                    </div>
+                    <input id="modalPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" data-modal-photo-input />
+                    <p class="photo-hint">Cliquez sur la photo pour la modifier</p>
+                    <p class="feedback-msg" data-photo-feedback></p>
                 </div>
                 <form data-edit-profile-form>
                     <label class="field-row" for="editPrenom">

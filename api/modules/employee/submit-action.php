@@ -23,33 +23,74 @@ if (gp_normalize_role($claims['role'] ?? '') !== 'employe') {
     gp_send_json(403, ['message' => 'Accès refusé']);
 }
 
-$body = gp_read_json_body();
-$defiId = (int) ($body['defi_id'] ?? 0);
-$actionId = (int) ($body['action_id'] ?? 0);
-$preuve = trim((string) ($body['preuve'] ?? ''));
+$defiId   = (int) ($_POST['defi_id']   ?? 0);
+$actionId = (int) ($_POST['action_id'] ?? 0);
+$proofText = trim((string) ($_POST['proofText'] ?? ''));
 
 if ($defiId <= 0 || $actionId <= 0) {
     gp_send_json(400, ['message' => 'defi_id et action_id requis']);
 }
-if ($preuve === '') {
-    gp_send_json(400, ['message' => 'Une preuve est requise']);
+
+// Gérer la photo de preuve
+$preuve = '';
+$file   = $_FILES['preuvePhoto'] ?? null;
+$hasPhoto = $file && isset($file['tmp_name']) && $file['error'] === UPLOAD_ERR_OK && $file['size'] > 0;
+
+if ($hasPhoto) {
+    $allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
+    $detectedMime = mime_content_type($file['tmp_name']);
+    if (!in_array($detectedMime, $allowedMime, true)) {
+        gp_send_json(400, ['message' => 'Type de fichier non autorisé (jpeg, png, webp uniquement)']);
+    }
+    if ($file['size'] > 5 * 1024 * 1024) {
+        gp_send_json(400, ['message' => 'Photo trop volumineuse (5 Mo max)']);
+    }
+    $extMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $ext = $extMap[$detectedMime] ?? 'jpg';
+    $filename  = 'proof_' . uniqid('', true) . '.' . $ext;
+    $uploadDir = __DIR__ . '/../../../public/image/preuves/';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+    if (!move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
+        gp_send_json(500, ['message' => "Impossible d'enregistrer la photo"]);
+    }
+    $preuve = '/image/preuves/' . $filename;
+} elseif ($proofText !== '') {
+    $preuve = $proofText;
+} else {
+    gp_send_json(400, ['message' => 'Une photo ou un commentaire de preuve est requis']);
 }
 
-$pdo = gp_pdo($config);
+$pdo    = gp_pdo($config);
 $userId = (int) $claims['sub'];
 
-$stmt = $pdo->prepare("\n    SELECT emp.Id_equipe AS equipe_id\n    FROM Employe emp\n    WHERE emp.Id_Employe = :id\n    LIMIT 1\n");
+$stmt = $pdo->prepare("
+    SELECT emp.Id_equipe AS equipe_id
+    FROM Employe emp
+    WHERE emp.Id_Employe = :id
+    LIMIT 1
+");
 $stmt->execute([':id' => $userId]);
 $teamRow = $stmt->fetch();
-$teamId = $teamRow ? (int) $teamRow['equipe_id'] : 0;
+$teamId  = $teamRow ? (int) $teamRow['equipe_id'] : 0;
 
-$stmt = $pdo->prepare("\n    SELECT 1\n    FROM Faire_partie\n    WHERE Id_defi = :defi AND Id_actions = :action\n");
+$stmt = $pdo->prepare("
+    SELECT 1
+    FROM Faire_partie
+    WHERE Id_defi = :defi AND Id_actions = :action
+");
 $stmt->execute([':defi' => $defiId, ':action' => $actionId]);
 if (!$stmt->fetch()) {
-    gp_send_json(400, ['message' => 'Cette action n\'appartient pas à ce défi']);
+    gp_send_json(400, ['message' => "Cette action n'appartient pas à ce défi"]);
 }
 
-$stmt = $pdo->prepare("\n    SELECT r.ordre, r.Id_thematique\n    FROM Regroupe r\n    WHERE r.Id_defi = :defi\n    LIMIT 1\n");
+$stmt = $pdo->prepare("
+    SELECT r.ordre, r.Id_thematique
+    FROM Regroupe r
+    WHERE r.Id_defi = :defi
+    LIMIT 1
+");
 $stmt->execute([':defi' => $defiId]);
 $challengeRow = $stmt->fetch();
 if (!$challengeRow) {
@@ -57,14 +98,26 @@ if (!$challengeRow) {
 }
 
 if ($teamId > 0) {
-    $stmt = $pdo->prepare("\n        SELECT COUNT(*) AS nb\n        FROM Employe e\n        JOIN Utilisateur u ON u.Id_User = e.Id_Employe\n        WHERE e.Id_equipe = :team\n          AND u.statutUser = 'actif'\n    ");
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) AS nb
+        FROM Employe e
+        JOIN Utilisateur u ON u.Id_User = e.Id_Employe
+        WHERE e.Id_equipe = :team
+          AND u.statutUser = 'actif'
+    ");
     $stmt->execute([':team' => $teamId]);
     $memberCountRow = $stmt->fetch();
     $memberCount = max(1, (int) ($memberCountRow['nb'] ?? 0));
 
     $ordre = (int) $challengeRow['ordre'];
     if ($ordre > 1) {
-        $stmt = $pdo->prepare("\n            SELECT r2.Id_defi\n            FROM Regroupe r2\n            WHERE r2.Id_thematique = :theme\n              AND r2.ordre = :ordre\n            LIMIT 1\n        ");
+        $stmt = $pdo->prepare("
+            SELECT r2.Id_defi
+            FROM Regroupe r2
+            WHERE r2.Id_thematique = :theme
+              AND r2.ordre = :ordre
+            LIMIT 1
+        ");
         $stmt->execute([
             ':theme' => (int) $challengeRow['id_thematique'],
             ':ordre' => $ordre - 1,
@@ -72,12 +125,20 @@ if ($teamId > 0) {
         $previousRow = $stmt->fetch();
 
         if ($previousRow) {
-            $stmt = $pdo->prepare("\n                SELECT COUNT(DISTINCT v.Id_Employe) AS nb_valides\n                FROM Valider v\n                JOIN Employe e ON e.Id_Employe = v.Id_Employe\n                JOIN Utilisateur u ON u.Id_User = e.Id_Employe\n                WHERE e.Id_equipe = :team\n                  AND u.statutUser = 'actif'\n                  AND v.Id_defi = :defi\n            ");
+            $stmt = $pdo->prepare("
+                SELECT COUNT(DISTINCT v.Id_Employe) AS nb_valides
+                FROM Valider v
+                JOIN Employe e ON e.Id_Employe = v.Id_Employe
+                JOIN Utilisateur u ON u.Id_User = e.Id_Employe
+                WHERE e.Id_equipe = :team
+                  AND u.statutUser = 'actif'
+                  AND v.Id_defi = :defi
+            ");
             $stmt->execute([
                 ':team' => $teamId,
                 ':defi' => (int) $previousRow['id_defi'],
             ]);
-            $validatedRow = $stmt->fetch();
+            $validatedRow   = $stmt->fetch();
             $validatedCount = (int) ($validatedRow['nb_valides'] ?? 0);
 
             if ($validatedCount < $memberCount) {
@@ -87,18 +148,25 @@ if ($teamId > 0) {
     }
 }
 
-$stmt = $pdo->prepare("\n    SELECT 1\n    FROM Valider\n    WHERE Id_defi = :defi AND Id_actions = :action AND Id_Employe = :emp\n");
+$stmt = $pdo->prepare("
+    SELECT 1
+    FROM Valider
+    WHERE Id_defi = :defi AND Id_actions = :action AND Id_Employe = :emp
+");
 $stmt->execute([':defi' => $defiId, ':action' => $actionId, ':emp' => $userId]);
 if ($stmt->fetch()) {
     gp_send_json(409, ['message' => 'Vous avez déjà validé cette action']);
 }
 
 try {
-    $stmt = $pdo->prepare("\n        INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, preuve)\n        VALUES (:defi, :action, :emp, :preuve)\n    ");
+    $stmt = $pdo->prepare("
+        INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, preuve)
+        VALUES (:defi, :action, :emp, :preuve)
+    ");
     $stmt->execute([
-        ':defi' => $defiId,
+        ':defi'   => $defiId,
         ':action' => $actionId,
-        ':emp' => $userId,
+        ':emp'    => $userId,
         ':preuve' => $preuve,
     ]);
 } catch (PDOException $e) {

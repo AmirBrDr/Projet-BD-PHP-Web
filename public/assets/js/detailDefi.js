@@ -111,28 +111,35 @@
             feedback.className = 'feedback-msg';
             feedback.textContent = '';
 
-            const preuve = String(new FormData(form).get('proofText') || '').trim();
             if (!selectedActionId) {
                 feedback.textContent = 'Sélectionnez une action.';
                 return;
             }
-            if (!preuve) {
-                feedback.textContent = 'Ajoutez un commentaire de preuve.';
+
+            const fd = new FormData(form);
+            const hasPhoto = fd.get('preuvePhoto') && fd.get('preuvePhoto').size > 0;
+            const hasText  = String(fd.get('proofText') || '').trim().length > 0;
+            if (!hasPhoto && !hasText) {
+                feedback.textContent = 'Ajoutez une photo ou un commentaire de preuve.';
                 return;
             }
+
+            fd.set('defi_id', defiId);
+            fd.set('action_id', selectedActionId);
 
             const submitBtn = form.querySelector('[type=submit]');
             submitBtn.disabled = true;
             try {
-                await apiPost('/modules/employee/submit-action.php', {
-                    defi_id: defiId,
-                    action_id: selectedActionId,
-                    preuve,
+                const res = await fetch(API_BASE + '/modules/employee/submit-action.php', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token() },
+                    body: fd,
                 });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.message || 'HTTP ' + res.status);
                 feedback.className = 'feedback-msg is-success';
                 feedback.textContent = 'Action validée avec succès ! Vos points ont été crédités.';
                 form.reset();
-                // Refresh data to update action states
                 const data = await apiGet('/modules/employee/challenge-detail.php?id=' + defiId);
                 renderActions(data.actions, data.deja_valide);
                 renderHistory(data.historique);

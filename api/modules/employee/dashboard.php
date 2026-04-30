@@ -96,7 +96,7 @@ $notifs = $stmt->fetchAll();
 
 $stmt = $pdo->prepare("
     SELECT
-        TO_CHAR(date_trunc('month', v.date_validation), 'M Y') AS mois_key,
+        TO_CHAR(date_trunc('month', v.date_validation), 'YYYY-MM') AS mois_key,
         COALESCE(SUM(d.nbCO2Defi), 0) AS co2
     FROM Valider v
     JOIN Defi d ON d.Id_defi = v.Id_defi
@@ -119,7 +119,7 @@ $co2Mensuel = [];
 $hasCo2Data  = false;
 for ($i = 5; $i >= 0; $i--) {
     $dt      = new DateTimeImmutable("first day of -$i month");
-    $key     = $dt->format('n Y');   // même format que TO_CHAR 'M Y' ('4 2026', etc.)
+    $key     = $dt->format('Y-m');   // format YYYY-MM, correspond à TO_CHAR 'YYYY-MM'
     $co2Val  = $co2Map[$key] ?? 0;
     if ($co2Val > 0) $hasCo2Data = true;
     $co2Mensuel[] = [

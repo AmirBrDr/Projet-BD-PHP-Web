@@ -33,7 +33,7 @@ if ($defiId <= 0) {
 if ($message === '') {
     gp_send_json(400, ['message' => 'Le message ne peut pas être vide']);
 }
-if (mb_strlen($message) > 500) {
+if (strlen($message) > 500) {
     gp_send_json(400, ['message' => 'Message trop long (500 caractères max)']);
 }
 

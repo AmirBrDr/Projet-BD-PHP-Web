@@ -23,7 +23,7 @@ $pdo    = gp_pdo($config);
 $userId = (int) $claims['sub'];
 
 $stmt = $pdo->prepare("
-    SELECT u.prenomUser, u.nomUser, u.email, u.inscriptionUser,
+    SELECT u.prenomUser, u.nomUser, u.email, u.inscriptionUser, u.pdpUser,
            emp.nbPointsEmploye, emp.nbCO2, emp.departementEmploye,
            eq.nomEquipe, eq.Id_equipe AS equipe_id,
            ent.nomEntreprise
@@ -80,6 +80,7 @@ gp_send_json(200, [
         'inscription' => $user['inscriptionuser'],
         'departement' => $user['departementemploye'],
         'entreprise'  => $user['nomentreprise'],
+        'photo'       => $user['pdpuser'] ?? null,
     ],
     'stats' => [
         'points'     => (int) $user['nbpointsemploye'],

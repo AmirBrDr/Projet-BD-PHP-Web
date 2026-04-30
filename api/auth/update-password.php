@@ -31,7 +31,7 @@ if ($currentPassword === '' || $newPassword === '') {
     gp_send_json(400, ['message' => 'Mot de passe actuel et nouveau requis']);
 }
 
-if (mb_strlen($newPassword) < 8) {
+if (strlen($newPassword) < 8) {
     gp_send_json(400, ['message' => 'Le nouveau mot de passe doit contenir au moins 8 caractères']);
 }
 
