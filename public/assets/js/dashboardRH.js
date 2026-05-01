@@ -90,7 +90,7 @@
                     labels: engagementParDept.map((item) => item.departement),
                     datasets: [{
                         label: "Taux de participation (%)",
-                        data: engagementParDept.map((item) => item.taux),
+                        data: engagementParDept.map((item) => item.engagementParDept),
                         backgroundColor: "rgba(148, 187, 57, 0.8)",
                         borderRadius: 6
                     }]
@@ -140,20 +140,20 @@
         const tauxParticipation = data?.tauxParticipation ?? "0%";
         const actionsValides = data?.actionsValides ?? 0;
 
-        const co2ParCategorie = [
-            { categorie: "Mobilité", co2: 3.3, pourcentage: 55 },
-            { categorie: "Énergie", co2: 1.5, pourcentage: 25 },
-            { categorie: "Déchets", co2: 0.9, pourcentage: 15 },
-            { categorie: "Alimentation", co2: 0.3, pourcentage: 5 },
-        ];
+        const co2ParCategorie = Array.isArray(data?.engagementParDept)
+            ? data.co2ParCategorie.map(d => ({
+            categorie: d.categorie,
+            co2: Number(d.co2), 
+            pourcentage: Number(d.pourcentage)
+         }))
+        : [];
 
-        const engagementParDept = [
-            { departement: "IT", taux: 92 },
-            { departement: "Marketing", taux: 85 },
-            { departement: "RH", taux: 78 },
-            { departement: "Compta", taux: 65 },
-            { departement: "Logistique", taux: 55 },
-        ];
+        const engagementParDept = Array.isArray(data?.engagementParDept)
+            ? data.engagementParDept.map(d => ({
+            departement: d.departement,
+            engagementParDept: Number(d.engagementpardept)
+         }))
+        : [];
 
         window.dashboardData = { co2Tot, tauxParticipation, actionsValides };
         window.co2ParCategorie = co2ParCategorie;
