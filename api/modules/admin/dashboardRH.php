@@ -13,10 +13,10 @@ $sql_co2 = "SELECT COALESCE(SUM(nbCO2Equipe), 0) AS co2Tot FROM Equipe";
 
 $sql_participation = "SELECT 
     ROUND(
-        COUNT(DISTINCT m.id_employe) * 100.0 / (SELECT COUNT(*) FROM Employe),
+        COUNT(DISTINCT v.id_employe) * 100.0 / (SELECT COUNT(*) FROM Employe),
         1
     ) AS tauxParticipation
-FROM Message m
+FROM Valider v
 ";
 
 $sql_actions_Validees = "SELECT COUNT(*) AS actionsValides FROM Valider";
