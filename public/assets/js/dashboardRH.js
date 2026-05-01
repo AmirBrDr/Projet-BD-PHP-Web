@@ -34,7 +34,7 @@
         rows.push(["=== TAUX D'ENGAGEMENT PAR DÉPARTEMENT ==="]);
         rows.push(["Département", "Taux d'engagement (%)"]);
         engagementParDept.forEach((item) => {
-            rows.push([item.departement, item.taux]);
+            rows.push([item.departement, item.engagementParDept]);
         });
 
         const csvContent = rows.map((r) => r.join(";")).join("\n");
