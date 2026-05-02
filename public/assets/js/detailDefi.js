@@ -71,6 +71,13 @@
         });
     }
 
+    function formatDateTime(dateStr) {
+        const d = new Date(dateStr);
+        const date = d.toLocaleDateString('fr-FR');
+        const time = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        return `${date} à ${time}`;
+    }
+
     function renderForum(messages) {
         const host = document.querySelector('[data-forum-list]');
         if (!host) return;
@@ -82,7 +89,7 @@
             <li class="forum-item">
                 <strong>${m.auteur}</strong><br />
                 ${m.texte}<br />
-                <small>${new Date(m.date).toLocaleDateString('fr-FR')}</small>
+                <small>${formatDateTime(m.date)}</small>
             </li>`).join('');
     }
 
