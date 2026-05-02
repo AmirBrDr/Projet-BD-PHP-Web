@@ -1,18 +1,15 @@
 // ============================================================
 // Fichier: public/assets/js/statistiques.js
-// Logique de la page Statistiques (Animateur)
 // ============================================================
 
-const API_URL = '/api/modules/statistics/index.php';
+const API_URL = '/api/modules/statistics/';
 
-// --- Éléments DOM ---
-const loadingEl  = document.getElementById('loading');
-const contenuEl  = document.getElementById('contenu');
-const erreurEl   = document.getElementById('erreur');
+const loadingEl   = document.getElementById('loading');
+const contenuEl   = document.getElementById('contenu');
+const erreurEl    = document.getElementById('erreur');
 const erreurMsgEl = document.getElementById('erreur-msg');
 const moisLabelEl = document.getElementById('mois-label');
 
-// --- Affiche le mois courant ---
 function afficherMois() {
     const now = new Date();
     const label = now.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
@@ -21,15 +18,13 @@ function afficherMois() {
     }
 }
 
-// --- Remplit les KPIs globaux ---
-function remplirKpis(globales) {
+function remplirKpis(globales, parTheme) {
     document.getElementById('kpi-defis').textContent        = globales.total_defis ?? 0;
-    document.getElementById('kpi-participants').textContent = globales.total_participants ?? 0;
+    document.getElementById('kpi-participants').textContent = globales.total_validations ?? 0;
     document.getElementById('kpi-co2').textContent          = globales.total_co2 ?? 0;
-    document.getElementById('kpi-themes').textContent       = globales.total_themes ?? 0;
+    document.getElementById('kpi-themes').textContent       = parTheme && parTheme.length > 0 ? parTheme[0].nomtheme : '-';
 }
 
-// --- Construit le bar chart participants par défi ---
 function afficherBarChart(parDefi) {
     const el = document.getElementById('chart-defis');
     el.innerHTML = '';
@@ -39,10 +34,10 @@ function afficherBarChart(parDefi) {
         return;
     }
 
-    const max = Math.max(...parDefi.map(d => parseInt(d.nb_participants))) || 1;
+    const max = Math.max(...parDefi.map(d => parseInt(d.nb_validations))) || 1;
 
     parDefi.forEach(defi => {
-        const pct = Math.round((parseInt(defi.nb_participants) / max) * 100);
+        const pct = Math.round((parseInt(defi.nb_validations) / max) * 100);
         const item = document.createElement('div');
         item.className = 'bar-item';
         item.innerHTML = `
@@ -50,7 +45,7 @@ function afficherBarChart(parDefi) {
                 <span class="bar-label">${defi.nomdefi}</span>
                 <div style="display:flex;gap:8px;align-items:center">
                     <span class="bar-theme-badge">${defi.nomtheme}</span>
-                    <span class="bar-value">${defi.nb_participants} participant(s)</span>
+                    <span class="bar-value">${defi.nb_validations} validation(s)</span>
                 </div>
             </div>
             <div class="bar-track">
@@ -61,26 +56,32 @@ function afficherBarChart(parDefi) {
     });
 }
 
-// --- Construit la liste par thématique ---
-function afficherThemes(parTheme) {
+function afficherThemes(parDefi) {
     const el = document.getElementById('chart-themes');
     el.innerHTML = '';
 
-    if (!parTheme || parTheme.length === 0) {
+    if (!parDefi || parDefi.length === 0) {
         el.innerHTML = '<p style="color:var(--shell-muted);font-size:13px">Aucune donnée.</p>';
         return;
     }
 
-    parTheme.forEach((theme, index) => {
+    const maxVal = Math.max(...parDefi.map(d => parseInt(d.nb_validations))) || 1;
+
+    parDefi.forEach((defi, index) => {
+        const pct = Math.round((parseInt(defi.nb_validations) / maxVal) * 100);
         const item = document.createElement('div');
         item.className = 'theme-item';
         item.innerHTML = `
             <div>
-                <div class="theme-name">${theme.nomtheme}</div>
+                <div class="theme-name">${defi.nomdefi}</div>
                 <div class="theme-meta">
-                    <span><i class="fas fa-trophy"></i> ${theme.nb_defis} défi(s)</span>
-                    <span><i class="fas fa-users"></i> ${theme.nb_participants} participant(s)</span>
-                    <span><i class="fas fa-leaf"></i> ${theme.co2_total} kg CO₂</span>
+                    <span><i class="fas fa-check-circle"></i> ${defi.nb_validations} validation(s)</span>
+                    <span><i class="fas fa-star"></i> ${defi.points} pts</span>
+                </div>
+                <div style="margin-top:8px">
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width:${pct}%"></div>
+                    </div>
                 </div>
             </div>
             <div class="theme-rank ${index === 0 ? 'top' : ''}">#${index + 1}</div>
@@ -89,7 +90,6 @@ function afficherThemes(parTheme) {
     });
 }
 
-// --- Construit le taux de validation ---
 function afficherValidation(validation) {
     const el = document.getElementById('chart-validation');
     el.innerHTML = '';
@@ -122,7 +122,6 @@ function afficherValidation(validation) {
     });
 }
 
-// --- Affiche une erreur ---
 function afficherErreur(msg) {
     loadingEl.classList.add('hidden');
     contenuEl.classList.add('hidden');
@@ -130,7 +129,6 @@ function afficherErreur(msg) {
     erreurMsgEl.textContent = msg;
 }
 
-// --- Charge les stats ---
 async function chargerStats() {
     try {
         const res = await fetch(API_URL);
@@ -141,9 +139,9 @@ async function chargerStats() {
 
         const { globales, par_defi, par_theme, validation } = json.data;
 
-        remplirKpis(globales);
+        remplirKpis(globales, par_theme);
         afficherBarChart(par_defi);
-        afficherThemes(par_theme);
+        afficherThemes(par_defi);
         afficherValidation(validation);
 
         loadingEl.classList.add('hidden');
@@ -155,6 +153,5 @@ async function chargerStats() {
     }
 }
 
-// --- Init ---
 afficherMois();
 chargerStats();

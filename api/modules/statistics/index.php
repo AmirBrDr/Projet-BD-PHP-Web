@@ -1,9 +1,12 @@
 <?php
 // Fichier: api/modules/statistics/index.php
 
+error_reporting(0);
+ini_set('display_errors', 0);
+
 require_once __DIR__ . '/../../bootstrap.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 $pdo = gp_pdo($config);
 
 // --- 1. Stats globales ---
@@ -11,7 +14,7 @@ $stmt = $pdo->query("
     SELECT 
         COUNT(DISTINCT d.Id_defi) AS total_defis,
         COUNT(DISTINCT t.Id_thematique) AS total_themes,
-        COUNT(DISTINCT v.Id_Employe) AS total_participants,
+        COUNT(v.Id_defi) AS total_validations,
         COALESCE(SUM(d.nbCO2Defi), 0) AS total_co2
     FROM Defi d
     LEFT JOIN Regroupe r ON r.Id_defi = d.Id_defi
@@ -21,12 +24,12 @@ $stmt = $pdo->query("
 ");
 $globales = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// --- 2. Participants par défi ---
+// --- 2. Validations par défi ---
 $stmt2 = $pdo->query("
     SELECT 
         d.nomDefi,
         t.nomTheme,
-        COUNT(DISTINCT v.Id_Employe) AS nb_participants,
+        COUNT(v.Id_Employe) AS nb_validations,
         d.nbPointsDefi AS points
     FROM Defi d
     JOIN Regroupe r ON r.Id_defi = d.Id_defi
@@ -34,7 +37,7 @@ $stmt2 = $pdo->query("
     LEFT JOIN Valider v ON v.Id_defi = d.Id_defi
     WHERE DATE_TRUNC('month', r.mois) = DATE_TRUNC('month', CURRENT_DATE)
     GROUP BY d.Id_defi, d.nomDefi, t.nomTheme, d.nbPointsDefi
-    ORDER BY nb_participants DESC
+    ORDER BY nb_validations DESC
 ");
 $parDefi = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
@@ -43,15 +46,15 @@ $stmt3 = $pdo->query("
     SELECT 
         t.nomTheme,
         COUNT(DISTINCT d.Id_defi) AS nb_defis,
-        COUNT(DISTINCT v.Id_Employe) AS nb_participants,
-        COALESCE(SUM(d.nbCO2Defi), 0) AS co2_total
+        COUNT(v.Id_Employe) AS nb_validations,
+        COALESCE(SUM(DISTINCT d.nbCO2Defi), 0) AS co2_total
     FROM Thematique t
     JOIN Regroupe r ON r.Id_thematique = t.Id_thematique
     JOIN Defi d ON d.Id_defi = r.Id_defi
     LEFT JOIN Valider v ON v.Id_defi = d.Id_defi
     WHERE DATE_TRUNC('month', r.mois) = DATE_TRUNC('month', CURRENT_DATE)
     GROUP BY t.Id_thematique, t.nomTheme
-    ORDER BY nb_participants DESC
+    ORDER BY nb_validations DESC
 ");
 $parTheme = $stmt3->fetchAll(PDO::FETCH_ASSOC);
 
@@ -80,4 +83,4 @@ echo json_encode([
         'par_theme'  => $parTheme,
         'validation' => $validation,
     ]
-]);
+], JSON_UNESCAPED_UNICODE);
