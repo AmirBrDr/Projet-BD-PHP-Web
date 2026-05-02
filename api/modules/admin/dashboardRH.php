@@ -8,8 +8,10 @@ header('Content-Type: application/json');
 
 $pdo = gp_pdo($config);
 
-// Requêtes avec alias
-$sql_co2 = "SELECT COALESCE(SUM(nbCO2Equipe), 0) AS co2Tot FROM Equipe";
+
+$sql_co2 = "SELECT SUM(nbCo2defi) FROM 
+Valider v, Defi d 
+WHERE v.id_defi = d.id_defi;";
 
 $sql_participation = "SELECT 
     ROUND(
@@ -37,13 +39,21 @@ WHERE u.statutUser = 'actif'
 GROUP BY e.departementEmploye
 ORDER BY engagementParDept DESC";
 
-$sql_co2ParCategorie = "SELECT t.nomTheme as categorie
-, SUM(d.nbCo2defi) as co2
-, ROUND(SUM(d.nbCo2defi) * 1.0 * 100 / (SELECT SUM(nbCo2defi) FROM Defi )) as pourcentage 
-FROM Thematique t, Defi d, Regroupe r
-WHERE t.id_thematique = r.id_thematique 
-and d.id_defi = r.id_defi 
-Group by categorie";
+$sql_co2ParCategorie = "SELECT 
+    t.nomTheme AS categorie,
+    SUM(d.nbCo2defi) AS co2,
+    ROUND(
+        SUM(d.nbCo2defi) * 100.0 / (
+            SELECT SUM(d2.nbCo2defi)
+            FROM Valider v2
+            JOIN Defi d2 ON v2.id_defi = d2.id_defi
+        ), 2
+    ) AS pourcentage
+FROM Valider v
+JOIN Defi d ON v.id_defi = d.id_defi
+JOIN Regroupe r ON d.id_defi = r.id_defi
+JOIN Thematique t ON r.id_thematique = t.id_thematique
+GROUP BY t.nomTheme";
 
 // Tableau des requêtes
 $queries = [

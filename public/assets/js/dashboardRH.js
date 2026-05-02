@@ -116,14 +116,51 @@
         }
     }
 
+    // Fonction à appeler sur votre bouton "Rapport PDF"
+    async function genererRapportPDF() {
+        const { jsPDF } = window.jspdf;
+
+        // L'élément à capturer (toute la page ou un div spécifique)
+        const element = document.body; // ou document.getElementById('mon-contenu')
+
+        // Capture d'écran de l'élément
+        const canvas = await html2canvas(element, {
+            scale: 2,           // Meilleure résolution
+            useCORS: true,      // Pour les images externes
+            logging: false
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+        });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();   // 297mm en landscape
+        const pdfHeight = pdf.internal.pageSize.getHeight(); // 210mm en landscape
+
+        const canvasRatio = canvas.height / canvas.width;
+        const imgHeightInPdf = pdfWidth * canvasRatio; // hauteur réelle de l'image dans le PDF
+
+        let positionY = 0;
+
+        while (positionY < imgHeightInPdf) {
+        pdf.addImage(imgData, 'PNG', 0, -positionY, pdfWidth, imgHeightInPdf);
+        positionY += pdfHeight;
+        if (positionY < imgHeightInPdf) pdf.addPage();
+        }
+
+        pdf.save('rapport.pdf');
+    }
+    
     function bindActions() {
         const pdfBtn = document.getElementById("btn-export-pdf");
         if (pdfBtn) {
             pdfBtn.addEventListener("click", () => {
-                alert("Génération du rapport PDF en cours...");
+                genererRapportPDF();
             });
         }
-
         const csvBtn = document.getElementById("btn-export-csv");
         if (csvBtn) {
             csvBtn.addEventListener("click", () => {
