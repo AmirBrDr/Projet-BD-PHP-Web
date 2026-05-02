@@ -37,7 +37,7 @@
         <div class="param-grid">
             <div class="param-col">
                 <section class="param-box">
-                    <h2><i class="fas fa-tags"></i> Catégories Globales</h2>
+                    <h2><i class="fas fa-tags"></i> Thématiques</h2>
                     <p class="box-desc">Ces thématiques seront disponibles pour les Animateurs DD.</p>
                     
                     <ul id="categoryList" class="item-list"></ul>
@@ -54,16 +54,16 @@
                             <small>Si inactif depuis 3 jours</small>
                         </div>
                         <label class="switch">
-                            <input type="checkbox" checked>
+                            <input id="remindersToggle" type="checkbox" checked>
                             <span class="slider round"></span>
                         </label>
                     </div>
 
                     <div class="form-group mt-15">
                         <label>Fréquence des relances</label>
-                        <select>
-                            <option>1 fois par semaine</option>
-                            <option selected>1 fois toutes les deux semaines</option>
+                        <select id="reminderFrequency">
+                            <option value="weekly">1 fois par semaine</option>
+                            <option value="biweekly" selected>1 fois toutes les deux semaines</option>
                         </select>
                     </div>
                 </section>

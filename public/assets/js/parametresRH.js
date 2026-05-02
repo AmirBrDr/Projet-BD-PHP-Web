@@ -5,6 +5,10 @@
         thematiques: [],
         badges: [],
         editingBadgeId: null,
+        notifications: {
+            active: true,
+            frequency: 'biweekly',
+        },
     };
 
     const els = {
@@ -23,6 +27,8 @@
         thematiqueNom: document.getElementById("thematiqueNom"),
         thematiqueDesc: document.getElementById("thematiqueDesc"),
         thematiquDefis: document.getElementById("thematiquDefis"),
+        remindersToggle: document.getElementById("remindersToggle"),
+        reminderFrequency: document.getElementById("reminderFrequency"),
     };
 
     function getToken() {
@@ -418,6 +424,17 @@
                 description: badge.description || "",
                 icone: badge.icone || "",
             }));
+            state.notifications = {
+                active: Boolean(response.settings.notifications?.active ?? true),
+                frequency: String(response.settings.notifications?.frequency ?? 'biweekly'),
+            };
+
+            if (els.remindersToggle) {
+                els.remindersToggle.checked = state.notifications.active;
+            }
+            if (els.reminderFrequency) {
+                els.reminderFrequency.value = state.notifications.frequency;
+            }
 
             renderCategories();
             renderBadges();
@@ -442,6 +459,11 @@
     async function saveSettings() {
         try {
             clearFeedback();
+            const notificationPayload = {
+                active: els.remindersToggle ? Boolean(els.remindersToggle.checked) : state.notifications.active,
+                frequency: els.reminderFrequency ? String(els.reminderFrequency.value) : state.notifications.frequency,
+            };
+
             const payload = {
                 thematiques: state.thematiques
                     .filter((theme) => String(theme.nom || "").trim() !== "")
@@ -457,13 +479,17 @@
                     icone: String(badge.icone || "").trim(),
                     deleted: badge.deleted ? true : false,
                 })),
+                notifications: notificationPayload,
             };
 
-            await apiRequest(API_SETTINGS, {
+            const response = await apiRequest(API_SETTINGS, {
                 method: "POST",
                 body: JSON.stringify(payload),
             });
-            showToast("Paramètres enregistrés.", "success");
+
+            const sentCount = Number(response.emailsSent ?? 0);
+            const emailMessage = sentCount > 0 ? ` ${sentCount} email(s) de relance envoyée(s).` : "";
+            showToast(`Paramètres enregistrés.${emailMessage}`, "success");
             await loadSettings();
         } catch (error) {
             showFeedback(error.message || "Impossible d'enregistrer les paramètres.", "error");
@@ -490,6 +516,20 @@
             els.saveSettingsBtn.addEventListener("click", (event) => {
                 event.preventDefault();
                 saveSettings();
+            });
+        }
+
+        if (els.remindersToggle) {
+            els.remindersToggle.addEventListener("change", () => {
+                state.notifications.active = Boolean(els.remindersToggle.checked);
+                scheduleSave();
+            });
+        }
+
+        if (els.reminderFrequency) {
+            els.reminderFrequency.addEventListener("change", () => {
+                state.notifications.frequency = String(els.reminderFrequency.value);
+                scheduleSave();
             });
         }
 

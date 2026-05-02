@@ -70,6 +70,10 @@ function security_change_password(PDO $pdo, int $userId, string $currentPassword
         gp_send_json(400, ['message' => 'Le mot de passe doit faire au moins 8 caractères']);
     }
 
+    if (!preg_match('/[A-Z]/', $newPassword) || !preg_match('/\d/', $newPassword)) {
+        gp_send_json(400, ['message' => 'Le mot de passe doit contenir au moins une majuscule et un chiffre']);
+    }
+
     // Hasher et mettre à jour
     $hashedPassword = password_hash($newPassword, PASSWORD_ARGON2ID);
     
@@ -90,12 +94,35 @@ function security_change_password(PDO $pdo, int $userId, string $currentPassword
     }
 }
 
+function base32_encode(string $data): string
+{
+    $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    $binary = '';
+    foreach (str_split($data) as $chr) {
+        $binary .= str_pad(decbin(ord($chr)), 8, '0', STR_PAD_LEFT);
+    }
+
+    $output = '';
+    foreach (str_split($binary, 5) as $chunk) {
+        if (strlen($chunk) < 5) {
+            $chunk = str_pad($chunk, 5, '0', STR_PAD_RIGHT);
+        }
+        $output .= $alphabet[bindec($chunk)];
+    }
+
+    while (strlen($output) % 8 !== 0) {
+        $output .= '=';
+    }
+
+    return $output;
+}
+
 /**
  * Active ou désactive l'authentification à deux facteurs (placeholder)
  */
 function security_toggle_2fa(PDO $pdo, int $userId, bool $enable): array
 {
-    $stmt = $pdo->prepare('SELECT 1 FROM utilisateur WHERE id_user = :id');
+    $stmt = $pdo->prepare('SELECT email FROM utilisateur WHERE id_user = :id');
     $stmt->execute([':id' => $userId]);
     $user = $stmt->fetch();
 
@@ -104,14 +131,18 @@ function security_toggle_2fa(PDO $pdo, int $userId, bool $enable): array
     }
 
     if ($enable) {
-        // Générer un secret TOTP
-        $secret = bin2hex(random_bytes(20));
-        // À améliorer: ajouter colonne twofa_secret à la table utilisateur
-        
-        return ['status' => 'secret_generated', 'secret' => $secret];
+        $secret = base32_encode(random_bytes(20));
+        $email = $user['email'];
+        $issuer = 'GreenPulse';
+        $label = rawurlencode($issuer . ':' . $email);
+        $otpauthUri = sprintf('otpauth://totp/%s?secret=%s&issuer=%s&algorithm=SHA1&digits=6&period=30', $label, $secret, rawurlencode($issuer));
+
+        return [
+            'status' => 'secret_generated',
+            'secret' => $secret,
+            'otpauth_uri' => $otpauthUri,
+        ];
     } else {
-        // À améliorer: ajouter colonne twofa_secret à la table utilisateur
-        
         return ['status' => 'disabled'];
     }
 }
@@ -134,8 +165,13 @@ function security_get_sessions(PDO $pdo, int $userId): array
         return [
             'id_session' => (int)$session['id_session'],
             'ip_address' => $session['adresse_ip'],
-            'user_agent' => $session['u
- */
+            'user_agent' => $session['user_agent'],
+            'date_creation' => $session['date_creation'],
+            'derniere_activite' => $session['derniere_activite'],
+        ];
+    }, $sessions);
+}
+
 function security_logout_session(PDO $pdo, int $userId, int $sessionId): void
 {
     // Vérifier que la session appartient à l'utilisateur
@@ -149,13 +185,6 @@ function security_logout_session(PDO $pdo, int $userId, int $sessionId): void
     // Marquer la session comme inactive
     $stmt = $pdo->prepare('UPDATE Session SET active = false WHERE id_session = :session_id');
     $stmt->execute([':session_id' => $sessionId]);
- * Termine une session de l'utilisateur (placeholder)
- */
-function security_logout_session(PDO $pdo, int $userId, string $sessionId): void
-{
-    // Placeholder: pas de vrai système de sessions pour l'instant
-    // Cette fonction simule une déconnexion d'une session
-    // À améliorer avec un vrai système de suivi de sessions
 }
 
 // Routage des requêtes

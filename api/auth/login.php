@@ -60,6 +60,14 @@ try {
     }
     
     $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown';
+
+    // Fermer les sessions actives identiques pour éviter les doublons
+    $stmt = $pdo->prepare('UPDATE Session SET active = false WHERE id_user = :user_id AND adresse_ip = :ip AND user_agent = :agent AND active = true');
+    $stmt->execute([
+        ':user_id' => $idUser,
+        ':ip' => $ipAddress,
+        ':agent' => $userAgent,
+    ]);
     
     $stmt = $pdo->prepare('
         INSERT INTO Session (id_user, adresse_ip, user_agent, active)
