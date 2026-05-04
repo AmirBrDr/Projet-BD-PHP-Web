@@ -64,8 +64,13 @@ if (!$forumRow) {
 }
 
 $stmt = $pdo->prepare("
-    INSERT INTO Message (contenuMessage, Id_Employe, Id_forum) VALUES (:msg, :emp, :forum)
+    INSERT INTO Message (contenuMessage, Id_Employe, Id_forum, dateMessage) VALUES (:msg, :emp, :forum, :date)
 ");
-$stmt->execute([':msg' => $message, ':emp' => $userId, ':forum' => $forumId]);
+$stmt->execute([
+    ':msg'   => $message,
+    ':emp'   => $userId,
+    ':forum' => $forumId,
+    ':date'  => date('Y-m-d H:i:s'),
+]);
 
 gp_send_json(201, ['message' => 'Message publié']);

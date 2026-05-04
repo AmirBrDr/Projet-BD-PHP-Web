@@ -103,7 +103,7 @@ gp_send_json(200, [
     'messages' => array_map(fn($m) => [
         'auteur' => $m['prenomuser'] . ' ' . $m['nomuser'],
         'texte'  => $m['contenumessage'],
-        'date'   => $m['datemessage'],
+        'date'   => str_replace(' ', 'T', (string) $m['datemessage']),
     ], $messages),
     'historique' => array_map(fn($h) => [
         'action' => $h['nomaction'],
