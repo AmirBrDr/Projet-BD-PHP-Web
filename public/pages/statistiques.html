@@ -34,7 +34,36 @@
 
         <!-- CONTENU -->
         <div id="contenu" class="hidden" style="display:flex; flex-direction:column; gap:18px;">
+            <!-- SÉLECTEUR DE VUE -->
+        <section class="filtre-vue">
+            <div class="filtre-btns">
+                <button class="filtre-btn active" id="btn-global" onclick="changerFiltre('global')">
+                    <i class="fas fa-globe"></i> Vue globale
+                </button>
+                <button class="filtre-btn" id="btn-employe" onclick="changerFiltre('employe')">
+                    <i class="fas fa-user"></i> Par employé
+                </button>
+                <button class="filtre-btn" id="btn-equipe" onclick="changerFiltre('equipe')">
+                    <i class="fas fa-users"></i> Par équipe
+                </button>
+            </div>
 
+            <div id="select-employe" class="filtre-select hidden">
+                <select id="dropdown-employe" onchange="appliquerFiltre()">
+                    <option value="">-- Choisir un employé --</option>
+                </select>
+            </div>
+
+            <div id="select-equipe" class="filtre-select hidden">
+                <select id="dropdown-equipe" onchange="appliquerFiltre()">
+                    <option value="">-- Choisir une équipe --</option>
+                </select>
+            </div>
+
+            <div class="filtre-label" id="filtre-label">
+                <i class="fas fa-chart-line"></i> Statistiques globales du mois
+            </div>
+        </section>
             <!-- KPIs GLOBAUX -->
             <section class="kpi-grid">
                 <div class="kpi-card">
