@@ -57,7 +57,7 @@
 
     function renderMemberChips(progress) {
         const validated = progress.validated_names || [];
-        const pending   = progress.pending_names   || [];
+        const pending = progress.pending_names || [];
         if (!validated.length && !pending.length) return '';
         return `<div class="step-members">
             ${validated.map(n => `<span class="member-chip validated">✓ ${n}</span>`).join('')}

@@ -447,6 +447,7 @@
 }
 
 @media (max-width: 980px) {
+
     .stats-grid,
     .profile-grid {
         grid-template-columns: 1fr;
