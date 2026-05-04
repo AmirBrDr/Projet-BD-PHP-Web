@@ -50,7 +50,63 @@
 
     window.exportCSV = exportCSV;
 
+    function hexToRgb(hex) {
+    const bigint = parseInt(hex.slice(1), 16);
+    return {
+        r: (bigint >> 16) & 255,
+        g: (bigint >> 8) & 255,
+        b: bigint & 255
+    };
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + [r, g, b]
+        .map(x => x.toString(16).padStart(2, "0"))
+        .join("");
+}
+
+// mélange avec blanc (éclaircir) ou noir (assombrir)
+function mix(color, target, amount) {
+    const c1 = hexToRgb(color);
+    const c2 = hexToRgb(target);
+
+    const r = Math.round(c1.r + (c2.r - c1.r) * amount);
+    const g = Math.round(c1.g + (c2.g - c1.g) * amount);
+    const b = Math.round(c1.b + (c2.b - c1.b) * amount);
+
+    return rgbToHex(r, g, b);
+}
+
+function generateGroupedPalette(baseColors, count) {
+    const colors = [];
+    const variationsPerColor = Math.ceil(count / baseColors.length);
+
+    for (let i = 0; i < variationsPerColor; i++) {
+        for (let base of baseColors) {
+            if (colors.length >= count) break;
+
+            let color = base;
+
+            if (i > 0) {
+                const t = i / variationsPerColor;
+
+                // 🔥 alterne clair / foncé autour de la couleur de base
+                if (i % 2 === 0) {
+                    color = mix(base, "#ffffff", t * 0.4); // éclaircir
+                } else {
+                    color = mix(base, "#000000", t * 0.3); // assombrir
+                }
+            }
+
+            colors.push(color);
+        }
+    }
+
+    return colors;
+}
+
     function renderCharts(co2ParCategorie, engagementParDept) {
+         const colors = generateGroupedPalette( ["#94BB39", "#2A997F", "#298E77"] ,co2ParCategorie.length);
         if (typeof window.Chart !== "function") {
             console.warn("Chart.js n'est pas disponible (CSP ou chargement script)");
             return;
@@ -67,7 +123,7 @@
                     labels: co2ParCategorie.map((item) => `${item.categorie} (${item.pourcentage}%)`),
                     datasets: [{
                         data: co2ParCategorie.map((item) => item.co2),
-                        backgroundColor: ["#94BB39", "#2A997F", "#298E77", "#1B2D31"],
+                        backgroundColor: colors,
                         borderColor: "#1B2D31",
                         borderWidth: 2
                     }]
