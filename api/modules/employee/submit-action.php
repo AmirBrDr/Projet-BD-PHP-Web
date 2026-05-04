@@ -63,7 +63,20 @@ if ($hasPhoto) {
 }
 
 $pdo    = gp_pdo($config);
+gp_ensure_defi_block_table($pdo);
+gp_ensure_replies_table($pdo);
 $userId = (int) $claims['sub'];
+
+$stmt = $pdo->prepare(
+    'SELECT 1
+     FROM Defi_Employe_Block
+     WHERE Id_defi = :defi_id AND Id_Employe = :employe_id
+     LIMIT 1'
+);
+$stmt->execute([':defi_id' => $defiId, ':employe_id' => $userId]);
+if ($stmt->fetch()) {
+    gp_send_json(403, ['message' => 'Vous etes bloque pour ce defi']);
+}
 
 $stmt = $pdo->prepare("
     SELECT emp.Id_equipe AS equipe_id
@@ -86,7 +99,7 @@ if (!$stmt->fetch()) {
 }
 
 $stmt = $pdo->prepare("
-    SELECT r.ordre, r.Id_thematique
+    SELECT r.ordre, r.Id_thematique, r.mois
     FROM Regroupe r
     WHERE r.Id_defi = :defi
     LIMIT 1
@@ -116,11 +129,13 @@ if ($teamId > 0) {
             FROM Regroupe r2
             WHERE r2.Id_thematique = :theme
               AND r2.ordre = :ordre
+              AND date_trunc('month', r2.mois) = date_trunc('month', :mois::date)
             LIMIT 1
         ");
         $stmt->execute([
             ':theme' => (int) $challengeRow['id_thematique'],
             ':ordre' => $ordre - 1,
+            ':mois' => $challengeRow['mois'],
         ]);
         $previousRow = $stmt->fetch();
 
@@ -153,28 +168,40 @@ $stmt = $pdo->prepare("
     FROM Valider
     WHERE Id_defi = :defi AND Id_actions = :action AND Id_Employe = :emp
 ");
-$stmt->execute([':defi' => $defiId, ':action' => $actionId, ':emp' => $userId]);
+$stmt->execute([
+    ':defi' => $defiId,
+    ':action' => $actionId,
+    ':emp' => $userId,
+]);
 if ($stmt->fetch()) {
     gp_send_json(409, ['message' => 'Vous avez déjà validé cette action']);
 }
 
-try {
-    $stmt = $pdo->prepare("
-        INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, preuve)
-        VALUES (:defi, :action, :emp, :preuve)
-    ");
-    $stmt->execute([
-        ':defi'   => $defiId,
-        ':action' => $actionId,
-        ':emp'    => $userId,
-        ':preuve' => $preuve,
-    ]);
-} catch (PDOException $e) {
-    $msg = $e->getMessage();
-    if (str_contains($msg, 'ordre')) {
-        gp_send_json(422, ['message' => 'Vous devez valider le défi précédent avant celui-ci']);
-    }
-    gp_send_json(500, ['message' => 'Erreur lors de la validation']);
+$stmt = $pdo->prepare("
+    SELECT 1
+    FROM Reponse_Defi
+    WHERE Id_defi = :defi AND Id_actions = :action AND Id_Employe = :emp
+      AND statut_reponse = 'pending'
+    LIMIT 1
+");
+$stmt->execute([
+    ':defi' => $defiId,
+    ':action' => $actionId,
+    ':emp' => $userId,
+]);
+if ($stmt->fetch()) {
+    gp_send_json(409, ['message' => 'Une soumission est déjà en attente pour cette action']);
 }
 
-gp_send_json(201, ['message' => 'Action validée avec succès']);
+$stmt = $pdo->prepare("
+    INSERT INTO Reponse_Defi (Id_defi, Id_actions, Id_Employe, reponse_text)
+    VALUES (:defi, :action, :emp, :reponse)
+");
+$stmt->execute([
+    ':defi' => $defiId,
+    ':action' => $actionId,
+    ':emp' => $userId,
+    ':reponse' => $preuve,
+]);
+
+gp_send_json(201, ['message' => 'Soumission envoyée pour validation']);

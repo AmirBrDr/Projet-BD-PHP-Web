@@ -107,6 +107,23 @@
         }).format(date);
     }
 
+    function isImageProof(value) {
+        const text = String(value || "").trim();
+        return /^\/image\//.test(text) || /\.(png|jpe?g|webp)$/i.test(text);
+    }
+
+    function proofMarkup(value) {
+        const text = String(value || "").trim();
+        if (!text) {
+            return "";
+        }
+        if (isImageProof(text)) {
+            const safeSrc = escapeHtml(text);
+            return `<div class="reply-proof"><img src="${safeSrc}" alt="Preuve" loading="lazy" /></div>`;
+        }
+        return `<p class="reply-text">${escapeHtml(text)}</p>`;
+    }
+
     function renderChallengeFilters() {
         if (!elements.replyChallengeFilter) {
             return;
@@ -158,6 +175,9 @@
             .map((reply) => {
                 const employeeName = `${reply.prenomuser || ""} ${reply.nomuser || ""}`.trim() || "Employe";
                 const statusClass = `status-${reply.statut_reponse}`;
+                const actionChip = reply.nomaction
+                    ? `<span class="chip">Action: ${escapeHtml(reply.nomaction)}</span>`
+                    : "";
                 const decisionButtons =
                     reply.statut_reponse === "pending"
                         ? `
@@ -165,16 +185,18 @@
                             <button class="small-btn reject" type="button" data-action="reject" data-id="${reply.id_reponse}">Refuser</button>
                         `
                         : "";
+                const proof = proofMarkup(reply.reponse_text);
 
                 return `
                     <article class="reply-card">
                         <h3>${escapeHtml(reply.nomdefi || "Defi")}</h3>
                         <div class="reply-meta">
                             <span class="chip">Employe: ${escapeHtml(employeeName)}</span>
+                            ${actionChip}
                             <span class="chip ${statusClass}">${escapeHtml(statusLabel(reply.statut_reponse))}</span>
                             <span class="chip">Envoye: ${escapeHtml(formatDate(reply.date_reponse))}</span>
                         </div>
-                        <p class="reply-text">${escapeHtml(reply.reponse_text || "")}</p>
+                        ${proof}
                         ${reply.commentaire_animateur ? `<p class="comment-box">Commentaire animateur: ${escapeHtml(reply.commentaire_animateur)}</p>` : ""}
                         <div class="card-actions">
                             ${decisionButtons}

@@ -47,30 +47,30 @@
 
     function renderAvatar(photoPath, prenom, nom) {
         // Avatar principal (page)
-        const photoEl    = document.querySelector('[data-avatar-photo]');
+        const photoEl = document.querySelector('[data-avatar-photo]');
         const initialsEl = document.querySelector('[data-user-initials]');
         // Avatar dans la modale
-        const modalPhotoEl    = document.querySelector('[data-modal-avatar-photo]');
+        const modalPhotoEl = document.querySelector('[data-modal-avatar-photo]');
         const modalInitialsEl = document.querySelector('[data-modal-initials]');
 
         const initStr = ((prenom || 'G').charAt(0) + (nom || 'P').charAt(0)).toUpperCase();
 
         if (photoPath) {
-            if (photoEl)    { photoEl.src = photoPath; photoEl.classList.remove('hidden'); }
-            if (initialsEl)      initialsEl.classList.add('hidden');
-            if (modalPhotoEl)    { modalPhotoEl.src = photoPath; modalPhotoEl.classList.remove('hidden'); }
+            if (photoEl) { photoEl.src = photoPath; photoEl.classList.remove('hidden'); }
+            if (initialsEl) initialsEl.classList.add('hidden');
+            if (modalPhotoEl) { modalPhotoEl.src = photoPath; modalPhotoEl.classList.remove('hidden'); }
             if (modalInitialsEl) modalInitialsEl.classList.add('hidden');
         } else {
-            if (photoEl)    photoEl.classList.add('hidden');
+            if (photoEl) photoEl.classList.add('hidden');
             if (initialsEl) { initialsEl.classList.remove('hidden'); setInitials(prenom, nom); }
-            if (modalPhotoEl)    modalPhotoEl.classList.add('hidden');
+            if (modalPhotoEl) modalPhotoEl.classList.add('hidden');
             if (modalInitialsEl) { modalInitialsEl.classList.remove('hidden'); modalInitialsEl.textContent = initStr; }
         }
     }
 
     function bindPhotoUpload() {
-        const wrap     = document.querySelector('[data-modal-avatar-wrap]');
-        const input    = document.querySelector('[data-modal-photo-input]');
+        const wrap = document.querySelector('[data-modal-avatar-wrap]');
+        const input = document.querySelector('[data-modal-photo-input]');
         const feedback = document.querySelector('[data-photo-feedback]');
         if (!wrap || !input) return;
 
@@ -92,7 +92,7 @@
                 renderAvatar(json.photo, null, null);
                 if (feedback) { feedback.className = 'feedback-msg is-success'; feedback.textContent = 'Photo mise à jour.'; }
                 let current = {};
-                try { current = JSON.parse(localStorage.getItem('gp_user') || '{}'); } catch (_) {}
+                try { current = JSON.parse(localStorage.getItem('gp_user') || '{}'); } catch (_) { }
                 localStorage.setItem('gp_user', JSON.stringify({ ...current, pdpUser: json.photo }));
             } catch (err) {
                 if (feedback) { feedback.className = 'feedback-msg is-error'; feedback.textContent = err.message || 'Erreur upload.'; }
@@ -147,14 +147,14 @@
 
     function syncStoredUser(user) {
         let current = {};
-        try { current = JSON.parse(localStorage.getItem('gp_user') || '{}'); } catch (_) {}
+        try { current = JSON.parse(localStorage.getItem('gp_user') || '{}'); } catch (_) { }
         localStorage.setItem('gp_user', JSON.stringify({
             ...current,
-            nomUser:    user.nomUser    || current.nomUser    || '',
+            nomUser: user.nomUser || current.nomUser || '',
             prenomUser: user.prenomUser || current.prenomUser || '',
-            email:      user.email      || current.email      || '',
-            role:       user.role       || current.role       || '',
-            pdpUser:    user.pdpUser    ?? current.pdpUser    ?? null,
+            email: user.email || current.email || '',
+            role: user.role || current.role || '',
+            pdpUser: user.pdpUser ?? current.pdpUser ?? null,
         }));
     }
 
@@ -162,12 +162,39 @@
 
     function openModal(id) {
         const el = document.getElementById(id);
-        if (el) el.classList.remove('hidden');
+        if (!el) return;
+        if (id === 'modal-edit-password') {
+            const inputs = el.querySelectorAll('input');
+            inputs.forEach((input) => {
+                input.value = '';
+            });
+            resetPasswordToggles(el);
+        }
+        el.classList.remove('hidden');
+    }
+
+    function resetPasswordToggles(scope) {
+        if (!scope) return;
+        scope.querySelectorAll('[data-toggle-password]').forEach((btn) => {
+            const targetId = btn.getAttribute('data-toggle-password');
+            const input = targetId ? document.getElementById(targetId) : null;
+            if (input) {
+                input.type = 'password';
+            }
+            btn.classList.remove('is-active');
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.classList.add('fa-eye');
+                icon.classList.remove('fa-eye-slash');
+            }
+            btn.setAttribute('aria-label', 'Afficher le mot de passe');
+        });
     }
 
     function closeModal(id) {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
+        resetPasswordToggles(el);
         // Clear feedbacks on close
         el?.querySelectorAll('.feedback-msg').forEach(f => { f.textContent = ''; f.className = 'feedback-msg'; });
     }
@@ -195,20 +222,41 @@
         });
     }
 
+    function bindPasswordToggles() {
+        document.querySelectorAll('[data-toggle-password]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-toggle-password');
+                const input = targetId ? document.getElementById(targetId) : null;
+                if (!input) return;
+
+                const isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
+                btn.classList.toggle('is-active', isHidden);
+                btn.setAttribute('aria-label', isHidden ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('fa-eye', !isHidden);
+                    icon.classList.toggle('fa-eye-slash', isHidden);
+                }
+            });
+        });
+    }
+
     // ── Edit profile modal ──
 
     function bindEditModal(initialUser) {
-        const form     = document.querySelector('[data-edit-profile-form]');
+        const form = document.querySelector('[data-edit-profile-form]');
         const feedback = document.querySelector('[data-edit-profile-feedback]');
         if (!form || !feedback) return;
 
         if (initialUser) {
             const prenomInput = form.querySelector('[name=prenomUser]');
-            const nomInput    = form.querySelector('[name=nomUser]');
-            const emailInput  = form.querySelector('[name=email]');
+            const nomInput = form.querySelector('[name=nomUser]');
+            const emailInput = form.querySelector('[name=email]');
             if (prenomInput) prenomInput.value = initialUser.prenom || '';
-            if (nomInput)    nomInput.value    = initialUser.nom    || '';
-            if (emailInput)  emailInput.value  = initialUser.email  || '';
+            if (nomInput) nomInput.value = initialUser.nom || '';
+            if (emailInput) emailInput.value = initialUser.email || '';
         }
 
         form.addEventListener('submit', async (e) => {
@@ -216,10 +264,10 @@
             feedback.className = 'feedback-msg';
             feedback.textContent = '';
 
-            const fd        = new FormData(form);
+            const fd = new FormData(form);
             const prenomUser = fd.get('prenomUser')?.trim() || '';
-            const nomUser    = fd.get('nomUser')?.trim()    || '';
-            const email      = fd.get('email')?.trim()      || '';
+            const nomUser = fd.get('nomUser')?.trim() || '';
+            const email = fd.get('email')?.trim() || '';
 
             if (!prenomUser || !nomUser) {
                 feedback.className = 'feedback-msg is-error';
@@ -238,12 +286,12 @@
                 syncStoredUser(updated);
 
                 const finalPrenom = updated.prenomUser || prenomUser;
-                const finalNom    = updated.nomUser    || nomUser;
-                const finalEmail  = updated.email      || email;
+                const finalNom = updated.nomUser || nomUser;
+                const finalEmail = updated.email || email;
 
-                const nameEl  = document.querySelector('[data-user-name]');
+                const nameEl = document.querySelector('[data-user-name]');
                 const emailEl = document.querySelector('[data-user-email]');
-                if (nameEl)  nameEl.textContent  = `${finalPrenom} ${finalNom}`.trim();
+                if (nameEl) nameEl.textContent = `${finalPrenom} ${finalNom}`.trim();
                 if (emailEl) emailEl.textContent = finalEmail;
                 setInitials(finalPrenom, finalNom);
 
@@ -263,7 +311,7 @@
     // ── Change password modal ──
 
     function bindPasswordModal() {
-        const form     = document.querySelector('[data-pwd-form]');
+        const form = document.querySelector('[data-pwd-form]');
         const feedback = document.querySelector('[data-pwd-feedback]');
         if (!form || !feedback) return;
 
@@ -272,9 +320,9 @@
             feedback.className = 'feedback-msg';
             feedback.textContent = '';
 
-            const fd              = new FormData(form);
+            const fd = new FormData(form);
             const currentPassword = fd.get('current_password')?.trim() || '';
-            const newPassword     = fd.get('new_password')?.trim()     || '';
+            const newPassword = fd.get('new_password')?.trim() || '';
             const confirmPassword = fd.get('confirm_password')?.trim() || '';
 
             if (!currentPassword || !newPassword) {
@@ -313,7 +361,7 @@
     // ── Preferences ──
 
     function bindPreferences() {
-        const form     = document.querySelector('[data-preference-form]');
+        const form = document.querySelector('[data-preference-form]');
         const feedback = document.querySelector('[data-pref-feedback]');
         if (!form || !feedback) return;
         form.addEventListener('submit', (e) => {
@@ -327,6 +375,7 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
         bindModalTriggers();
+        bindPasswordToggles();
         bindPasswordModal();
         bindPreferences();
 
@@ -336,12 +385,12 @@
             renderAvatar(data.user.photo, data.user.prenom, data.user.nom);
             bindPhotoUpload();
 
-            const nameEl  = document.querySelector('[data-user-name]');
+            const nameEl = document.querySelector('[data-user-name]');
             const emailEl = document.querySelector('[data-user-email]');
-            const teamEl  = document.querySelector('[data-profile-team]');
-            if (nameEl)  nameEl.textContent  = `${data.user.prenom} ${data.user.nom}`;
+            const teamEl = document.querySelector('[data-profile-team]');
+            if (nameEl) nameEl.textContent = `${data.user.prenom} ${data.user.nom}`;
             if (emailEl) emailEl.textContent = data.user.email;
-            if (teamEl)  teamEl.textContent  = data.equipe ? data.equipe.nom : 'Sans équipe';
+            if (teamEl) teamEl.textContent = data.equipe ? data.equipe.nom : 'Sans équipe';
 
             bindEditModal(data.user);
             renderStats(data.stats);

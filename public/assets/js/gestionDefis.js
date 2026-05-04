@@ -320,7 +320,7 @@
                             </div>
                         </div>
                         <div class="defi-action">
-                            <a href="detailDefi.html?id=${challenge.id_defi}" class="btn-detail">Voir le defi</a>
+                            <a href="detailDefiAnimateur.html?id=${challenge.id_defi}" class="btn-detail">Voir le defi</a>
                             <div class="manage-actions">
                                 <button class="btn-manage" type="button" data-action="edit" data-id="${challenge.id_defi}">Modifier</button>
                                 <button class="btn-manage danger" type="button" data-action="delete" data-id="${challenge.id_defi}">Supprimer</button>
@@ -333,7 +333,8 @@
     }
 
     async function loadThemes() {
-        const response = await apiRequest("themes");
+        const selectedMonth = elements.challengeMonth?.value || getCurrentMonth();
+        const response = await apiRequest("themes", { params: { mois: selectedMonth } });
         state.themes = response?.data || [];
 
         if (elements.challengeTheme) {
@@ -449,6 +450,11 @@
             return;
         }
 
+        // Ignore les liens (permet au navigateur de les suivre)
+        if (target.tagName === 'A') {
+            return;
+        }
+
         const action = target.dataset.action;
         const challengeId = Number(target.dataset.id || 0);
         if (!action || challengeId <= 0) {
@@ -478,8 +484,13 @@
             resetForm();
             closeModal();
         });
-        elements.openCreateModalBtn?.addEventListener("click", () => {
+        elements.openCreateModalBtn?.addEventListener("click", async () => {
             resetForm();
+            try {
+                await loadThemes();
+            } catch (error) {
+                setFormAlert(error?.message || "Chargement des thematiques impossible.", "error");
+            }
             openModal();
         });
         elements.closeModalBtn?.addEventListener("click", () => {
@@ -491,10 +502,17 @@
             }
         });
         elements.challengeTheme?.addEventListener("change", setDefaultOrderFromTheme);
+        elements.challengeMonth?.addEventListener("change", async () => {
+            try {
+                await loadThemes();
+            } catch (error) {
+                setFormAlert(error?.message || "Chargement des thematiques impossible.", "error");
+            }
+        });
         elements.filtreTheme?.addEventListener("change", renderChallenges);
         elements.refreshChallengesBtn?.addEventListener("click", async () => {
             try {
-                await loadChallenges();
+                await Promise.all([loadThemes(), loadChallenges()]);
                 setPageAlert("");
             } catch (error) {
                 setPageAlert(error?.message || "Actualisation impossible.");

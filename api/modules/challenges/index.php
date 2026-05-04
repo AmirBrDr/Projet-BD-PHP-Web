@@ -74,11 +74,24 @@ try {
             }
 
             $stmt = $pdo->prepare(
-                'SELECT d.*, t.nomTheme, r.ordre, r.mois
+                'SELECT d.Id_defi AS idDefi,
+                        d.nomDefi AS nomDefi,
+                        d.descriptionDefi AS descriptionDefi,
+                        d.nbPointsDefi AS nbPointsDefi,
+                        d.nbCO2Defi AS nbCO2Defi,
+                        d.niveauDefi AS niveauDefi,
+                        t.nomTheme AS nomTheme,
+                        r.ordre AS ordre,
+                        r.mois AS mois,
+                        COUNT(DISTINCT v.Id_Employe) AS nbParticipants
                  FROM Defi d
                  JOIN Regroupe r ON r.Id_defi = d.Id_defi
                  JOIN Thematique t ON t.Id_thematique = r.Id_thematique
-                 WHERE d.Id_defi = ?'
+                 LEFT JOIN Valider v ON v.Id_defi = d.Id_defi
+                 WHERE d.Id_defi = ?
+                 GROUP BY d.Id_defi, d.nomDefi, d.descriptionDefi,
+                          d.nbPointsDefi, d.nbCO2Defi, d.niveauDefi,
+                          t.nomTheme, r.ordre, r.mois'
             );
             $stmt->execute([$id]);
             $defi = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -87,7 +100,7 @@ try {
             }
 
             $stmt2 = $pdo->prepare(
-                'SELECT a.Id_actions, a.nomAction, a.descriptionAction
+                'SELECT a.Id_actions AS idAction, a.nomAction AS nomAction, a.descriptionAction AS descriptionAction
                  FROM Actions a
                  JOIN Faire_partie fp ON fp.Id_actions = a.Id_actions
                  WHERE fp.Id_defi = ?'
@@ -96,7 +109,7 @@ try {
             $actions = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
             $stmt3 = $pdo->prepare(
-                'SELECT f.Id_forum, f.nomForum
+                'SELECT f.Id_forum AS idForum, f.nomForum AS nomForum, f.descriptionForum AS descriptionForum
                  FROM Forum f
                  WHERE f.Id_defi = ?'
             );
@@ -104,27 +117,71 @@ try {
             $forum = $stmt3->fetch(PDO::FETCH_ASSOC);
 
             $messages = [];
-            if ($forum && isset($forum['id_forum'])) {
+            $forumId = $forum['idforum'] ?? $forum['idForum'] ?? $forum['id_forum'] ?? null;
+            if ($forum && $forumId) {
                 $stmt4 = $pdo->prepare(
-                    'SELECT m.contenuMessage, m.dateMessage,
-                            u.nomUser, u.prenomUser
+                    "SELECT m.Id_Employe AS idEmploye,
+                            m.contenuMessage, m.dateMessage,
+                            u.nomUser, u.prenomUser, u.pdpUser,
+                            CASE
+                                WHEN EXISTS (SELECT 1 FROM Animateur an WHERE an.Id_Animateur = u.Id_User) THEN 'animateur'
+                                WHEN EXISTS (SELECT 1 FROM Admin ad WHERE ad.Id_Admin = u.Id_User) THEN 'admin'
+                                ELSE 'employe'
+                            END AS roleUtilisateur
                      FROM Message m
                      JOIN Utilisateur u ON u.Id_User = m.Id_Employe
                      WHERE m.Id_forum = ?
-                     ORDER BY m.dateMessage DESC
-                     LIMIT 20'
+                     ORDER BY m.dateMessage ASC, m.Id_Message ASC"
                 );
-                $stmt4->execute([$forum['id_forum']]);
+                $stmt4->execute([$forumId]);
                 $messages = $stmt4->fetchAll(PDO::FETCH_ASSOC);
             }
+
+            $defiPayload = [
+                'idDefi' => (int) ($defi['iddefi'] ?? 0),
+                'nomDefi' => $defi['nomdefi'] ?? '',
+                'descriptionDefi' => $defi['descriptiondefi'] ?? '',
+                'nbPointsDefi' => (int) ($defi['nbpointsdefi'] ?? 0),
+                'nbCO2Defi' => (int) ($defi['nbco2defi'] ?? 0),
+                'niveauDefi' => (int) ($defi['niveaudefi'] ?? 0),
+                'nomTheme' => $defi['nomtheme'] ?? '',
+                'ordre' => $defi['ordre'] ?? null,
+                'mois' => $defi['mois'] ?? null,
+                'nbParticipants' => (int) ($defi['nbparticipants'] ?? 0),
+            ];
+
+            $actionsPayload = array_map(static fn(array $action): array => [
+                'idAction' => (int) ($action['idaction'] ?? $action['id_actions'] ?? 0),
+                'nomAction' => $action['nomaction'] ?? '',
+                'descriptionAction' => $action['descriptionaction'] ?? '',
+            ], $actions);
+
+            $forumPayload = null;
+            if ($forum) {
+                $forumPayload = [
+                    'idForum' => (int) ($forum['idforum'] ?? $forum['idForum'] ?? 0),
+                    'nomForum' => $forum['nomforum'] ?? ($forum['nomForum'] ?? ''),
+                    'descriptionForum' => $forum['descriptionforum'] ?? ($forum['descriptionForum'] ?? null),
+                ];
+            }
+
+            $messagesPayload = array_map(static fn(array $message): array => [
+                'idEmploye' => (int) ($message['idemploye'] ?? 0),
+                'contenuMessage' => $message['contenumessage'] ?? '',
+                'dateMessage' => $message['datemessage'] ?? null,
+                'prenomUser' => $message['prenomuser'] ?? '',
+                'nomUser' => $message['nomuser'] ?? '',
+                'pdpUser' => $message['pdpuser'] ?? null,
+                'roleUtilisateur' => $message['roleutilisateur'] ?? 'employe',
+            ], $messages);
 
             gp_send_json(200, [
                 'status' => 'success',
                 'data' => [
-                    'defi' => $defi,
-                    'actions' => $actions,
-                    'forum' => $forum,
-                    'messages' => $messages,
+                    'defi' => $defiPayload,
+                    'actions' => $actionsPayload,
+                    'forum' => $forumPayload,
+                    'messages' => $messagesPayload,
                 ],
             ]);
 

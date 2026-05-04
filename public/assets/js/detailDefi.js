@@ -27,8 +27,91 @@
         if (el) el.textContent = value;
     }
 
+    function statusLabel(status) {
+        const map = {
+            pending: 'En attente',
+            approved: 'Approuvee',
+            rejected: 'Refusee',
+        };
+        return map[status] || status || '';
+    }
+
+    function isImageProof(value) {
+        const text = String(value || '').trim();
+        return /^\/image\//.test(text) || /\.(png|jpe?g|webp)$/i.test(text);
+    }
+
+    function renderProof(value) {
+        const text = String(value || '').trim();
+        if (!text) {
+            return '';
+        }
+        if (isImageProof(text)) {
+            return `<div class="proof-media"><img src="${text}" alt="Preuve soumise" loading="lazy" /></div>`;
+        }
+        return `<p class="proof-text">${text}</p>`;
+    }
+
     let selectedActionId = 0;
     let defiId = 0;
+    let isBlocked = false;
+    let hasPendingSubmission = false;
+    let actionState = new Map();
+
+    function setBlockedState(blocked, reason, date) {
+        isBlocked = Boolean(blocked);
+        if (!isBlocked) {
+            return;
+        }
+
+        const reasonText = reason ? ` Motif : ${reason}` : '';
+        const dateText = date ? ` (bloque le ${new Date(date).toLocaleDateString('fr-FR')})` : '';
+        const message = `Vous etes bloque pour ce defi.${reasonText}${dateText}`;
+
+        const formFeedback = document.querySelector('[data-form-feedback]');
+        if (formFeedback) {
+            formFeedback.className = 'feedback-msg is-warning';
+            formFeedback.textContent = message;
+        }
+
+        const forumFeedback = document.querySelector('[data-forum-feedback]');
+        if (forumFeedback) {
+            forumFeedback.className = 'feedback-msg is-warning';
+            forumFeedback.textContent = message;
+        }
+
+        const submissionForm = document.querySelector('[data-submission-form]');
+        submissionForm?.querySelectorAll('input, textarea, button').forEach((el) => {
+            el.disabled = true;
+        });
+
+        const forumForm = document.querySelector('[data-forum-form]');
+        forumForm?.querySelectorAll('input, textarea, button').forEach((el) => {
+            el.disabled = true;
+        });
+    }
+
+    function setPendingState(pending) {
+        hasPendingSubmission = Boolean(pending);
+        if (isBlocked) {
+            return;
+        }
+
+        const submissionForm = document.querySelector('[data-submission-form]');
+        const formFeedback = document.querySelector('[data-form-feedback]');
+        if (!submissionForm) {
+            return;
+        }
+
+        submissionForm.querySelectorAll('input, textarea, button').forEach((el) => {
+            el.disabled = hasPendingSubmission;
+        });
+
+        if (formFeedback && hasPendingSubmission && !formFeedback.classList.contains('is-success')) {
+            formFeedback.className = 'feedback-msg is-warning';
+            formFeedback.textContent = 'Une soumission est deja en attente de validation.';
+        }
+    }
 
     function renderHead(defi) {
         setText('[data-challenge-theme]', 'Thématique : ' + defi.theme);
@@ -43,32 +126,53 @@
         const host = document.querySelector('[data-action-options]');
         if (!host) return;
 
-        const available = actions.filter(a => !a.valide);
-        if (alreadyDone && !available.length) {
-            host.innerHTML = '<p style="color:var(--shell-muted)">Toutes les actions de ce défi ont été validées.</p>';
+        actionState = new Map(actions.map((a) => [a.id, a]));
+
+        const selectable = actions.filter((a) => !a.valide && a.reply_status !== 'pending');
+        const firstSelectable = selectable[0];
+
+        if (!isBlocked && !hasPendingSubmission) {
+            selectedActionId = firstSelectable ? firstSelectable.id : 0;
+        } else {
+            selectedActionId = 0;
+        }
+
+        if (alreadyDone && !selectable.length) {
+            host.innerHTML = '<p style="color:var(--shell-muted)">Toutes les actions de ce defi ont ete validees.</p>';
             return;
         }
 
-        const firstAvailable = available[0];
-        selectedActionId = firstAvailable ? firstAvailable.id : 0;
+        host.innerHTML = actions.map((a) => {
+            const isPending = a.reply_status === 'pending';
+            const isRejected = a.reply_status === 'rejected';
+            const isDone = a.valide;
+            const statusText = isDone ? '✓ Validee' : isPending ? 'En attente' : isRejected ? 'Refusee' : '';
+            const statusClass = isDone ? 'is-approved' : isPending ? 'is-pending' : isRejected ? 'is-rejected' : '';
+            const disabled = isBlocked || hasPendingSubmission || isDone || isPending;
+            const selectedClass = a.id === selectedActionId ? ' is-selected' : '';
+            const cardClass = `${isDone ? ' is-done' : ''}${statusClass ? ' ' + statusClass : ''}${selectedClass}`;
+            const statusBadge = statusText ? `<small class="action-status ${statusClass}">${statusText}</small>` : '';
 
-        host.innerHTML = actions.map(a => `
-            <button class="option-card${a.valide ? ' is-done' : (a.id === selectedActionId ? ' is-selected' : '')}"
+            return `
+            <button class="option-card${cardClass}"
                     type="button"
                     data-action-id="${a.id}"
-                    ${a.valide ? 'disabled' : ''}>
+                    ${disabled ? 'disabled' : ''}>
                 <h3>${a.nom}</h3>
                 <p>${a.description || ''}</p>
-                ${a.valide ? '<small style="color:#94bb39">✓ Validée</small>' : ''}
-            </button>`).join('');
+                ${statusBadge}
+            </button>`;
+        }).join('');
 
-        host.querySelectorAll('[data-action-id]:not([disabled])').forEach(btn => {
-            btn.addEventListener('click', () => {
-                selectedActionId = parseInt(btn.dataset.actionId, 10);
-                host.querySelectorAll('[data-action-id]').forEach(b => b.classList.remove('is-selected'));
-                btn.classList.add('is-selected');
+        if (!isBlocked && !hasPendingSubmission) {
+            host.querySelectorAll('[data-action-id]:not([disabled])').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectedActionId = parseInt(btn.dataset.actionId, 10);
+                    host.querySelectorAll('[data-action-id]').forEach(b => b.classList.remove('is-selected'));
+                    btn.classList.add('is-selected');
+                });
             });
-        });
+        }
     }
 
     function formatDateTime(dateStr) {
@@ -93,19 +197,72 @@
             </li>`).join('');
     }
 
-    function renderHistory(historique) {
+    function renderHistory(reponses, historique = []) {
         const host = document.querySelector('[data-history-list]');
         if (!host) return;
-        if (!historique.length) {
+
+        const list = Array.isArray(reponses) && reponses.length
+            ? reponses.map((r) => ({
+                action: r.action || 'Action',
+                statut: r.statut,
+                date: r.date,
+                date_traitement: r.date_traitement,
+                reponse: r.reponse,
+                commentaire: r.commentaire,
+            }))
+            : historique.map((h) => ({
+                action: h.action,
+                statut: 'approved',
+                date: h.date,
+                reponse: h.preuve,
+                commentaire: null,
+                date_traitement: null,
+            }));
+
+        if (!list.length) {
             host.innerHTML = '<li class="history-item" style="color:var(--shell-muted)">Aucune soumission encore.</li>';
             return;
         }
-        host.innerHTML = historique.map(h => `
+
+        host.innerHTML = list.map((item) => {
+            const statusClass = item.statut ? `status-${item.statut}` : '';
+            const statusChip = item.statut ? `<span class="status-chip ${statusClass}">${statusLabel(item.statut)}</span>` : '';
+            const sentDate = item.date ? new Date(item.date).toLocaleDateString('fr-FR') : '';
+            const treatedDate = item.date_traitement ? new Date(item.date_traitement).toLocaleDateString('fr-FR') : '';
+            const sentLine = sentDate ? `<small>Envoye: ${sentDate}</small>` : '';
+            const treatedLine = treatedDate ? `${sentDate ? '<br />' : ''}<small>Traite: ${treatedDate}</small>` : '';
+            const proofLine = renderProof(item.reponse);
+            const commentLine = item.commentaire ? `<p class="comment-box">Commentaire animateur: ${item.commentaire}</p>` : '';
+
+            return `
             <li class="history-item">
-                <strong>${h.action}</strong><br />
-                <small>${new Date(h.date).toLocaleDateString('fr-FR')}</small>
-                ${h.preuve ? `<br /><span style="color:var(--shell-muted);font-size:12px">${h.preuve}</span>` : ''}
-            </li>`).join('');
+                <div class="history-head">
+                    <strong>${item.action}</strong>
+                    ${statusChip}
+                </div>
+                ${sentLine}
+                ${treatedLine}
+                ${proofLine}
+                ${commentLine}
+            </li>`;
+        }).join('');
+    }
+
+    function applyChallengeData(data) {
+        renderHead(data.defi);
+        setBlockedState(Boolean(data.blocked), data.blocked_reason, data.blocked_at);
+
+        hasPendingSubmission = Boolean(data.has_pending) || (data.reponses || []).some((r) => r.statut === 'pending');
+        renderActions(data.actions || [], data.deja_valide);
+        setPendingState(hasPendingSubmission);
+        renderForum(data.messages || []);
+        renderHistory(data.reponses || [], data.historique || []);
+
+        if (data.deja_valide) {
+            setText('[data-challenge-progress]', 'Deja valide ✓');
+        } else if (hasPendingSubmission) {
+            setText('[data-challenge-progress]', 'En attente de validation');
+        }
     }
 
     function bindSubmissionForm() {
@@ -118,14 +275,42 @@
             feedback.className = 'feedback-msg';
             feedback.textContent = '';
 
+            if (isBlocked) {
+                feedback.className = 'feedback-msg is-warning';
+                feedback.textContent = 'Vous etes bloque pour ce defi.';
+                return;
+            }
+
+            if (hasPendingSubmission) {
+                feedback.className = 'feedback-msg is-warning';
+                feedback.textContent = 'Une soumission est deja en attente de validation.';
+                return;
+            }
+
             if (!selectedActionId) {
                 feedback.textContent = 'Sélectionnez une action.';
                 return;
             }
 
+            const selectedAction = actionState.get(selectedActionId);
+            if (!selectedAction) {
+                feedback.textContent = 'Sélectionnez une action.';
+                return;
+            }
+            if (selectedAction.reply_status === 'pending') {
+                feedback.className = 'feedback-msg is-warning';
+                feedback.textContent = 'Cette action est deja en attente de validation.';
+                return;
+            }
+            if (selectedAction.valide) {
+                feedback.className = 'feedback-msg is-warning';
+                feedback.textContent = 'Cette action est deja validee.';
+                return;
+            }
+
             const fd = new FormData(form);
             const hasPhoto = fd.get('preuvePhoto') && fd.get('preuvePhoto').size > 0;
-            const hasText  = String(fd.get('proofText') || '').trim().length > 0;
+            const hasText = String(fd.get('proofText') || '').trim().length > 0;
             if (!hasPhoto && !hasText) {
                 feedback.textContent = 'Ajoutez une photo ou un commentaire de preuve.';
                 return;
@@ -145,11 +330,11 @@
                 const json = await res.json();
                 if (!res.ok) throw new Error(json.message || 'HTTP ' + res.status);
                 feedback.className = 'feedback-msg is-success';
-                feedback.textContent = 'Action validée avec succès ! Vos points ont été crédités.';
+                feedback.textContent = 'Soumission envoyee. En attente de validation.';
                 form.reset();
+                submitBtn.disabled = false;
                 const data = await apiGet('/modules/employee/challenge-detail.php?id=' + defiId);
-                renderActions(data.actions, data.deja_valide);
-                renderHistory(data.historique);
+                applyChallengeData(data);
             } catch (err) {
                 feedback.textContent = err.message || 'Erreur lors de la soumission.';
                 submitBtn.disabled = false;
@@ -164,6 +349,12 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (isBlocked) {
+                feedback.className = 'feedback-msg is-warning';
+                feedback.textContent = 'Vous etes bloque pour ce defi.';
+                return;
+            }
             const message = String(new FormData(form).get('message') || '').trim();
             if (!message) return;
 
@@ -198,14 +389,7 @@
 
         try {
             const data = await apiGet('/modules/employee/challenge-detail.php?id=' + defiId);
-            renderHead(data.defi);
-            renderActions(data.actions, data.deja_valide);
-            renderForum(data.messages);
-            renderHistory(data.historique);
-
-            if (data.deja_valide) {
-                setText('[data-challenge-progress]', 'Déjà validé ✓');
-            }
+            applyChallengeData(data);
         } catch (err) {
             console.error('Erreur détail défi:', err);
             setText('[data-challenge-title]', 'Erreur de chargement');

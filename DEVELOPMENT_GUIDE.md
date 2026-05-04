@@ -57,7 +57,7 @@ ssh cServer
 │   │   ├── gestionDefis.html
 │   │   ├── moderation.html
 │   │   ├── parametresRH.html
-│   │   ├── parametresAnimateur.html
+│   │   ├── compteAnimateur.html
 │   │   ├── statistiques.html
 │   │   ├── profil.html
 │   │   ├── detailEquipe.html
@@ -94,8 +94,7 @@ ssh cServer
 
 ### 🎬 **Animateur**
 - **Statistiques** - `public/pages/statistiques.html` - Voir les statistiques et analyses
-- **Profil** - `public/pages/profil.html` - Profil utilisateur
-- **Paramètres** - `public/pages/parametresAnimateur.html` - Paramètres animateur
+- **Compte** - `public/pages/compteAnimateur.html` - Profil animateur
 
 **Modules API :**
 - `api/modules/animator/`

@@ -33,13 +33,16 @@ try {
                 rd.Id_reponse,
                 rd.Id_defi,
                 d.nomDefi,
+                rd.Id_actions,
                                 t.nomTheme,
+                a.nomAction,
                 rd.reponse_text,
                 rd.commentaire_animateur,
                                 to_char(rd.date_reponse, \'YYYY-MM-DD"T"HH24:MI:SS\') AS date_reponse,
                                 to_char(rd.date_traitement, \'YYYY-MM-DD"T"HH24:MI:SS\') AS date_traitement
              FROM Reponse_Defi rd
              JOIN Defi d ON d.Id_defi = rd.Id_defi
+                         LEFT JOIN Actions a ON a.Id_actions = rd.Id_actions
                          LEFT JOIN Regroupe r ON r.Id_defi = d.Id_defi
                          LEFT JOIN Thematique t ON t.Id_thematique = r.Id_thematique
              WHERE rd.Id_Employe = :employe_id
@@ -119,7 +122,9 @@ try {
                 rd.Id_reponse,
                 rd.Id_defi,
                 d.nomDefi,
+                rd.Id_actions,
                 t.nomTheme,
+                a.nomAction,
                 rd.reponse_text,
                 rd.statut_reponse,
                 rd.commentaire_animateur,
@@ -127,6 +132,7 @@ try {
                      to_char(rd.date_traitement, \'YYYY-MM-DD"T"HH24:MI:SS\') AS date_traitement
              FROM Reponse_Defi rd
              JOIN Defi d ON d.Id_defi = rd.Id_defi
+             LEFT JOIN Actions a ON a.Id_actions = rd.Id_actions
              LEFT JOIN Regroupe r ON r.Id_defi = d.Id_defi
              LEFT JOIN Thematique t ON t.Id_thematique = r.Id_thematique
              ' . $where . '
@@ -255,19 +261,3 @@ function gp_assert_employe_exists(PDO $pdo, int $employeId): void
     }
 }
 
-function gp_ensure_replies_table(PDO $pdo): void
-{
-    $pdo->exec(
-        'CREATE TABLE IF NOT EXISTS Reponse_Defi (
-            Id_reponse              SERIAL PRIMARY KEY,
-            Id_defi                 INT NOT NULL REFERENCES Defi(Id_defi),
-            Id_Employe              INT NOT NULL REFERENCES Employe(Id_Employe),
-            reponse_text            TEXT NOT NULL,
-            statut_reponse          VARCHAR(20) NOT NULL DEFAULT \'pending\' CHECK (statut_reponse IN (\'pending\', \'approved\', \'rejected\')),
-            commentaire_animateur   TEXT,
-            date_reponse            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            date_traitement         TIMESTAMP,
-            Id_Animateur_traitement INT REFERENCES Animateur(Id_Animateur)
-        )'
-    );
-}
