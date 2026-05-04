@@ -63,6 +63,8 @@ class CompteRHManager {
             }
         }
 
+    }
+
     saveAll() {
         localStorage.setItem(this.storageKeys.profile, JSON.stringify(this.user));
         localStorage.setItem(this.storageKeys.security, JSON.stringify(this.securityInfo));
