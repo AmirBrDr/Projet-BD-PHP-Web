@@ -162,12 +162,39 @@
 
     function openModal(id) {
         const el = document.getElementById(id);
-        if (el) el.classList.remove('hidden');
+        if (!el) return;
+        if (id === 'modal-edit-password') {
+            const inputs = el.querySelectorAll('input');
+            inputs.forEach((input) => {
+                input.value = '';
+            });
+            resetPasswordToggles(el);
+        }
+        el.classList.remove('hidden');
+    }
+
+    function resetPasswordToggles(scope) {
+        if (!scope) return;
+        scope.querySelectorAll('[data-toggle-password]').forEach((btn) => {
+            const targetId = btn.getAttribute('data-toggle-password');
+            const input = targetId ? document.getElementById(targetId) : null;
+            if (input) {
+                input.type = 'password';
+            }
+            btn.classList.remove('is-active');
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.classList.add('fa-eye');
+                icon.classList.remove('fa-eye-slash');
+            }
+            btn.setAttribute('aria-label', 'Afficher le mot de passe');
+        });
     }
 
     function closeModal(id) {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
+        resetPasswordToggles(el);
         // Clear feedbacks on close
         el?.querySelectorAll('.feedback-msg').forEach(f => { f.textContent = ''; f.className = 'feedback-msg'; });
     }
@@ -192,6 +219,27 @@
             if (e.key === 'Escape') {
                 document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id));
             }
+        });
+    }
+
+    function bindPasswordToggles() {
+        document.querySelectorAll('[data-toggle-password]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-toggle-password');
+                const input = targetId ? document.getElementById(targetId) : null;
+                if (!input) return;
+
+                const isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
+                btn.classList.toggle('is-active', isHidden);
+                btn.setAttribute('aria-label', isHidden ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('fa-eye', !isHidden);
+                    icon.classList.toggle('fa-eye-slash', isHidden);
+                }
+            });
         });
     }
 
@@ -327,6 +375,7 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
         bindModalTriggers();
+        bindPasswordToggles();
         bindPasswordModal();
         bindPreferences();
 

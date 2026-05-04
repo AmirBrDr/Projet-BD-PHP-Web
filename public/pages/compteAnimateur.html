@@ -3,29 +3,28 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>GreenPulse - Profil Employe</title>
+        <title>GreenPulse - Compte Animateur</title>
         <link rel="stylesheet" href="../assets/css/app-shell.css" />
         <link rel="stylesheet" href="../assets/css/unified-navbar.css" />
         <link rel="stylesheet" href="../assets/css/profil.css" />
+        <link rel="stylesheet" href="../assets/css/compteAnimateur.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     </head>
-    <body class="app-page" data-required-role="employe">
+    <body class="app-page" data-required-role="animateur">
         <nav class="navbar">
             <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo" />
             <div class="nav-links">
-                <a href="dashboardE.html">Dashboard</a>
-                <a href="defis.html">Defis</a>
-                <a href="classement.html">Classement</a>
-                <a href="detailEquipe.html?id=current">Equipe</a>
-                <a class="active" href="profil.html">Mon profil</a>
+                <a href="gestionDefis.html">Gestion des defis</a>
+                <a href="moderation.html">Moderation</a>
+                <a href="statistiques.html">Statistiques</a>
+                <a class="active" href="compteAnimateur.html">Compte</a>
             </div>
             <div class="nav-right">
-                <div class="role-badge employe">Employe</div>
+                <div class="role-badge animateur">Animateur DD</div>
                 <button type="button" class="logout-btn" data-logout title="Deconnexion"><i class="fas fa-sign-out-alt"></i></button>
             </div>
         </nav>
         <main class="app-shell employee-layout">
-            <!-- Profile hero -->
             <section class="panel profile-hero">
                 <div class="avatar-block">
                     <div class="avatar-wrapper">
@@ -36,7 +35,8 @@
                 <div class="identity-block">
                     <h1 data-user-name>Utilisateur</h1>
                     <p class="profile-email" data-user-email></p>
-                    <div class="team-chip" data-profile-team>Equipe non definie</div>
+                    <div class="team-chip" data-user-role-label>Animateur DD</div>
+                    <p class="meta-row">Inscrit le <span data-user-since>--</span></p>
                 </div>
                 <div class="profile-actions">
                     <button class="btn-edit-profile" type="button" data-open-edit-modal>Modifier le profil</button>
@@ -44,40 +44,40 @@
                 </div>
             </section>
 
-            <!-- Stats -->
-            <section class="stats-grid" data-profile-stats></section>
-
-            <!-- Badges + historique -->
             <div class="profile-grid">
                 <article class="panel profile-card">
-                    <h2>Mes badges</h2>
-                    <ul class="badge-list" data-badge-list></ul>
+                    <h2>Informations</h2>
+                    <ul class="info-list">
+                        <li class="info-item">
+                            <span class="info-label">Nom complet</span>
+                            <span class="info-value" data-user-name>Utilisateur</span>
+                        </li>
+                        <li class="info-item">
+                            <span class="info-label">Adresse email</span>
+                            <span class="info-value" data-user-email>utilisateur@entreprise.fr</span>
+                        </li>
+                        <li class="info-item">
+                            <span class="info-label">Role</span>
+                            <span class="info-value" data-user-role-label>Animateur DD</span>
+                        </li>
+                        <li class="info-item">
+                            <span class="info-label">Statut</span>
+                            <span class="info-value" data-user-status>Actif</span>
+                        </li>
+                    </ul>
+                    <p class="feedback-msg" data-profile-feedback></p>
                 </article>
-
                 <article class="panel profile-card">
-                    <h2>Defis termines</h2>
-                    <ul class="history-list" data-history-list></ul>
-                </article>
-
-                <article class="panel profile-card preference-card">
-                    <h2>Parametres</h2>
-                    <form data-preference-form>
-                        <label class="toggle-row" for="notifMail">
-                            <span>Recevoir les notifications email</span>
-                            <input id="notifMail" name="notifMail" type="checkbox" checked />
-                        </label>
-                        <label class="toggle-row" for="notifForum">
-                            <span>Suivre les nouveaux messages forum</span>
-                            <input id="notifForum" name="notifForum" type="checkbox" checked />
-                        </label>
-                        <button class="submit-btn" type="submit">Enregistrer mes preferences</button>
-                    </form>
-                    <p class="feedback-msg" data-pref-feedback></p>
+                    <h2>Acces rapide</h2>
+                    <ul class="info-list">
+                        <li class="info-item"><a class="info-link" href="gestionDefis.html">Gerer les defis</a></li>
+                        <li class="info-item"><a class="info-link" href="moderation.html">Moderation</a></li>
+                        <li class="info-item"><a class="info-link" href="statistiques.html">Statistiques</a></li>
+                    </ul>
                 </article>
             </div>
         </main>
 
-        <!-- Modal: edit profile -->
         <div class="modal-overlay hidden" id="modal-edit-profile" role="dialog" aria-modal="true" aria-labelledby="modal-edit-title">
             <div class="modal-box">
                 <div class="modal-header">
@@ -96,7 +96,7 @@
                 </div>
                 <form data-edit-profile-form>
                     <label class="field-row" for="editPrenom">
-                        <span>Prénom</span>
+                        <span>Prenom</span>
                         <input id="editPrenom" name="prenomUser" type="text" autocomplete="given-name" required />
                     </label>
                     <label class="field-row" for="editNom">
@@ -116,7 +116,6 @@
             </div>
         </div>
 
-        <!-- Modal: change password -->
         <div class="modal-overlay hidden" id="modal-edit-password" role="dialog" aria-modal="true" aria-labelledby="modal-pwd-title">
             <div class="modal-box">
                 <div class="modal-header">
@@ -161,6 +160,6 @@
         </div>
 
         <script src="../assets/js/app-shell.js" defer></script>
-        <script src="../assets/js/profil.js" defer></script>
+        <script src="../assets/js/compteAnimateur.js" defer></script>
     </body>
 </html>

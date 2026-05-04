@@ -204,6 +204,7 @@ CREATE TABLE Reponse_Defi (
                                         CONSTRAINT fk_Reponse_Defi_Defi REFERENCES Defi(Id_defi),
     Id_Employe             INT          CONSTRAINT nn_Reponse_Defi_Employe NOT NULL
                                         CONSTRAINT fk_Reponse_Defi_Employe REFERENCES Employe(Id_Employe),
+    Id_actions             INT,
     reponse_text           TEXT         CONSTRAINT nn_Reponse_Defi_Text NOT NULL,
     statut_reponse         VARCHAR(20)  DEFAULT 'pending'
                                         CONSTRAINT nn_Reponse_Defi_Statut NOT NULL
@@ -212,7 +213,23 @@ CREATE TABLE Reponse_Defi (
     date_reponse           TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
                                         CONSTRAINT nn_Reponse_Defi_Date NOT NULL,
     date_traitement        TIMESTAMP,
-    Id_Animateur_traitement INT         CONSTRAINT fk_Reponse_Defi_Animateur REFERENCES Animateur(Id_Animateur)
+    Id_Animateur_traitement INT         CONSTRAINT fk_Reponse_Defi_Animateur REFERENCES Animateur(Id_Animateur),
+    CONSTRAINT fk_Reponse_Defi_Action FOREIGN KEY (Id_defi, Id_actions)
+        REFERENCES Faire_partie(Id_defi, Id_actions)
+);
+
+-- Defi_Employe_Block : blocage d'un employe sur un defi par l'animateur
+CREATE TABLE Defi_Employe_Block (
+    Id_defi        INT        CONSTRAINT nn_Block_Defi NOT NULL
+                           CONSTRAINT fk_Block_Defi REFERENCES Defi(Id_defi),
+    Id_Employe     INT        CONSTRAINT nn_Block_Employe NOT NULL
+                           CONSTRAINT fk_Block_Employe REFERENCES Employe(Id_Employe),
+    Id_Animateur   INT        CONSTRAINT nn_Block_Animateur NOT NULL
+                           CONSTRAINT fk_Block_Animateur REFERENCES Animateur(Id_Animateur),
+    motif          TEXT,
+    date_blocage   TIMESTAMP  DEFAULT CURRENT_TIMESTAMP
+                           CONSTRAINT nn_Block_Date NOT NULL,
+    CONSTRAINT pk_Block PRIMARY KEY (Id_defi, Id_Employe)
 );
 
 -- Valider : validation d'une action d'un défi par un employé

@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../bootstrap.php';
 
 $pdo = gp_pdo($config);
 gp_ensure_replies_table($pdo);
+gp_ensure_defi_block_table($pdo);
 
 $auth = gp_require_authenticated_user($config, 'animateur');
 $animateurId = $auth['id_user'];
@@ -50,17 +51,26 @@ try {
     }
 
     if ($method === 'GET' && $action === 'themes') {
-        $stmt = $pdo->query(
+        $mois = trim((string)($_GET['mois'] ?? ''));
+        if ($mois === '') {
+            $mois = date('Y-m');
+        }
+        $moisDate = $mois . '-01';
+
+        $stmt = $pdo->prepare(
             'SELECT
                 t.Id_thematique,
                 t.nomTheme,
                 t.descriptionTheme,
                 COALESCE(MAX(r.ordre), 0) + 1 AS next_ordre
              FROM Thematique t
-             LEFT JOIN Regroupe r ON r.Id_thematique = t.Id_thematique
+             LEFT JOIN Regroupe r
+                ON r.Id_thematique = t.Id_thematique
+               AND date_trunc(\'month\', r.mois) = date_trunc(\'month\', :mois::date)
              GROUP BY t.Id_thematique, t.nomTheme, t.descriptionTheme
              ORDER BY t.nomTheme ASC'
         );
+        $stmt->execute([':mois' => $moisDate]);
 
         gp_send_json(200, [
             'status' => 'success',
@@ -169,6 +179,112 @@ try {
                 'actions' => $stmt2->fetchAll(PDO::FETCH_ASSOC),
             ],
         ]);
+    }
+
+    if ($method === 'GET' && $action === 'blocked_employees') {
+        $defiId = (int)($_GET['defi_id'] ?? 0);
+        if ($defiId <= 0) {
+            gp_send_json(400, ['message' => 'defi_id requis']);
+        }
+
+        $stmt = $pdo->prepare(
+            'SELECT 1
+             FROM Defi
+             WHERE Id_defi = :defi_id AND Id_Animateur = :animateur_id
+             LIMIT 1'
+        );
+        $stmt->execute([':defi_id' => $defiId, ':animateur_id' => $animateurId]);
+        if (!$stmt->fetch()) {
+            gp_send_json(404, ['message' => 'Defis introuvable']);
+        }
+
+        $stmt = $pdo->prepare(
+            'SELECT b.Id_Employe, u.prenomUser, u.nomUser, b.motif, b.date_blocage
+             FROM Defi_Employe_Block b
+             JOIN Utilisateur u ON u.Id_User = b.Id_Employe
+             WHERE b.Id_defi = :defi_id
+             ORDER BY b.date_blocage DESC'
+        );
+        $stmt->execute([':defi_id' => $defiId]);
+
+        gp_send_json(200, [
+            'status' => 'success',
+            'data' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+        ]);
+    }
+
+    if ($method === 'POST' && $action === 'block_employee') {
+        $body = gp_read_json_body();
+        $defiId = (int)($body['defi_id'] ?? 0);
+        $employeId = (int)($body['employe_id'] ?? 0);
+        $motif = trim((string)($body['motif'] ?? ''));
+
+        if ($defiId <= 0 || $employeId <= 0) {
+            gp_send_json(400, ['message' => 'defi_id et employe_id requis']);
+        }
+
+        $stmt = $pdo->prepare(
+            'SELECT 1
+             FROM Defi
+             WHERE Id_defi = :defi_id AND Id_Animateur = :animateur_id
+             LIMIT 1'
+        );
+        $stmt->execute([':defi_id' => $defiId, ':animateur_id' => $animateurId]);
+        if (!$stmt->fetch()) {
+            gp_send_json(404, ['message' => 'Defis introuvable']);
+        }
+
+        $stmt = $pdo->prepare('SELECT 1 FROM Employe WHERE Id_Employe = :emp LIMIT 1');
+        $stmt->execute([':emp' => $employeId]);
+        if (!$stmt->fetch()) {
+            gp_send_json(404, ['message' => 'Employe introuvable']);
+        }
+
+        $stmt = $pdo->prepare(
+            'INSERT INTO Defi_Employe_Block (Id_defi, Id_Employe, Id_Animateur, motif)
+             VALUES (:defi_id, :employe_id, :animateur_id, :motif)
+             ON CONFLICT (Id_defi, Id_Employe)
+             DO UPDATE SET motif = EXCLUDED.motif,
+                           Id_Animateur = EXCLUDED.Id_Animateur,
+                           date_blocage = CURRENT_TIMESTAMP'
+        );
+        $stmt->execute([
+            ':defi_id' => $defiId,
+            ':employe_id' => $employeId,
+            ':animateur_id' => $animateurId,
+            ':motif' => $motif !== '' ? $motif : null,
+        ]);
+
+        gp_send_json(200, ['status' => 'success', 'message' => 'Employe bloque pour ce defi']);
+    }
+
+    if ($method === 'POST' && $action === 'unblock_employee') {
+        $body = gp_read_json_body();
+        $defiId = (int)($body['defi_id'] ?? 0);
+        $employeId = (int)($body['employe_id'] ?? 0);
+
+        if ($defiId <= 0 || $employeId <= 0) {
+            gp_send_json(400, ['message' => 'defi_id et employe_id requis']);
+        }
+
+        $stmt = $pdo->prepare(
+            'SELECT 1
+             FROM Defi
+             WHERE Id_defi = :defi_id AND Id_Animateur = :animateur_id
+             LIMIT 1'
+        );
+        $stmt->execute([':defi_id' => $defiId, ':animateur_id' => $animateurId]);
+        if (!$stmt->fetch()) {
+            gp_send_json(404, ['message' => 'Defis introuvable']);
+        }
+
+        $stmt = $pdo->prepare(
+            'DELETE FROM Defi_Employe_Block
+             WHERE Id_defi = :defi_id AND Id_Employe = :employe_id'
+        );
+        $stmt->execute([':defi_id' => $defiId, ':employe_id' => $employeId]);
+
+        gp_send_json(200, ['status' => 'success', 'message' => 'Employe debloque pour ce defi']);
     }
 
     if ($method === 'POST' && $action === 'challenge_create') {
@@ -445,6 +561,12 @@ try {
             $pdo->beginTransaction();
             gp_assert_animateur_owns_challenge($pdo, $animateurId, $challengeId);
 
+            $stmtDeleteBlocks = $pdo->prepare(
+                'DELETE FROM Defi_Employe_Block
+                 WHERE Id_defi = :challenge_id'
+            );
+            $stmtDeleteBlocks->execute([':challenge_id' => $challengeId]);
+
             $stmtDeleteReplies = $pdo->prepare(
                 'DELETE FROM Reponse_Defi
                  WHERE Id_defi = :challenge_id'
@@ -545,6 +667,8 @@ try {
                 rd.Id_reponse,
                 rd.Id_defi,
                 d.nomDefi,
+                rd.Id_actions,
+                a.nomAction,
                 rd.Id_Employe,
                 u.nomUser,
                 u.prenomUser,
@@ -555,6 +679,7 @@ try {
                      to_char(rd.date_traitement, \'YYYY-MM-DD"T"HH24:MI:SS\') AS date_traitement
              FROM Reponse_Defi rd
              JOIN Defi d ON d.Id_defi = rd.Id_defi
+             LEFT JOIN Actions a ON a.Id_actions = rd.Id_actions
              JOIN Utilisateur u ON u.Id_User = rd.Id_Employe
              ' . $where . '
              ORDER BY rd.date_reponse DESC
@@ -614,7 +739,8 @@ try {
                          JOIN Utilisateur ud ON ud.Id_User = d.Id_Animateur
              WHERE rd.Id_reponse = :reply_id
                AND d.Id_defi = rd.Id_defi
-                             AND ua.Id_Entreprise = ud.Id_Entreprise'
+                             AND ua.Id_Entreprise = ud.Id_Entreprise
+             RETURNING rd.Id_defi, rd.Id_actions, rd.Id_Employe, rd.reponse_text'
         );
         $stmt->execute([
             ':new_status' => $newStatus,
@@ -624,8 +750,23 @@ try {
             ':animateur_owner_id' => $animateurId,
         ]);
 
-        if ($stmt->rowCount() <= 0) {
+        $reply = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$reply) {
             gp_send_json(404, ['message' => 'Reponse introuvable']);
+        }
+
+        if ($newStatus === 'approved' && !empty($reply['id_actions'])) {
+            $stmtInsert = $pdo->prepare(
+                'INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, preuve)
+                 VALUES (:defi, :action, :employe, :preuve)
+                 ON CONFLICT DO NOTHING'
+            );
+            $stmtInsert->execute([
+                ':defi' => (int) $reply['id_defi'],
+                ':action' => (int) $reply['id_actions'],
+                ':employe' => (int) $reply['id_employe'],
+                ':preuve' => $reply['reponse_text'] ?? null,
+            ]);
         }
 
         gp_send_json(200, [
@@ -793,19 +934,3 @@ function gp_clean_db_message(string $message): string
     return $trimmed;
 }
 
-function gp_ensure_replies_table(PDO $pdo): void
-{
-    $pdo->exec(
-        'CREATE TABLE IF NOT EXISTS Reponse_Defi (
-            Id_reponse              SERIAL PRIMARY KEY,
-            Id_defi                 INT NOT NULL REFERENCES Defi(Id_defi),
-            Id_Employe              INT NOT NULL REFERENCES Employe(Id_Employe),
-            reponse_text            TEXT NOT NULL,
-            statut_reponse          VARCHAR(20) NOT NULL DEFAULT \'pending\' CHECK (statut_reponse IN (\'pending\', \'approved\', \'rejected\')),
-            commentaire_animateur   TEXT,
-            date_reponse            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            date_traitement         TIMESTAMP,
-            Id_Animateur_traitement INT REFERENCES Animateur(Id_Animateur)
-        )'
-    );
-}
