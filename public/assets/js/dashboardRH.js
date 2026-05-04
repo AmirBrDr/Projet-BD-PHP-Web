@@ -34,7 +34,7 @@
         rows.push(["=== TAUX D'ENGAGEMENT PAR DÉPARTEMENT ==="]);
         rows.push(["Département", "Taux d'engagement (%)"]);
         engagementParDept.forEach((item) => {
-            rows.push([item.departement, item.taux]);
+            rows.push([item.departement, item.engagementParDept]);
         });
 
         const csvContent = rows.map((r) => r.join(";")).join("\n");
@@ -50,7 +50,63 @@
 
     window.exportCSV = exportCSV;
 
+    function hexToRgb(hex) {
+    const bigint = parseInt(hex.slice(1), 16);
+    return {
+        r: (bigint >> 16) & 255,
+        g: (bigint >> 8) & 255,
+        b: bigint & 255
+    };
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + [r, g, b]
+        .map(x => x.toString(16).padStart(2, "0"))
+        .join("");
+}
+
+// mélange avec blanc (éclaircir) ou noir (assombrir)
+function mix(color, target, amount) {
+    const c1 = hexToRgb(color);
+    const c2 = hexToRgb(target);
+
+    const r = Math.round(c1.r + (c2.r - c1.r) * amount);
+    const g = Math.round(c1.g + (c2.g - c1.g) * amount);
+    const b = Math.round(c1.b + (c2.b - c1.b) * amount);
+
+    return rgbToHex(r, g, b);
+}
+
+function generateGroupedPalette(baseColors, count) {
+    const colors = [];
+    const variationsPerColor = Math.ceil(count / baseColors.length);
+
+    for (let i = 0; i < variationsPerColor; i++) {
+        for (let base of baseColors) {
+            if (colors.length >= count) break;
+
+            let color = base;
+
+            if (i > 0) {
+                const t = i / variationsPerColor;
+
+                // 🔥 alterne clair / foncé autour de la couleur de base
+                if (i % 2 === 0) {
+                    color = mix(base, "#ffffff", t * 0.4); // éclaircir
+                } else {
+                    color = mix(base, "#000000", t * 0.3); // assombrir
+                }
+            }
+
+            colors.push(color);
+        }
+    }
+
+    return colors;
+}
+
     function renderCharts(co2ParCategorie, engagementParDept) {
+         const colors = generateGroupedPalette( ["#94BB39", "#2A997F", "#298E77"] ,co2ParCategorie.length);
         if (typeof window.Chart !== "function") {
             console.warn("Chart.js n'est pas disponible (CSP ou chargement script)");
             return;
@@ -67,7 +123,7 @@
                     labels: co2ParCategorie.map((item) => `${item.categorie} (${item.pourcentage}%)`),
                     datasets: [{
                         data: co2ParCategorie.map((item) => item.co2),
-                        backgroundColor: ["#94BB39", "#2A997F", "#298E77", "#1B2D31"],
+                        backgroundColor: colors,
                         borderColor: "#1B2D31",
                         borderWidth: 2
                     }]
@@ -90,7 +146,7 @@
                     labels: engagementParDept.map((item) => item.departement),
                     datasets: [{
                         label: "Taux de participation (%)",
-                        data: engagementParDept.map((item) => item.taux),
+                        data: engagementParDept.map((item) => item.engagementParDept),
                         backgroundColor: "rgba(148, 187, 57, 0.8)",
                         borderRadius: 6
                     }]
@@ -116,14 +172,51 @@
         }
     }
 
+    // Fonction à appeler sur votre bouton "Rapport PDF"
+    async function genererRapportPDF() {
+        const { jsPDF } = window.jspdf;
+
+        // L'élément à capturer (toute la page ou un div spécifique)
+        const element = document.body; // ou document.getElementById('mon-contenu')
+
+        // Capture d'écran de l'élément
+        const canvas = await html2canvas(element, {
+            scale: 2,           // Meilleure résolution
+            useCORS: true,      // Pour les images externes
+            logging: false
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+        });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();   // 297mm en landscape
+        const pdfHeight = pdf.internal.pageSize.getHeight(); // 210mm en landscape
+
+        const canvasRatio = canvas.height / canvas.width;
+        const imgHeightInPdf = pdfWidth * canvasRatio; // hauteur réelle de l'image dans le PDF
+
+        let positionY = 0;
+
+        while (positionY < imgHeightInPdf) {
+        pdf.addImage(imgData, 'PNG', 0, -positionY, pdfWidth, imgHeightInPdf);
+        positionY += pdfHeight;
+        if (positionY < imgHeightInPdf) pdf.addPage();
+        }
+
+        pdf.save('rapport.pdf');
+    }
+    
     function bindActions() {
         const pdfBtn = document.getElementById("btn-export-pdf");
         if (pdfBtn) {
             pdfBtn.addEventListener("click", () => {
-                alert("Génération du rapport PDF en cours...");
+                genererRapportPDF();
             });
         }
-
         const csvBtn = document.getElementById("btn-export-csv");
         if (csvBtn) {
             csvBtn.addEventListener("click", () => {
@@ -140,20 +233,20 @@
         const tauxParticipation = data?.tauxParticipation ?? "0%";
         const actionsValides = data?.actionsValides ?? 0;
 
-        const co2ParCategorie = [
-            { categorie: "Mobilité", co2: 3.3, pourcentage: 55 },
-            { categorie: "Énergie", co2: 1.5, pourcentage: 25 },
-            { categorie: "Déchets", co2: 0.9, pourcentage: 15 },
-            { categorie: "Alimentation", co2: 0.3, pourcentage: 5 },
-        ];
+        const co2ParCategorie = Array.isArray(data?.engagementParDept)
+            ? data.co2ParCategorie.map(d => ({
+            categorie: d.categorie,
+            co2: Number(d.co2), 
+            pourcentage: Number(d.pourcentage)
+         }))
+        : [];
 
-        const engagementParDept = [
-            { departement: "IT", taux: 92 },
-            { departement: "Marketing", taux: 85 },
-            { departement: "RH", taux: 78 },
-            { departement: "Compta", taux: 65 },
-            { departement: "Logistique", taux: 55 },
-        ];
+        const engagementParDept = Array.isArray(data?.engagementParDept)
+            ? data.engagementParDept.map(d => ({
+            departement: d.departement,
+            engagementParDept: Number(d.engagementpardept)
+         }))
+        : [];
 
         window.dashboardData = { co2Tot, tauxParticipation, actionsValides };
         window.co2ParCategorie = co2ParCategorie;
