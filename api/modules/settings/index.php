@@ -80,7 +80,11 @@ function settings_get(PDO $pdo): array
         'system' => [
             'maintenanceMode' => false,
             'maxUsersParEquipe' => 10
-        ]
+        ],
+        'notifications' => [
+            'active' => true,
+            'frequency' => 'biweekly',
+        ],
     ];
 
     return $settings;
@@ -152,6 +156,63 @@ function settings_update(PDO $pdo, array $data): void
     // TODO: Créer table config avec clé-valeur pour gamification et system settings
 }
 
+function settings_send_inactivity_notifications(PDO $pdo, array $notifications, array $config): array
+{
+    $active = !empty($notifications['active']);
+    if (!$active) {
+        return ['emailsSent' => 0];
+    }
+
+    $frequency = trim((string)($notifications['frequency'] ?? 'biweekly'));
+    if (!in_array($frequency, ['weekly', 'biweekly'], true)) {
+        $frequency = 'biweekly';
+    }
+
+    $stmt = $pdo->prepare(
+        "SELECT nomuser, prenomuser, email FROM utilisateur "
+        . "WHERE statutuser = 'actif' "
+        . "AND derniereconnexion < NOW() - INTERVAL '3 days'"
+    );
+    $stmt->execute();
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $subject = 'GreenPulse - Rappel de participation';
+    $frequencyText = $frequency === 'weekly' ? 'une fois par semaine' : 'une fois toutes les deux semaines';
+    $sentCount = 0;
+
+    foreach ($users as $user) {
+        $email = trim((string)($user['email'] ?? ''));
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            continue;
+        }
+
+        $displayName = trim((string)($user['prenomuser'] ?? '') . ' ' . (string)($user['nomuser'] ?? ''));
+        if ($displayName === '') {
+            $displayName = 'collaborateur';
+        }
+
+        $htmlBody = '<!doctype html><html><body style="font-family:Arial,sans-serif;background:#071225;color:#fff;padding:24px;">'
+            . '<div style="max-width:640px;margin:0 auto;background:#0a1830;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;">'
+            . '<h2 style="margin-top:0;color:#2bd47c;">Rappel de participation</h2>'
+            . '<p>Bonjour ' . htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') . ',</p>'
+            . '<p>Vous n’avez pas accédé à GreenPulse depuis plus de 3 jours. Pour rester dans le rythme du défi, pensez à vous reconnecter et à participer aux actions.</p>'
+            . '<p>Ce type de rappel est envoyé ' . htmlspecialchars($frequencyText, ENT_QUOTES, 'UTF-8') . ' lorsque l’option est activée.</p>'
+            . '<p style="margin-top:24px;color:rgba(255,255,255,.75);">Si vous avez déjà participé récemment, vous pouvez ignorer ce message.</p>'
+            . '</div></body></html>';
+
+        $textBody = "Bonjour {$displayName},\n\nVous n’avez pas accédé à GreenPulse depuis plus de 3 jours. Ce rappel est envoyé {$frequencyText}.\n\nConnectez-vous pour continuer à participer aux défis.";
+
+        try {
+            gp_send_email($config, $email, $subject, $htmlBody, $textBody);
+            $sentCount++;
+        } catch (Throwable $e) {
+            continue;
+        }
+    }
+
+    return ['emailsSent' => $sentCount];
+}
+
 // Routage des requêtes
 $method = $_SERVER['REQUEST_METHOD'] ?? '';
 
@@ -165,7 +226,8 @@ try {
     } elseif ($method === 'POST') {
         $body = gp_read_json_body();
         settings_update($pdo, $body);
-        gp_send_json(200, ['message' => 'Paramètres mis à jour']);
+        $result = settings_send_inactivity_notifications($pdo, $body['notifications'] ?? [], $config);
+        gp_send_json(200, array_merge(['message' => 'Paramètres mis à jour'], $result));
     } else {
         gp_send_json(405, ['message' => 'Méthode non autorisée']);
     }

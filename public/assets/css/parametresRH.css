@@ -164,6 +164,9 @@ body {
     margin: 0;
     display: grid;
     gap: 12px;
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 4px;
 }
 
 .item-list li {
@@ -314,6 +317,9 @@ input:checked + .slider:before {
 .badge-list {
     display: grid;
     gap: 16px;
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 4px;
 }
 
 .badge-config-item {
@@ -492,6 +498,35 @@ input:checked + .slider:before {
     background: rgba(148, 187, 57, 0.1);
     border-radius: 12px;
     margin-top: 15px;
+}
+
+/* Scrollbar styling for dark theme */
+.item-list::-webkit-scrollbar,
+.badge-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.item-list::-webkit-scrollbar-track,
+.badge-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.item-list::-webkit-scrollbar-thumb,
+.badge-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 4px;
+}
+
+.item-list::-webkit-scrollbar-thumb:hover,
+.badge-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.item-list,
+.badge-list {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.18) rgba(255, 255, 255, 0.05);
 }
 
 .icon-preview-container img {
