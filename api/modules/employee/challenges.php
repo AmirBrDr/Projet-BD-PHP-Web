@@ -79,27 +79,27 @@ if ($teamId > 0) {
     }
 }
 
-// Current month theme
+// Current month themes
 $stmt = $pdo->query("
     SELECT DISTINCT t.Id_thematique, t.nomTheme, t.descriptionTheme
     FROM Thematique t
     JOIN Regroupe r ON r.Id_thematique = t.Id_thematique
     WHERE date_trunc('month', r.mois) = date_trunc('month', CURRENT_DATE)
     ORDER BY t.nomTheme
-    LIMIT 1
 ");
-$theme = $stmt->fetch();
+$themes = $stmt->fetchAll();
 
-if (!$theme) {
+if (!$themes) {
     gp_send_json(200, [
         'theme'    => null,
+        'themes'   => [],
         'team'     => $teamRow ? ['id' => $teamId, 'nom' => $teamRow['nomequipe'], 'membres' => $memberCount] : null,
         'progress' => ['completed' => 0, 'total' => 0],
         'defis'    => [],
     ]);
 }
 
-$themeId = (int) $theme['id_thematique'];
+$singleTheme = count($themes) === 1 ? $themes[0] : null;
 
 $stmt = $pdo->prepare("
     SELECT d.Id_defi, d.nomDefi, d.descriptionDefi, d.nbPointsDefi, d.nbCO2Defi, d.niveauDefi,
@@ -107,29 +107,33 @@ $stmt = $pdo->prepare("
     FROM Defi d
     JOIN Regroupe r ON r.Id_defi = d.Id_defi
     JOIN Thematique t ON t.Id_thematique = r.Id_thematique
-    WHERE date_trunc('month', r.mois) = date_trunc('month', CURRENT_DATE)
-      AND r.Id_thematique = :theme_id
-    ORDER BY r.ordre
+        WHERE date_trunc('month', r.mois) = date_trunc('month', CURRENT_DATE)
+        ORDER BY t.nomTheme, r.ordre
 ");
-$stmt->execute([':theme_id' => $themeId]);
+$stmt->execute();
 $rows = $stmt->fetchAll();
 
-$unlocked      = true;
-$completedCount = 0;
-$defis         = [];
+$unlockedByTheme = [];
+$completedCount  = 0;
+$defis           = [];
 
 foreach ($rows as $row) {
-    $defiId           = (int) $row['id_defi'];
+    $defiId   = (int) $row['id_defi'];
+    $themeId  = (int) $row['id_thematique'];
+    if (!array_key_exists($themeId, $unlockedByTheme)) {
+        $unlockedByTheme[$themeId] = true;
+    }
+
     $validatedMembers = $validationMap[$defiId] ?? 0;
     $completed        = $validatedMembers >= $memberCount;
 
     if ($completed) {
         $statut = 'completed';
         $completedCount++;
-        $unlocked = true;
-    } elseif ($unlocked) {
-        $statut   = 'active';
-        $unlocked = false;
+        $unlockedByTheme[$themeId] = true;
+    } elseif ($unlockedByTheme[$themeId]) {
+        $statut = 'active';
+        $unlockedByTheme[$themeId] = false;
     } else {
         $statut = 'locked';
     }
@@ -161,7 +165,16 @@ foreach ($rows as $row) {
 }
 
 gp_send_json(200, [
-    'theme'    => ['id' => $themeId, 'nom' => $theme['nomtheme'], 'description' => $theme['descriptiontheme']],
+    'theme'    => $singleTheme ? [
+        'id' => (int) $singleTheme['id_thematique'],
+        'nom' => $singleTheme['nomtheme'],
+        'description' => $singleTheme['descriptiontheme'],
+    ] : null,
+    'themes'   => array_map(fn($t) => [
+        'id' => (int) $t['id_thematique'],
+        'nom' => $t['nomtheme'],
+        'description' => $t['descriptiontheme'],
+    ], $themes),
     'team'     => $teamRow ? ['id' => $teamId, 'nom' => $teamRow['nomequipe'], 'membres' => $memberCount] : null,
     'progress' => ['completed' => $completedCount, 'total' => count($defis)],
     'defis'    => $defis,

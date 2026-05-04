@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>GreenPulse - Compte Admin RH</title>
-        <link rel="stylesheet" href="../assets/css/unified-navbar.css" />
+        <link rel="stylesheet" href="../assets/css/parametresRH.css" />
         <link rel="stylesheet" href="../assets/css/compteRH.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     </head>
@@ -19,17 +19,17 @@
             </div>
             <div class="nav-right">
                 <div class="role-badge admin">Admin RH</div>
-                <button type="button" class="logout-btn" data-logout title="Déconnexion"><i class="fas fa-sign-out-alt"></i></button>
+                <a href="index.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </nav>
 
         <main class="admin-main">
-            <!-- Page Header -->
             <header class="admin-header">
                 <div>
                     <h1>Compte &amp; Profil</h1>
                     <p>Gérez vos paramètres de sécurité et vos informations personnelles.</p>
                 </div>
+                <button id="saveProfileBtn" type="submit" form="security-params-form" class="btn-primary"><i class="fas fa-save"></i> Sauvegarder</button>
             </header>
 
             <!-- Profile Header Card -->
@@ -74,6 +74,10 @@
                             <input type="email" id="recovery-email" name="recoveryEmail" placeholder="Email alternatif">
                         </div>
                         <div class="form-group">
+                            <label for="current-password">Mot de passe actuel</label>
+                            <input type="password" id="current-password" name="currentPassword" placeholder="••••••••••••">
+                        </div>
+                        <div class="form-group">
                             <label for="new-password">Nouveau mot de passe</label>
                             <input type="password" id="new-password" name="newPassword" placeholder="••••••••••••">
                         </div>
@@ -116,6 +120,7 @@
                             <div class="security-details">
                                 <strong>Authentification à double facteur (2FA)</strong>
                                 <small id="twofa-status">Désactivée - <a href="#" data-toggle-2fa>Configurer maintenant</a></small>
+                                <div id="twofa-qr-container" class="twofa-qr-container" style="display:none; margin-top:1rem;"></div>
                             </div>
                         </div>
                     </div>

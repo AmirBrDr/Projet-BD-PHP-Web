@@ -38,7 +38,19 @@ if (strlen($message) > 500) {
 }
 
 $pdo    = gp_pdo($config);
+gp_ensure_defi_block_table($pdo);
 $userId = (int) $claims['sub'];
+
+$stmt = $pdo->prepare(
+    'SELECT 1
+     FROM Defi_Employe_Block
+     WHERE Id_defi = :defi_id AND Id_Employe = :employe_id
+     LIMIT 1'
+);
+$stmt->execute([':defi_id' => $defiId, ':employe_id' => $userId]);
+if ($stmt->fetch()) {
+    gp_send_json(403, ['message' => 'Vous etes bloque pour ce defi']);
+}
 
 // Trouver ou créer le forum du défi
 $stmt = $pdo->prepare("SELECT Id_forum FROM Forum WHERE Id_defi = :id LIMIT 1");
@@ -64,8 +76,13 @@ if (!$forumRow) {
 }
 
 $stmt = $pdo->prepare("
-    INSERT INTO Message (contenuMessage, Id_Employe, Id_forum) VALUES (:msg, :emp, :forum)
+    INSERT INTO Message (contenuMessage, Id_Employe, Id_forum, dateMessage) VALUES (:msg, :emp, :forum, :date)
 ");
-$stmt->execute([':msg' => $message, ':emp' => $userId, ':forum' => $forumId]);
+$stmt->execute([
+    ':msg'   => $message,
+    ':emp'   => $userId,
+    ':forum' => $forumId,
+    ':date'  => date('Y-m-d H:i:s'),
+]);
 
 gp_send_json(201, ['message' => 'Message publié']);

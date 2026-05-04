@@ -57,7 +57,7 @@
 
     function renderMemberChips(progress) {
         const validated = progress.validated_names || [];
-        const pending   = progress.pending_names   || [];
+        const pending = progress.pending_names || [];
         if (!validated.length && !pending.length) return '';
         return `<div class="step-members">
             ${validated.map(n => `<span class="member-chip validated">✓ ${n}</span>`).join('')}
@@ -114,6 +114,12 @@
                 if (subtitle) subtitle.textContent = `Thème du mois : ${data.theme.nom}`;
                 const desc = document.querySelector('[data-theme-desc]');
                 if (desc) desc.textContent = data.theme.description || '';
+            } else if (Array.isArray(data.themes) && data.themes.length) {
+                const subtitle = document.querySelector('[data-theme-subtitle]');
+                const names = data.themes.map(t => t.nom).filter(Boolean).join(', ');
+                if (subtitle) subtitle.textContent = names ? `Thèmes du mois : ${names}` : 'Thèmes du mois';
+                const desc = document.querySelector('[data-theme-desc]');
+                if (desc) desc.textContent = 'Plusieurs thématiques sont actives ce mois-ci.';
             }
 
             allDefis = data.defis;

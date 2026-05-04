@@ -319,7 +319,7 @@
     const roleRoutes = {
       employe: "/pages/dashboardE.html",
       admin: "/pages/gestionUtilisateurs.html",
-      animateur: "/pages/parametresAnimateur.html",
+      animateur: "/pages/statistiques.html",
     };
 
     window.location.replace(roleRoutes[(user.role || "").toLowerCase()] || "/auth.html");

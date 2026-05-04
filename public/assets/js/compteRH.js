@@ -62,12 +62,104 @@ class CompteRHManager {
                 console.error('Erreur parsing sessions:', error);
             }
         }
+
     }
 
     saveAll() {
         localStorage.setItem(this.storageKeys.profile, JSON.stringify(this.user));
         localStorage.setItem(this.storageKeys.security, JSON.stringify(this.securityInfo));
         localStorage.setItem(this.storageKeys.sessions, JSON.stringify(this.sessions));
+    }
+
+    async loadProfile() {
+        try {
+            const token = localStorage.getItem('gp_token') || '';
+            const response = await fetch('/api/modules/profile/index.php', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors du chargement du profil');
+            }
+
+            const data = await response.json();
+            const profile = data.profile || {};
+
+            this.user.prenom = profile.prenomUser || this.user.prenom;
+            this.user.nom = profile.nomUser || this.user.nom;
+            this.user.email = profile.email || this.user.email;
+            this.user.department = profile.departementEmploye || this.user.department;
+            this.user.role = profile.role || this.user.role;
+            this.user.avatar = profile.pdpUser || this.user.avatar;
+        } catch (error) {
+            console.error('Erreur lors du chargement du profil:', error);
+        }
+    }
+
+    async loadSecurityInfo() {
+        try {
+            const token = localStorage.getItem('gp_token') || '';
+            const [securityResponse, sessionsResponse] = await Promise.all([
+                fetch('/api/modules/profile/security.php?action=info', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                }),
+                fetch('/api/modules/profile/security.php?action=sessions', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                }),
+            ]);
+
+            if (!securityResponse.ok) {
+                throw new Error('Erreur lors du chargement des infos de sécurité');
+            }
+            if (!sessionsResponse.ok) {
+                throw new Error('Erreur lors du chargement des sessions');
+            }
+
+            const securityData = await securityResponse.json();
+            const sessionsData = await sessionsResponse.json();
+
+            if (securityData.security) {
+                this.securityInfo = {
+                    lastPasswordChange: securityData.security.lastPasswordChange || new Date().toISOString(),
+                    daysSincePasswordChange: Number(securityData.security.daysSincePasswordChange || 0),
+                    lastLogin: securityData.security.lastLogin || new Date().toISOString(),
+                    twoFactorEnabled: Boolean(securityData.security.twoFactorEnabled),
+                };
+            }
+
+            if (sessionsData.sessions && Array.isArray(sessionsData.sessions)) {
+                this.sessions = sessionsData.sessions.map((session, index) => ({
+                    id: session.id_session,
+                    current: index === 0,
+                    userAgent: session.user_agent || 'Navigateur inconnu',
+                    ipAddress: session.ip_address || 'Inconnue',
+                    lastActivity: session.derniere_activite || session.date_creation || new Date().toISOString(),
+                }));
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement de security info:', error);
+        }
+    }
+
+    async refreshData() {
+        await this.loadProfile();
+        await this.loadSecurityInfo();
+        this.ensureSessions();
+        this.updateProfileDisplay();
+        this.updateSecurityDisplay();
+        this.renderSessions();
     }
 
     ensureSessions() {
@@ -116,11 +208,6 @@ class CompteRHManager {
             if (e.target.matches('[data-logout]')) {
                 e.preventDefault();
                 this.logout();
-            }
-
-            if (e.target.matches('[data-session-id]')) {
-                e.preventDefault();
-                this.handleTerminateSession(e);
             }
         });
     }
@@ -182,6 +269,8 @@ class CompteRHManager {
     }
 
     updateSecurityDisplay() {
+        this.clearTwoFAQr();
+
         const lastPwdEl = document.getElementById('last-pwd-change');
         if (lastPwdEl) {
             const days = Number(this.securityInfo.daysSincePasswordChange || 0);
@@ -202,6 +291,41 @@ class CompteRHManager {
                 twoFAEl.innerHTML = 'Désactivée - <a href="#" data-toggle-2fa>Configurer maintenant</a>';
             }
         }
+    }
+
+    showTwoFAQr(secret, uri) {
+        const container = document.getElementById('twofa-qr-container');
+        if (!container) {
+            return;
+        }
+
+        const qrImageUrl = uri ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(uri)}` : '';
+        const qrImage = uri ? `<img src="${qrImageUrl}" alt="QR Code 2FA" style="display:block; margin-bottom:0.75rem; max-width:100%;"/>` : '';
+        const secretText = secret ? `<div style="color:#fff; font-size:0.9rem; word-break:break-all;"><strong>Secret :</strong> ${secret}</div>` : '';
+
+        container.innerHTML = `
+            <div class="twofa-qr-content" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 1rem; border-radius: 0.5rem;">
+                ${qrImage}
+                ${secretText}
+                <p style="margin:0.75rem 0 0; font-size:0.9rem; color: rgba(255,255,255,0.75);">Scannez ce QR code avec votre application Authenticator.</p>
+            </div>
+        `;
+        container.style.display = 'block';
+    }
+
+    clearTwoFAQr() {
+        const container = document.getElementById('twofa-qr-container');
+        if (!container) {
+            return;
+        }
+        container.style.display = 'none';
+        container.innerHTML = '';
+    }
+
+    buildTotpUri(secret) {
+        const account = encodeURIComponent(this.user.email || 'utilisateur@example.com');
+        const issuer = encodeURIComponent('GreenPulse');
+        return `otpauth://totp/${issuer}:${account}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`;
     }
 
     renderSessions() {
@@ -229,13 +353,13 @@ class CompteRHManager {
                         <div class="session-ip">IP: ${session.ipAddress || 'Inconnue'}</div>
                         <div class="session-time">${dateText}</div>
                     </div>
-                    ${!session.current ? '<button type="button" class="btn btn-sm btn-danger" data-session-id="' + session.id + '">Terminer</button>' : '<span style="color: var(--shell-accent); font-weight: bold; font-size: 0.85rem;">Actuelle</span>'}
+                    <span style="color: var(--shell-accent); font-weight: bold; font-size: 0.85rem;">${session.current ? 'Actuelle' : 'Autre session'}</span>
                 </div>
             `;
         }).join('');
     }
 
-    handleProfilePictureUpload(e) {
+    async handleProfilePictureUpload(e) {
         const file = e.target.files[0];
         if (!file) {
             return;
@@ -253,14 +377,46 @@ class CompteRHManager {
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            this.user.avatar = event.target.result;
-            this.saveAll();
-            this.updateProfileDisplay();
-            this.showNotification('Photo de profil mise à jour', 'success');
-        };
-        reader.readAsDataURL(file);
+        const token = localStorage.getItem('gp_token') || '';
+        if (!token) {
+            this.showNotification('Session invalide, veuillez vous reconnecter', 'error');
+            e.target.value = '';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        try {
+            const response = await fetch('/api/modules/profile/index.php', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erreur lors de l\'upload de la photo');
+            }
+
+            const data = await response.json();
+            if (data.avatar) {
+                this.user.avatar = data.avatar;
+                this.saveAll();
+                this.updateProfileDisplay();
+                this.showNotification('Photo de profil sauvegardée', 'success');
+            } else {
+                throw new Error('Aucune photo renvoyée par le serveur');
+            }
+        } catch (error) {
+            console.error('Erreur upload avatar:', error);
+            this.showNotification(error.message || 'Impossible de sauvegarder la photo', 'error');
+            e.target.value = '';
+        }
+
+        e.target.setCustomValidity('');
     }
 
     validatePasswordStrength(e) {
@@ -302,11 +458,12 @@ class CompteRHManager {
         e.target.setCustomValidity('');
     }
 
-    handleSecurityParamsSubmit(e) {
+    async handleSecurityParamsSubmit(e) {
         e.preventDefault();
 
         const displayName = document.getElementById('display-name')?.value.trim() || '';
         const recoveryEmail = document.getElementById('recovery-email')?.value.trim() || '';
+        const currentPassword = document.getElementById('current-password')?.value || '';
         const newPassword = document.getElementById('new-password')?.value || '';
         const confirmPassword = document.getElementById('confirm-password')?.value || '';
 
@@ -320,64 +477,169 @@ class CompteRHManager {
             return;
         }
 
-        if (newPassword || confirmPassword) {
-            if (!newPassword || !confirmPassword) {
-                this.showNotification('Veuillez confirmer le mot de passe', 'error');
-                return;
-            }
-
-            if (newPassword !== confirmPassword) {
-                this.showNotification('Les mots de passe ne correspondent pas', 'error');
-                return;
-            }
-
-            if (newPassword.length < 8) {
-                this.showNotification('Le mot de passe doit faire au moins 8 caractères', 'error');
-                return;
-            }
-
-            if (this.calculatePasswordStrength(newPassword) < 2) {
-                this.showNotification('Le mot de passe est trop faible', 'error');
-                return;
-            }
-
-            this.securityInfo.daysSincePasswordChange = 0;
-        }
-
-        const nameParts = displayName.split(' ').filter(Boolean);
-        this.user.prenom = nameParts[0] || this.user.prenom;
-        this.user.nom = nameParts.slice(1).join(' ') || this.user.nom;
-        this.user.email = recoveryEmail;
-        this.securityInfo.lastLogin = new Date().toISOString();
-
-        this.saveAll();
-        this.updateProfileDisplay();
-        this.updateSecurityDisplay();
-
-        const newPasswordInput = document.getElementById('new-password');
-        const confirmPasswordInput = document.getElementById('confirm-password');
-        if (newPasswordInput) newPasswordInput.value = '';
-        if (confirmPasswordInput) confirmPasswordInput.value = '';
-
-        this.showNotification('Profil mis à jour avec succès !', 'success');
-    }
-
-    handleToggle2FA() {
-        const current = Boolean(this.securityInfo.twoFactorEnabled);
-        const action = current ? 'désactiver' : 'activer';
-
-        if (!confirm(`Êtes-vous sûr de vouloir ${action} le 2FA ?`)) {
+        const token = localStorage.getItem('gp_token') || '';
+        if (!token) {
+            this.showNotification('Session invalide, veuillez vous reconnecter', 'error');
             return;
         }
 
-        this.securityInfo.twoFactorEnabled = !current;
-        this.saveAll();
-        this.updateSecurityDisplay();
-        this.showNotification('2FA mis à jour', 'success');
+        try {
+            if (newPassword || confirmPassword) {
+                if (!currentPassword) {
+                    this.showNotification('Veuillez entrer votre mot de passe actuel', 'error');
+                    return;
+                }
+
+                if (!newPassword || !confirmPassword) {
+                    this.showNotification('Veuillez confirmer le nouveau mot de passe', 'error');
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    this.showNotification('Les mots de passe ne correspondent pas', 'error');
+                    return;
+                }
+
+                if (newPassword.length < 8) {
+                    this.showNotification('Le mot de passe doit faire au moins 8 caractères', 'error');
+                    return;
+                }
+
+                if (!/[A-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
+                    this.showNotification('Le mot de passe doit contenir au moins une majuscule et un chiffre', 'error');
+                    return;
+                }
+
+                if (this.calculatePasswordStrength(newPassword) < 2) {
+                    this.showNotification('Le mot de passe est trop faible', 'error');
+                    return;
+                }
+
+                const passwordResponse = await fetch('/api/modules/profile/security.php?action=change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        currentPassword,
+                        newPassword,
+                    }),
+                });
+
+                if (!passwordResponse.ok) {
+                    const errorData = await passwordResponse.json();
+                    throw new Error(errorData.message || 'Erreur lors du changement de mot de passe');
+                }
+
+                this.securityInfo.daysSincePasswordChange = 0;
+                this.securityInfo.lastPasswordChange = new Date().toISOString();
+            }
+
+            const nameParts = displayName.split(' ').filter(Boolean);
+            const prenomUser = nameParts[0] || this.user.prenom;
+            const nomUser = nameParts.slice(1).join(' ') || this.user.nom;
+
+            const profileResponse = await fetch('/api/modules/profile/index.php', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prenomUser,
+                    nomUser,
+                    email: recoveryEmail,
+                }),
+            });
+
+            if (!profileResponse.ok) {
+                const errorData = await profileResponse.json();
+                throw new Error(errorData.message || 'Erreur lors de la mise à jour du profil');
+            }
+
+            this.user.prenom = prenomUser;
+            this.user.nom = nomUser;
+            this.user.email = recoveryEmail;
+            this.securityInfo.lastLogin = new Date().toISOString();
+            this.saveAll();
+            this.updateProfileDisplay();
+            this.updateSecurityDisplay();
+
+            const currentPasswordInput = document.getElementById('current-password');
+            const newPasswordInput = document.getElementById('new-password');
+            const confirmPasswordInput = document.getElementById('confirm-password');
+            if (currentPasswordInput) currentPasswordInput.value = '';
+            if (newPasswordInput) newPasswordInput.value = '';
+            if (confirmPasswordInput) confirmPasswordInput.value = '';
+
+            this.showNotification('Profil mis à jour avec succès', 'success');
+        } catch (error) {
+            console.error(error);
+            this.showNotification(error.message || 'Erreur lors de la mise à jour', 'error');
+        }
     }
 
-    handleTerminateSession(e) {
-        const sessionId = e.target.getAttribute('data-session-id');
+    async handleToggle2FA() {
+        const current = Boolean(this.securityInfo.twoFactorEnabled);
+        const action = current ? 'désactiver' : 'activer';
+
+        if (!confirm(`Êtes-vous sûr de vouloir ${action} l'authentification à deux facteurs ?`)) {
+            return;
+        }
+
+        const token = localStorage.getItem('gp_token') || '';
+        if (!token) {
+            this.showNotification('Session invalide, veuillez vous reconnecter', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/modules/profile/security.php?action=toggle-2fa', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    enable: !current,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erreur lors de la modification du 2FA');
+            }
+
+            const data = await response.json();
+            if (!data) {
+                throw new Error('Réponse invalide du serveur');
+            }
+
+            this.securityInfo.twoFactorEnabled = !current;
+            this.saveAll();
+            this.updateSecurityDisplay();
+
+            if (data.secret || data.otpauth_uri) {
+                const uri = data.otpauth_uri || this.buildTotpUri(data.secret);
+                const secret = data.secret || '';
+                this.showTwoFAQr(secret, uri);
+            }
+
+            this.showNotification('Authentification à deux facteurs mise à jour', 'success');
+        } catch (error) {
+            console.error('Erreur 2FA:', error);
+            this.showNotification(error.message || 'Erreur lors de la mise à jour du 2FA', 'error');
+        }
+    }
+
+    handleTerminateSession(buttonOrEvent) {
+        const sessionButton = buttonOrEvent.closest ? buttonOrEvent : buttonOrEvent.target?.closest('[data-session-id]');
+        if (!sessionButton) {
+            return;
+        }
+
+        const sessionId = sessionButton.getAttribute('data-session-id');
         if (!sessionId) {
             return;
         }
@@ -431,16 +693,24 @@ class CompteRHManager {
     }
 
     getDeviceIcon(userAgent) {
-        if (userAgent.includes('Mobile')) return 'mobile-alt';
-        if (userAgent.includes('Tablet')) return 'tablet-alt';
+        const ua = (userAgent || '').toLowerCase();
+        if (/ipad|tablet|kindle|silk/.test(ua)) return 'tablet-alt';
+        if (/mobile|iphone|ipod|android|blackberry|iemobile|opera mini/.test(ua)) return 'mobile-alt';
         return 'desktop';
     }
 
     parseUserAgent(userAgent) {
-        if (userAgent.includes('Chrome')) return 'Chrome';
-        if (userAgent.includes('Firefox')) return 'Firefox';
-        if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) return 'Safari';
-        return 'Navigateur';
+        const ua = (userAgent || '').toLowerCase();
+
+        if (/edg\//.test(ua) || ua.includes('edge')) return 'Microsoft Edge';
+        if (/opr\//.test(ua) || ua.includes('opera')) return 'Opera';
+        if (ua.includes('chrome') && !ua.includes('edg/') && !ua.includes('opr/') && !ua.includes('chromium')) return 'Chrome';
+        if (ua.includes('firefox')) return 'Firefox';
+        if (ua.includes('safari') && !ua.includes('chrome') && !ua.includes('chromium')) return 'Safari';
+        if (ua.includes('brave')) return 'Brave';
+        if (ua.includes('msie') || ua.includes('trident')) return 'Internet Explorer';
+
+        return 'Navigateur inconnu';
     }
 
     formatRole(role) {
@@ -462,6 +732,7 @@ class CompteRHManager {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    new CompteRHManager();
+document.addEventListener('DOMContentLoaded', async () => {
+    const manager = new CompteRHManager();
+    await manager.refreshData();
 });
