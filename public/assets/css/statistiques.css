@@ -11,7 +11,7 @@
 }
 
 .nav-logo {
-    height: 52px;
+    height: 75px;
     width: auto;
 }
 
@@ -355,4 +355,77 @@
     .kpi-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+/* --- FILTRE VUE --- */
+.filtre-vue {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 24px;
+    background: var(--shell-card);
+    border: 1px solid var(--shell-border);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    flex-wrap: wrap;
+}
+
+.filtre-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.filtre-btn {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--shell-border);
+    background: rgba(255,255,255,0.04);
+    color: var(--shell-muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.filtre-btn:hover {
+    color: var(--shell-accent);
+    border-color: var(--shell-accent);
+}
+
+.filtre-btn.active {
+    background: rgba(43, 212, 124, 0.12);
+    border-color: var(--shell-accent);
+    color: var(--shell-accent);
+}
+
+.filtre-select select {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--shell-border);
+    background: var(--shell-card);
+    color: var(--shell-text);
+    font-size: 13px;
+    cursor: pointer;
+    min-width: 200px;
+}
+
+.filtre-select select option {
+    background: #0a1830;
+    color: var(--shell-text);
+}
+
+.filtre-label {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--shell-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filtre-label i {
+    color: var(--shell-accent);
 }

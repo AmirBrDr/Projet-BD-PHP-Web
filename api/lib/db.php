@@ -13,8 +13,9 @@ function gp_pdo(array $config): PDO
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     ]);
-
+    $pdo->exec("SET client_encoding = 'WIN1252'");
     return $pdo;
+<<<<<<< HEAD
 }
 
 function gp_ensure_defi_block_table(PDO $pdo): void
@@ -63,3 +64,6 @@ function gp_ensure_replies_table(PDO $pdo): void
         . "END $$;"
     );
 }
+=======
+}
+>>>>>>> c88b0ba8662b03677f9c6619cf18e11559e1891d

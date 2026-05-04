@@ -1,40 +1,64 @@
 <?php
-// Fichier: api/modules/statistics/index.php
+error_reporting(0);
+ini_set('display_errors', 0);
 
 require_once __DIR__ . '/../../bootstrap.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 $pdo = gp_pdo($config);
+
+// --- Récupère les filtres ---
+$filtreType = $_GET['filtre'] ?? 'global'; // global, employe, equipe
+$filtreId   = isset($_GET['id']) ? (int)$_GET['id'] : null;
+
+// --- Condition WHERE selon le filtre ---
+function getWhereClause($filtreType, $filtreId) {
+    if ($filtreType === 'employe' && $filtreId) {
+        return "AND v.Id_Employe = $filtreId";
+    } elseif ($filtreType === 'equipe' && $filtreId) {
+        return "AND e.Id_equipe = $filtreId";
+    }
+    return '';
+}
+
+$whereFiltre = getWhereClause($filtreType, $filtreId);
+$joinEquipe  = ($filtreType === 'equipe' && $filtreId) 
+    ? "LEFT JOIN Employe e ON e.Id_Employe = v.Id_Employe" 
+    : "";
 
 // --- 1. Stats globales ---
 $stmt = $pdo->query("
     SELECT 
         COUNT(DISTINCT d.Id_defi) AS total_defis,
         COUNT(DISTINCT t.Id_thematique) AS total_themes,
-        COUNT(DISTINCT v.Id_Employe) AS total_participants,
-        COALESCE(SUM(d.nbCO2Defi), 0) AS total_co2
+        COUNT(v.Id_defi) AS total_validations,
+        COALESCE(SUM(DISTINCT d.nbCO2Defi), 0) AS total_co2
     FROM Defi d
     LEFT JOIN Regroupe r ON r.Id_defi = d.Id_defi
     LEFT JOIN Thematique t ON t.Id_thematique = r.Id_thematique
     LEFT JOIN Valider v ON v.Id_defi = d.Id_defi
+    $joinEquipe
     WHERE DATE_TRUNC('month', r.mois) = DATE_TRUNC('month', CURRENT_DATE)
+    $whereFiltre
 ");
 $globales = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// --- 2. Participants par défi ---
+// --- 2. Validations par défi ---
 $stmt2 = $pdo->query("
     SELECT 
         d.nomDefi,
         t.nomTheme,
-        COUNT(DISTINCT v.Id_Employe) AS nb_participants,
+        COUNT(v.Id_Employe) AS nb_validations,
         d.nbPointsDefi AS points
     FROM Defi d
     JOIN Regroupe r ON r.Id_defi = d.Id_defi
     JOIN Thematique t ON t.Id_thematique = r.Id_thematique
     LEFT JOIN Valider v ON v.Id_defi = d.Id_defi
+    $joinEquipe
     WHERE DATE_TRUNC('month', r.mois) = DATE_TRUNC('month', CURRENT_DATE)
+    $whereFiltre
     GROUP BY d.Id_defi, d.nomDefi, t.nomTheme, d.nbPointsDefi
-    ORDER BY nb_participants DESC
+    ORDER BY nb_validations DESC
 ");
 $parDefi = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
@@ -43,15 +67,17 @@ $stmt3 = $pdo->query("
     SELECT 
         t.nomTheme,
         COUNT(DISTINCT d.Id_defi) AS nb_defis,
-        COUNT(DISTINCT v.Id_Employe) AS nb_participants,
-        COALESCE(SUM(d.nbCO2Defi), 0) AS co2_total
+        COUNT(v.Id_Employe) AS nb_validations,
+        COALESCE(SUM(DISTINCT d.nbCO2Defi), 0) AS co2_total
     FROM Thematique t
     JOIN Regroupe r ON r.Id_thematique = t.Id_thematique
     JOIN Defi d ON d.Id_defi = r.Id_defi
     LEFT JOIN Valider v ON v.Id_defi = d.Id_defi
+    $joinEquipe
     WHERE DATE_TRUNC('month', r.mois) = DATE_TRUNC('month', CURRENT_DATE)
+    $whereFiltre
     GROUP BY t.Id_thematique, t.nomTheme
-    ORDER BY nb_participants DESC
+    ORDER BY nb_validations DESC
 ");
 $parTheme = $stmt3->fetchAll(PDO::FETCH_ASSOC);
 
@@ -65,11 +91,29 @@ $stmt4 = $pdo->query("
     JOIN Regroupe r ON r.Id_defi = d.Id_defi
     JOIN Faire_partie fp ON fp.Id_defi = d.Id_defi
     LEFT JOIN Valider v ON v.Id_defi = d.Id_defi AND v.Id_actions = fp.Id_actions
+    $joinEquipe
     WHERE DATE_TRUNC('month', r.mois) = DATE_TRUNC('month', CURRENT_DATE)
+    $whereFiltre
     GROUP BY d.Id_defi, d.nomDefi
     ORDER BY nb_actions_validees DESC
 ");
 $validation = $stmt4->fetchAll(PDO::FETCH_ASSOC);
+
+// --- 5. Liste des employés ---
+$employes = $pdo->query("
+    SELECT e.Id_Employe AS id, u.nomUser, u.prenomUser
+    FROM Employe e
+    JOIN Utilisateur u ON u.Id_User = e.Id_Employe
+    WHERE u.statutUser = 'actif'
+    ORDER BY u.nomUser, u.prenomUser
+")->fetchAll(PDO::FETCH_ASSOC);
+
+// --- 6. Liste des équipes ---
+$equipes = $pdo->query("
+    SELECT Id_equipe AS id, nomEquipe
+    FROM Equipe
+    ORDER BY nomEquipe
+")->fetchAll(PDO::FETCH_ASSOC);
 
 http_response_code(200);
 echo json_encode([
@@ -79,5 +123,7 @@ echo json_encode([
         'par_defi'   => $parDefi,
         'par_theme'  => $parTheme,
         'validation' => $validation,
+        'employes'   => $employes,
+        'equipes'    => $equipes,
     ]
-]);
+], JSON_UNESCAPED_UNICODE);
