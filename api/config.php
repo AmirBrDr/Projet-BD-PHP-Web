@@ -46,8 +46,8 @@ $config = [
         'host' => getenv('GP_DB_HOST') ?: 'localhost',
         'port' => getenv('GP_DB_PORT') ?: '5432',
         'name' => getenv('GP_DB_NAME') ?: 'greenpulse',
-        'user' => getenv('GP_DB_USER') ?: 'postgres',
-        'pass' => getenv('GP_DB_PASS') ?: 'postgres',
+        'user' => getenv('GP_DB_USER') ?: 'greenpulse',
+        'pass' => getenv('GP_DB_PASS') ?: 'Greenpulse1234',
     ],
     'jwt' => [
         'secret' => getenv('GP_JWT_SECRET') ?: 'change_this_secret',
