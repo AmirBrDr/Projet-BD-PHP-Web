@@ -205,7 +205,7 @@ class CompteRHManager {
                 this.handleToggle2FA();
             }
 
-            if (e.target.matches('[data-logout]')) {
+            if (e.target.closest('[data-logout]')) {
                 e.preventDefault();
                 this.logout();
             }

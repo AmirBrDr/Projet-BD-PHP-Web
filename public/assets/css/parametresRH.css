@@ -102,10 +102,11 @@ body {
     padding: 0;
     margin: 0;
     display: grid;
-    gap: 12px;
+    gap: 14px;
     max-height: 360px;
     overflow-y: auto;
     padding-right: 4px;
+    margin-top: 12px;
 }
 
 .item-list li {
@@ -132,17 +133,24 @@ body {
 }
 
 .btn-icon {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background: rgba(255,255,255,0.08);
-    border: none;
+    border: 1px solid rgba(255,255,255,0.12);
     border-radius: 50%;
     color: var(--text-muted);
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.btn-icon:hover {
+    background: rgba(255,255,255,0.12);
+    color: var(--white);
+    transform: translateY(-2px);
 }
 
 .btn-icon.delete:hover {
@@ -154,6 +162,7 @@ body {
     width: 100%;
     padding: 16px 18px;
     margin-top: 12px;
+    margin-bottom: 16px;
     background: transparent;
     color: var(--white);
     border: 2px dashed rgba(255,255,255,0.18);
@@ -255,54 +264,96 @@ input:checked + .slider:before {
 
 .badge-list {
     display: grid;
-    gap: 16px;
+    gap: 20px;
     max-height: 360px;
     overflow-y: auto;
     padding-right: 4px;
+    margin-top: 12px;
 }
 
 .badge-config-item {
-    display: grid;
-    gap: 18px;
-    padding: 20px;
-    border-radius: 22px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px 20px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(148, 187, 57, 0.08) 0%, rgba(255,255,255,0.04) 100%);
+    border: 1px solid rgba(148, 187, 57, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.badge-config-item:hover {
+    background: linear-gradient(135deg, rgba(148, 187, 57, 0.12) 0%, rgba(255,255,255,0.06) 100%);
+    border-color: rgba(148, 187, 57, 0.35);
+}
+
+.badge-icon-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: space-between;
 }
 
 .badge-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 18px;
-    display: inline-flex;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(148, 187, 57, 0.12);
+    background: linear-gradient(135deg, rgba(148, 187, 57, 0.25) 0%, rgba(148, 187, 57, 0.15) 100%);
     color: var(--green-light);
     font-size: 1.4rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(148, 187, 57, 0.15);
+}
+
+.badge-name-container {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
 }
 
 .badge-details {
-    display: grid;
-    gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 0;
 }
 
-.badge-details input {
-    width: 100%;
-    border: none;
-    background: transparent;
-    color: var(--white);
+.badge-details strong {
+    font-weight: 800;
     font-size: 1.05rem;
-    font-weight: 700;
-    outline: none;
+    color: var(--white);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.3px;
 }
 
 .badge-conditions {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     color: var(--text-muted);
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+    padding-left: 68px;
+}
+
+.badge-condition-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 12px;
+    background: rgba(148, 187, 57, 0.2);
+    color: var(--green-light);
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    border: 1px solid rgba(148, 187, 57, 0.3);
 }
 
 .cond-select,

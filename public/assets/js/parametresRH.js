@@ -114,7 +114,8 @@
     }
 
     function parseConditionText(text) {
-        const match = String(text || "").match(/^(.*)\s*>=\s*(\d+)$/);
+        // Nouveau format: "Pour avoir le badge il faut avoir au moins Type: Valeur"
+        const match = String(text || "").match(/Pour avoir le badge il faut avoir au moins\s*(.+?):\s*(\d+)/);
         if (match) {
             return {
                 conditionType: match[1].trim(),
@@ -122,10 +123,44 @@
             };
         }
 
+        // Ancien format pour la rétro-compatibilité: "Type >= Valeur"
+        const oldMatch = String(text || "").match(/^(.*)\s*>=?\s*(\d+)$/);
+        if (oldMatch) {
+            return {
+                conditionType: oldMatch[1].trim(),
+                conditionValue: Number(oldMatch[2]),
+            };
+        }
+
         return {
-            conditionType: "Défis \"Mobilité\"",
+            conditionType: "",
             conditionValue: 1,
         };
+    }
+
+    function populateConditionTypeSelect() {
+        if (!els.badgeConditionType) return;
+        
+        els.badgeConditionType.innerHTML = "";
+        
+        // Ajouter les thématiques
+        state.thematiques.forEach((theme) => {
+            if (theme.nom && String(theme.nom).trim() !== "") {
+                const option = document.createElement("option");
+                option.value = theme.nom;
+                option.textContent = theme.nom;
+                els.badgeConditionType.appendChild(option);
+            }
+        });
+
+        // Si aucune thématique n'existe, montrer un message
+        if (els.badgeConditionType.children.length === 0) {
+            const option = document.createElement("option");
+            option.disabled = true;
+            option.selected = true;
+            option.textContent = "Aucune thématique disponible";
+            els.badgeConditionType.appendChild(option);
+        }
     }
 
     function renderCategories() {
@@ -147,7 +182,7 @@
             input.type = "text";
             input.value = theme.nom || "";
             input.className = "inline-edit";
-            input.placeholder = "Nom de la catégorie";
+            input.placeholder = "Nom de la thématique";
             input.style.cursor = "pointer";
             input.addEventListener("input", (event) => {
                 state.thematiques[index].nom = event.target.value;
@@ -168,6 +203,7 @@
             deleteButton.addEventListener("click", () => {
                 state.thematiques.splice(index, 1);
                 renderCategories();
+                populateConditionTypeSelect();
                 scheduleSave();
             });
 
@@ -179,9 +215,11 @@
         if (state.thematiques.length === 0) {
             const placeholder = document.createElement("li");
             placeholder.className = "category-placeholder";
-            placeholder.textContent = "Aucune catégorie définie. Cliquez sur + Ajouter une catégorie pour en créer.";
+            placeholder.textContent = "Aucune thématique définie. Cliquez sur + Ajouter une thématique pour en créer.";
             placeholder.style.color = "var(--text-muted)";
             placeholder.style.padding = "1rem";
+            placeholder.style.backgroundColor = "transparent";
+            placeholder.style.border = "none";
             els.categoryList.appendChild(placeholder);
         }
     }
@@ -196,32 +234,40 @@
             const card = document.createElement("div");
             card.className = "badge-config-item";
 
+            // Wrapper pour icon + name + actions
+            const iconWrapper = document.createElement("div");
+            iconWrapper.className = "badge-icon-wrapper";
+
+            // Icon
             const icon = document.createElement("div");
             icon.className = "badge-icon preview-green";
             
-            // Vérifier si c'est du base64 (data URL) ou du texte/emoji
             if (badge.icone && badge.icone.startsWith("data:")) {
                 const img = document.createElement("img");
                 img.src = badge.icone;
                 img.alt = badge.nom || "Badge";
-                img.style.width = "40px";
-                img.style.height = "40px";
+                img.style.width = "44px";
+                img.style.height = "44px";
                 img.style.objectFit = "contain";
                 icon.appendChild(img);
             } else {
                 icon.textContent = badge.icone || "🏅";
             }
 
-            const details = document.createElement("div");
-            details.className = "badge-details";
-
-            const titleRow = document.createElement("div");
-            titleRow.style.display = "flex";
-            titleRow.style.justifyContent = "space-between";
-            titleRow.style.alignItems = "center";
+            // Name container
+            const nameContainer = document.createElement("div");
+            nameContainer.className = "badge-name-container";
 
             const name = document.createElement("strong");
             name.textContent = badge.nom || "Badge sans nom";
+            nameContainer.appendChild(name);
+
+            // Buttons container
+            const buttonsContainer = document.createElement("div");
+            buttonsContainer.style.display = "flex";
+            buttonsContainer.style.gap = "10px";
+            buttonsContainer.style.marginLeft = "auto";
+            buttonsContainer.style.flexShrink = "0";
 
             const editBtn = document.createElement("button");
             editBtn.type = "button";
@@ -229,16 +275,7 @@
             editBtn.innerHTML = "<i class='fas fa-pen'></i>";
             editBtn.title = "Modifier";
             editBtn.addEventListener("click", () => openBadgeModal(badge.id));
-
-            titleRow.appendChild(name);
-            titleRow.appendChild(editBtn);
-
-            const condition = document.createElement("div");
-            condition.className = "badge-conditions";
-            condition.textContent = badge.description || "Condition non définie";
-
-            details.appendChild(titleRow);
-            details.appendChild(condition);
+            buttonsContainer.appendChild(editBtn);
 
             const deleteButton = document.createElement("button");
             deleteButton.type = "button";
@@ -253,10 +290,72 @@
                 }
                 renderBadges();
             });
+            buttonsContainer.appendChild(deleteButton);
 
-            card.appendChild(icon);
-            card.appendChild(details);
-            card.appendChild(deleteButton);
+            // Build icon wrapper row
+            iconWrapper.appendChild(icon);
+            iconWrapper.appendChild(nameContainer);
+            iconWrapper.appendChild(buttonsContainer);
+
+            // Conditions row - style gamifié avec pills
+            const condition = document.createElement("div");
+            condition.className = "badge-conditions";
+            
+            const conditionText = badge.description || "Condition non définie";
+            
+            // Parser la description pour extraire type et valeur (nouveau format)
+            const conditionMatch = conditionText.match(/Pour avoir le badge il faut avoir au moins\s*(.+?):\s*(\d+)/);
+            if (conditionMatch) {
+                const type = conditionMatch[1].trim();
+                const value = conditionMatch[2];
+                
+                const descPill = document.createElement("span");
+                descPill.className = "badge-condition-pill";
+                descPill.innerHTML = `<i class="fas fa-bookmark"></i> Pour avoir ce badge`;
+                
+                const typePill = document.createElement("span");
+                typePill.className = "badge-condition-pill";
+                typePill.innerHTML = `<i class="fas fa-list"></i> ${type}`;
+                
+                const valuePill = document.createElement("span");
+                valuePill.className = "badge-condition-pill";
+                valuePill.innerHTML = `<i class="fas fa-arrow-right"></i> ${value}+`;
+                
+                condition.appendChild(descPill);
+                condition.appendChild(typePill);
+                condition.appendChild(valuePill);
+            } else {
+                // Ancien format pour la rétro-compatibilité
+                const oldMatch = conditionText.match(/(.+?)\s*>=?\s*(\d+)/);
+                if (oldMatch) {
+                    const type = oldMatch[1].trim();
+                    const value = oldMatch[2];
+                    
+                    const descPill = document.createElement("span");
+                    descPill.className = "badge-condition-pill";
+                    descPill.innerHTML = `<i class="fas fa-bookmark"></i> Pour avoir ce badge`;
+                    
+                    const typePill = document.createElement("span");
+                    typePill.className = "badge-condition-pill";
+                    typePill.innerHTML = `<i class="fas fa-list"></i> ${type}`;
+                    
+                    const valuePill = document.createElement("span");
+                    valuePill.className = "badge-condition-pill";
+                    valuePill.innerHTML = `<i class="fas fa-arrow-right"></i> ${value}+`;
+                    
+                    condition.appendChild(descPill);
+                    condition.appendChild(typePill);
+                    condition.appendChild(valuePill);
+                } else {
+                    const defaultPill = document.createElement("span");
+                    defaultPill.className = "badge-condition-pill";
+                    defaultPill.textContent = conditionText;
+                    condition.appendChild(defaultPill);
+                }
+            }
+
+            card.appendChild(iconWrapper);
+            card.appendChild(condition);
             els.badgeList.appendChild(card);
         });
 
@@ -274,6 +373,9 @@
         state.editingBadgeId = badgeId;
         const badge = badgeId ? state.badges.find((item) => item.id === badgeId) : null;
 
+        // Remplir d'abord le select avec les thématiques
+        populateConditionTypeSelect();
+
         if (badge) {
             els.badgeName.value = badge.nom || "";
             els.badgeIcon.value = badge.icone || "";
@@ -283,7 +385,10 @@
         } else {
             els.badgeName.value = "";
             els.badgeIcon.value = "";
-            els.badgeConditionType.value = "Défis \"Mobilité\"";
+            // Sélectionner la première thématique disponible
+            if (els.badgeConditionType.children.length > 0 && !els.badgeConditionType.children[0].disabled) {
+                els.badgeConditionType.value = els.badgeConditionType.children[0].value;
+            }
             els.badgeConditionValue.value = 1;
         }
 
@@ -380,10 +485,19 @@
     function saveBadgeFromModal() {
         const name = els.badgeName.value.trim();
         const icon = els.badgeIcon.value.trim();
-        const conditionText = `${els.badgeConditionType.value} >= ${Number(els.badgeConditionValue.value || 1)}`;
+        const conditionType = els.badgeConditionType.value.trim();
+        const conditionValue = Number(els.badgeConditionValue.value || 1);
+        
+        // Nouveau format: "Pour avoir le badge il faut avoir au moins Type: Valeur"
+        const conditionText = `Pour avoir le badge il faut avoir au moins ${conditionType}: ${conditionValue}`;
 
         if (!name) {
             showFeedback("Le nom du badge est requis.", "error");
+            return;
+        }
+
+        if (!conditionType || conditionType === "") {
+            showFeedback("Veuillez sélectionner une condition d'obtention.", "error");
             return;
         }
 
@@ -438,6 +552,7 @@
 
             renderCategories();
             renderBadges();
+            populateConditionTypeSelect();
         } catch (error) {
             showFeedback(error.message || "Impossible de charger les paramètres.", "error");
         }
@@ -502,6 +617,7 @@
                 event.preventDefault();
                 state.thematiques.push({ id: null, nom: "", description: "" });
                 renderCategories();
+                populateConditionTypeSelect();
             });
         }
 
@@ -627,6 +743,15 @@
                 }
             }
         }
+
+        // Gestionnaire de déconnexion
+        document.querySelectorAll("[data-logout]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                localStorage.removeItem("gp_token");
+                localStorage.removeItem("gp_user");
+                window.location.replace("/auth.html");
+            });
+        });
     }
 
     function initialize() {
