@@ -16,67 +16,6 @@ body {
     margin: 0;
 }
 
-.navbar {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 0.75rem 4%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    backdrop-filter: blur(10px);
-    height: 70px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.nav-logo {
-    height: 90px;
-    width: auto;
-    object-fit: contain;
-}
-
-.nav-links a {
-    color: var(--text-muted);
-    text-decoration: none;
-    margin: 0 15px;
-    font-weight: 500;
-    transition: 0.2s;
-}
-
-.nav-links a.active,
-.nav-links a:hover {
-    color: var(--green-light);
-}
-
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.role-badge.admin {
-    background: var(--admin-red);
-    color: white;
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 0.85rem;
-    font-weight: bold;
-}
-
-.logout-btn {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 1.1rem;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    width: 44px;
-    height: 44px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 50%;
-}
-
-.logout-btn:hover {
-    background: rgba(255,255,255,0.12);
-}
 
 .param-main {
     padding: 40px 4%;
