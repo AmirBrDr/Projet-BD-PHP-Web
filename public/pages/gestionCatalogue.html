@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GreenPulse - Catalogue des defis</title>
+    <link rel="stylesheet" href="../assets/css/app-shell.css" />
+    <link rel="stylesheet" href="../assets/css/unified-navbar.css" />
+    <link rel="stylesheet" href="../assets/css/gestionCatalogue.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+
+<body class="app-page" data-required-role="animateur">
+    <nav class="navbar">
+        <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo" />
+        <div class="nav-links">
+            <a href="gestionDefis.html">Gestion des defis</a>
+            <a class="active" href="gestionCatalogue.html">Catalogue</a>
+            <a href="moderation.html">Moderation</a>
+            <a href="statistiques.html">Statistiques</a>
+            <a href="compteAnimateur.html">Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge animateur">Animateur DD</div>
+            <button type="button" class="logout-btn" data-logout title="Deconnexion"><i
+                    class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </nav>
+
+    <main class="app-shell">
+        <section class="parcours-header manage-header">
+            <div>
+                <h2 class="parcours-title">Catalogue des defis</h2>
+                <p class="parcours-subtitle">Gerez vos thematiques et creez des defis generiques reutilisables.</p>
+            </div>
+            <div class="header-tools">
+                <button id="open-theme-modal-btn" class="primary-btn" type="button">
+                    <i class="fas fa-plus"></i> Nouvelle thematique
+                </button>
+            </div>
+        </section>
+
+        <div id="page-alert" class="page-alert" hidden></div>
+
+        <div id="catalogue-list" class="catalogue-list">
+            <div class="loading-state">Chargement du catalogue...</div>
+        </div>
+    </main>
+
+    <!-- Modal : créer une thématique -->
+    <div id="theme-modal-overlay" class="modal-overlay hidden" aria-hidden="true">
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="theme-modal-title">
+            <div class="modal-head">
+                <h2 id="theme-modal-title">Nouvelle thematique</h2>
+                <button class="icon-btn" type="button" data-close-overlay="theme-modal-overlay" aria-label="Fermer">x</button>
+            </div>
+            <form id="theme-form" novalidate>
+                <label>
+                    <span>Nom de la thematique</span>
+                    <input id="theme-name" type="text" required maxlength="100" />
+                </label>
+                <label>
+                    <span>Description (optionnel)</span>
+                    <textarea id="theme-description" rows="2" maxlength="500"></textarea>
+                </label>
+                <div class="form-actions">
+                    <button type="button" class="ghost-btn" data-close-overlay="theme-modal-overlay">Annuler</button>
+                    <button type="submit" class="primary-btn">Creer</button>
+                </div>
+            </form>
+            <div id="theme-form-alert" class="inline-alert" hidden></div>
+        </section>
+    </div>
+
+    <!-- Modal : créer un défi dans le catalogue -->
+    <div id="defi-modal-overlay" class="modal-overlay hidden" aria-hidden="true">
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="defi-modal-title">
+            <div class="modal-head">
+                <h2 id="defi-modal-title">Nouveau defi dans le catalogue</h2>
+                <button class="icon-btn" type="button" data-close-overlay="defi-modal-overlay" aria-label="Fermer">x</button>
+            </div>
+            <form id="defi-form" novalidate>
+                <input type="hidden" id="defi-theme-ids" />
+                <div class="form-grid">
+                    <label>
+                        <span>Nom du defi</span>
+                        <input id="defi-name" type="text" required maxlength="150" />
+                    </label>
+                    <label>
+                        <span>Points</span>
+                        <input id="defi-points" type="number" min="1" required />
+                    </label>
+                    <label>
+                        <span>CO2 evite (kg)</span>
+                        <input id="defi-co2" type="number" min="0" required />
+                    </label>
+                    <label>
+                        <span>Niveau</span>
+                        <input id="defi-level" type="number" min="1" required />
+                    </label>
+                </div>
+                <label>
+                    <span>Thematiques</span>
+                    <div id="defi-themes-checkboxes" class="checkboxes-group"></div>
+                </label>
+                <label>
+                    <span>Description (optionnel)</span>
+                    <textarea id="defi-description" rows="3" maxlength="1000"></textarea>
+                </label>
+                <div class="actions-head">
+                    <h3>Actions du defi</h3>
+                    <button id="add-action-btn" class="ghost-btn" type="button">+ Ajouter une action</button>
+                </div>
+                <div id="defi-actions-container" class="actions-container"></div>
+                <div class="form-actions">
+                    <button type="button" class="ghost-btn" data-close-overlay="defi-modal-overlay">Annuler</button>
+                    <button type="submit" class="primary-btn">Creer le defi</button>
+                </div>
+            </form>
+            <div id="defi-form-alert" class="inline-alert" hidden></div>
+        </section>
+    </div>
+
+    <script src="../assets/js/app-shell.js" defer></script>
+    <script src="../assets/js/dialog-runtime.js" defer></script>
+    <script src="../assets/js/gestionCatalogue.js" defer></script>
+</body>
+
+</html>

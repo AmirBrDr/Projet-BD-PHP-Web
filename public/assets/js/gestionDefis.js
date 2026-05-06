@@ -1,536 +1,276 @@
 (() => {
-    const token = localStorage.getItem("gp_token") || "";
+    const token = localStorage.getItem('gp_token') || '';
+
     const askConfirm = (message, options = {}) => {
-        if (typeof window.gpConfirm === "function") {
-            return window.gpConfirm(message, options);
-        }
-
-        if (window.GPDialog && typeof window.GPDialog.confirm === "function") {
-            return window.GPDialog.confirm({ message, ...options });
-        }
-
-        throw new Error("Modal de confirmation indisponible.");
+        if (typeof window.gpConfirm === 'function') return window.gpConfirm(message, options);
+        if (window.GPDialog?.confirm) return window.GPDialog.confirm({ message, ...options });
+        throw new Error('Modal de confirmation indisponible.');
     };
 
     const state = {
-        themes: [],
         challenges: [],
-        editingId: null,
+        setupThemes: [],
+        availableDefis: [],
+        selectedThemeId: 0,
+        selectedDefiIds: [],
     };
 
-    const elements = {
-        pageAlert: document.getElementById("page-alert"),
-        filtreTheme: document.getElementById("filtreTheme"),
-        emptyState: document.getElementById("empty-state"),
-        openCreateModalBtn: document.getElementById("open-create-modal-btn"),
-        closeModalBtn: document.getElementById("close-modal-btn"),
-        modalOverlay: document.getElementById("challenge-modal-overlay"),
-        challengeForm: document.getElementById("challenge-form"),
-        challengeFormTitle: document.getElementById("challenge-form-title"),
-        challengeFormAlert: document.getElementById("challenge-form-alert"),
-        cancelEditBtn: document.getElementById("cancel-edit-btn"),
-        submitChallengeBtn: document.getElementById("submit-challenge-btn"),
-        challengeName: document.getElementById("challenge-name"),
-        challengeDescription: document.getElementById("challenge-description"),
-        challengeTheme: document.getElementById("challenge-theme"),
-        challengeMonth: document.getElementById("challenge-month"),
-        challengeOrder: document.getElementById("challenge-order"),
-        challengePoints: document.getElementById("challenge-points"),
-        challengeCo2: document.getElementById("challenge-co2"),
-        challengeLevel: document.getElementById("challenge-level"),
-        challengeForumName: document.getElementById("challenge-forum-name"),
-        challengeForumDescription: document.getElementById("challenge-forum-description"),
-        actionsContainer: document.getElementById("actions-container"),
-        addActionBtn: document.getElementById("add-action-btn"),
-        challengeList: document.getElementById("challenge-list"),
-        refreshChallengesBtn: document.getElementById("refresh-challenges-btn"),
+    const el = {
+        pageAlert: document.getElementById('page-alert'),
+        filtreTheme: document.getElementById('filtreTheme'),
+        emptyState: document.getElementById('empty-state'),
+        challengeList: document.getElementById('challenge-list'),
+        refreshBtn: document.getElementById('refresh-challenges-btn'),
+        monthSetup: document.getElementById('month-setup'),
+        setupThemeSelect: document.getElementById('setup-theme-select'),
+        defiSlots: document.getElementById('defi-slots'),
+        saveMonthBtn: document.getElementById('save-month-btn'),
     };
 
-    function escapeHtml(value) {
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/\"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+    function escapeHtml(v) {
+        return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    function setPageAlert(message) {
-        if (!elements.pageAlert) {
-            return;
-        }
-
-        if (!message) {
-            elements.pageAlert.hidden = true;
-            elements.pageAlert.textContent = "";
-            return;
-        }
-
-        elements.pageAlert.hidden = false;
-        elements.pageAlert.textContent = message;
+    function setPageAlert(msg) {
+        if (!el.pageAlert) return;
+        if (!msg) { el.pageAlert.hidden = true; el.pageAlert.textContent = ''; return; }
+        el.pageAlert.hidden = false;
+        el.pageAlert.textContent = msg;
     }
 
-    function setFormAlert(message, type) {
-        if (!elements.challengeFormAlert) {
-            return;
-        }
-
-        if (!message) {
-            elements.challengeFormAlert.hidden = true;
-            elements.challengeFormAlert.className = "inline-alert";
-            elements.challengeFormAlert.textContent = "";
-            return;
-        }
-
-        elements.challengeFormAlert.hidden = false;
-        elements.challengeFormAlert.className = `inline-alert ${type || ""}`.trim();
-        elements.challengeFormAlert.textContent = message;
-    }
-
-    function openModal() {
-        if (!elements.modalOverlay) {
-            return;
-        }
-
-        elements.modalOverlay.classList.remove("hidden");
-        elements.modalOverlay.setAttribute("aria-hidden", "false");
-    }
-
-    function closeModal() {
-        if (!elements.modalOverlay) {
-            return;
-        }
-
-        elements.modalOverlay.classList.add("hidden");
-        elements.modalOverlay.setAttribute("aria-hidden", "true");
-    }
-
-    async function apiRequest(action, options = {}) {
-        const method = options.method || "GET";
+    async function apiReq(action, options = {}) {
+        const method = options.method || 'GET';
         const params = new URLSearchParams({ action, ...(options.params || {}) });
-        const url = `/api/modules/animator/?${params.toString()}`;
-
-        const requestOptions = {
-            method,
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        };
-
+        const url = `/api/modules/animator/?${params}`;
+        const opts = { method, headers: { Authorization: `Bearer ${token}` } };
         if (options.body) {
-            requestOptions.headers["Content-Type"] = "application/json";
-            requestOptions.body = JSON.stringify(options.body);
+            opts.headers['Content-Type'] = 'application/json';
+            opts.body = JSON.stringify(options.body);
         }
-
-        const response = await fetch(url, requestOptions);
-
+        const res = await fetch(url, opts);
         let data = null;
-        try {
-            data = await response.json();
-        } catch (_error) {
-            data = null;
-        }
-
-        if (!response.ok) {
-            throw new Error(data?.message || `Erreur HTTP ${response.status}`);
-        }
-
+        try { data = await res.json(); } catch (_) {}
+        if (!res.ok) throw new Error(data?.message || `Erreur ${res.status}`);
         return data;
     }
 
     function getCurrentMonth() {
         const now = new Date();
-        const month = `${now.getMonth() + 1}`.padStart(2, "0");
-        return `${now.getFullYear()}-${month}`;
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     }
 
-    function formatThemeOptions() {
-        if (!elements.filtreTheme) {
-            return;
-        }
-
-        const currentValue = elements.filtreTheme.value || "all";
-        const allThemes = [...new Set(state.challenges.map((item) => item.nomtheme).filter(Boolean))];
-
-        elements.filtreTheme.innerHTML = '<option value="all">Toutes les thematiques</option>';
-        allThemes.forEach((theme) => {
-            const option = document.createElement("option");
-            option.value = theme;
-            option.textContent = theme;
-            elements.filtreTheme.appendChild(option);
-        });
-
-        elements.filtreTheme.value = allThemes.includes(currentValue) ? currentValue : "all";
-    }
-
-    function createActionRow(action = {}) {
-        const row = document.createElement("div");
-        row.className = "action-row";
-
-        row.innerHTML = `
-            <div class="action-row-head">
-                <div class="action-row-title">Action du defi</div>
-                <button class="action-remove" type="button">Supprimer</button>
-            </div>
-            <label>
-                <span>Nom de l'action</span>
-                <input class="action-name" type="text" value="${escapeHtml(action.nomaction || action.nomAction || "")}" required />
-            </label>
-            <label>
-                <span>Description de l'action</span>
-                <textarea class="action-description" rows="2">${escapeHtml(action.descriptionaction || action.descriptionAction || "")}</textarea>
-            </label>
-        `;
-
-        row.querySelector(".action-remove")?.addEventListener("click", () => {
-            row.remove();
-            if (elements.actionsContainer?.children.length === 0) {
-                addActionRow();
-            }
-        });
-
-        elements.actionsContainer?.appendChild(row);
-    }
-
-    function addActionRow(action) {
-        createActionRow(action);
-    }
-
-    function getActionsPayload() {
-        const rows = Array.from(elements.actionsContainer?.querySelectorAll(".action-row") || []);
-        const actions = rows
-            .map((row) => {
-                const nomAction = row.querySelector(".action-name")?.value?.trim() || "";
-                const descriptionAction = row.querySelector(".action-description")?.value?.trim() || "";
-                return {
-                    nomAction,
-                    descriptionAction,
-                };
-            })
-            .filter((item) => item.nomAction !== "");
-
-        if (actions.length === 0) {
-            throw new Error("Ajoutez au moins une action avec un nom.");
-        }
-
-        return actions;
-    }
-
-    function resetForm() {
-        state.editingId = null;
-        elements.challengeForm?.reset();
-        elements.challengeMonth.value = getCurrentMonth();
-        setDefaultOrderFromTheme();
-
-        if (elements.actionsContainer) {
-            elements.actionsContainer.innerHTML = "";
-            addActionRow();
-        }
-
-        if (elements.challengeFormTitle) {
-            elements.challengeFormTitle.textContent = "Creer un defi";
-        }
-        if (elements.submitChallengeBtn) {
-            elements.submitChallengeBtn.textContent = "Creer le defi";
-        }
-
-        setFormAlert("", "");
-    }
-
-    function setDefaultOrderFromTheme() {
-        const selectedThemeId = Number(elements.challengeTheme?.value || 0);
-        const selectedTheme = state.themes.find((item) => Number(item.id_thematique) === selectedThemeId);
-        if (selectedTheme && !state.editingId) {
-            elements.challengeOrder.value = String(selectedTheme.next_ordre || 1);
-        }
-    }
-
-    function buildChallengePayload() {
-        const nomDefi = elements.challengeName?.value?.trim() || "";
-        const descriptionDefi = elements.challengeDescription?.value?.trim() || "";
-        const idThematique = Number(elements.challengeTheme?.value || 0);
-        const mois = elements.challengeMonth?.value || "";
-        const ordre = Number(elements.challengeOrder?.value || 0);
-        const nbPointsDefi = Number(elements.challengePoints?.value || 0);
-        const nbCO2Defi = Number(elements.challengeCo2?.value || 0);
-        const niveauDefi = Number(elements.challengeLevel?.value || 0);
-        const nomForum = elements.challengeForumName?.value?.trim() || "";
-        const descriptionForum = elements.challengeForumDescription?.value?.trim() || "";
-
-        if (!nomDefi) {
-            throw new Error("Le nom du defi est obligatoire.");
-        }
-        if (idThematique <= 0) {
-            throw new Error("Selectionnez une thematique.");
-        }
-        if (!mois) {
-            throw new Error("Selectionnez le mois du defi.");
-        }
-        if (ordre <= 0 || nbPointsDefi <= 0 || nbCO2Defi < 0 || niveauDefi <= 0) {
-            throw new Error("Les valeurs numeriques du defi sont invalides.");
-        }
-
-        return {
-            nomDefi,
-            descriptionDefi,
-            idThematique,
-            mois,
-            ordre,
-            nbPointsDefi,
-            nbCO2Defi,
-            niveauDefi,
-            nomForum,
-            descriptionForum,
-            actions: getActionsPayload(),
-        };
-    }
+    // ── Affichage de la liste des défis existants ──────────────────────────────
 
     function renderChallenges() {
-        if (!elements.challengeList) {
-            return;
-        }
-
-        const selectedTheme = elements.filtreTheme?.value || "all";
-        const visibleChallenges = selectedTheme === "all"
+        const selectedTheme = el.filtreTheme?.value || 'all';
+        const visible = selectedTheme === 'all'
             ? state.challenges
-            : state.challenges.filter((item) => item.nomtheme === selectedTheme);
+            : state.challenges.filter(c => c.nomtheme === selectedTheme);
 
-        if (!visibleChallenges.length) {
-            elements.challengeList.innerHTML = "";
-            elements.emptyState?.classList.remove("hidden");
+        if (!visible.length) {
+            el.challengeList.innerHTML = '';
+            el.emptyState?.classList.remove('hidden');
             return;
         }
+        el.emptyState?.classList.add('hidden');
 
-        elements.emptyState?.classList.add("hidden");
+        // Alimenter le filtre thématique
+        const themes = [...new Set(state.challenges.map(c => c.nomtheme).filter(Boolean))];
+        const currentFilter = el.filtreTheme?.value || 'all';
+        if (el.filtreTheme) {
+            el.filtreTheme.innerHTML = '<option value="all">Toutes les thematiques</option>' +
+                themes.map(t => `<option value="${escapeHtml(t)}"${t === currentFilter ? ' selected' : ''}>${escapeHtml(t)}</option>`).join('');
+        }
 
-        elements.challengeList.innerHTML = visibleChallenges
-            .map(
-                (challenge, index) => `
-                    <article class="defi-card ${index === 0 ? "actif" : ""}" data-id="${challenge.id_defi}">
-                        <div class="defi-ordre">${escapeHtml(challenge.ordre || "-")}</div>
-                        <div class="defi-body">
-                            <span class="defi-theme-badge">${escapeHtml(challenge.nomtheme || "Thematique")}</span>
-                            <h3 class="defi-nom">${escapeHtml(challenge.nomdefi)}</h3>
-                            <p class="defi-desc">${escapeHtml(challenge.descriptiondefi || "Aucune description")}</p>
-                            <div class="defi-meta">
-                                <span>${escapeHtml(challenge.nbpointsdefi || 0)} pts</span>
-                                <span>${escapeHtml(challenge.nbco2defi || 0)} kg CO2</span>
-                                <span>Niveau ${escapeHtml(challenge.niveaudefi || "-")}</span>
-                                <span>Mois ${escapeHtml(challenge.mois || "-")}</span>
-                            </div>
-                        </div>
-                        <div class="defi-action">
-                            <a href="detailDefiAnimateur.html?id=${challenge.id_defi}" class="btn-detail">Voir le defi</a>
-                            <div class="manage-actions">
-                                <button class="btn-manage" type="button" data-action="edit" data-id="${challenge.id_defi}">Modifier</button>
-                                <button class="btn-manage danger" type="button" data-action="delete" data-id="${challenge.id_defi}">Supprimer</button>
-                            </div>
-                        </div>
-                    </article>
-                `
-            )
-            .join("");
+        el.challengeList.innerHTML = visible.map((c, i) => `
+            <article class="defi-card ${i === 0 ? 'actif' : ''}" data-id="${c.id_defi}">
+                <div class="defi-ordre">${escapeHtml(c.ordre ?? '-')}</div>
+                <div class="defi-body">
+                    <span class="defi-theme-badge">${escapeHtml(c.nomtheme || 'Thematique')}</span>
+                    <h3 class="defi-nom">${escapeHtml(c.nomdefi)}</h3>
+                    <p class="defi-desc">${escapeHtml(c.descriptiondefi || 'Aucune description')}</p>
+                    <div class="defi-meta">
+                        <span>${escapeHtml(c.nbpointsdefi || 0)} pts</span>
+                        <span>${escapeHtml(c.nbco2defi || 0)} kg CO2</span>
+                        <span>Niveau ${escapeHtml(c.niveaudefi || '-')}</span>
+                        <span>Mois ${escapeHtml(c.mois || '-')}</span>
+                    </div>
+                </div>
+                <div class="defi-action">
+                    <a href="detailDefiAnimateur.html?id=${c.id_defi}" class="btn-detail">Voir le defi</a>
+                    <div class="manage-actions">
+                        <button class="btn-manage danger" type="button" data-action="delete" data-id="${c.id_defi}">Supprimer</button>
+                    </div>
+                </div>
+            </article>`).join('');
     }
 
-    async function loadThemes() {
-        const selectedMonth = elements.challengeMonth?.value || getCurrentMonth();
-        const response = await apiRequest("themes", { params: { mois: selectedMonth } });
-        state.themes = response?.data || [];
+    async function loadCurrentMonthChallenges() {
+        const res = await apiReq('challenges');
+        const allChallenges = res?.data || [];
+        const currentMonth = getCurrentMonth();
+        state.challenges = allChallenges.filter(c => c.mois === currentMonth);
+        return state.challenges;
+    }
 
-        if (elements.challengeTheme) {
-            elements.challengeTheme.innerHTML = "";
-            state.themes.forEach((theme) => {
-                const option = document.createElement("option");
-                option.value = String(theme.id_thematique);
-                option.textContent = `${theme.nomtheme} (ordre conseille: ${theme.next_ordre})`;
-                elements.challengeTheme.appendChild(option);
+    // ── Setup mensuel ──────────────────────────────────────────────────────────
+
+    async function loadSetupThemes() {
+        const res = await apiReq('catalogue_themes');
+        state.setupThemes = res?.data || [];
+        if (!el.setupThemeSelect) return;
+        el.setupThemeSelect.innerHTML = '<option value="">-- Choisir une thematique --</option>' +
+            state.setupThemes.map(t => `<option value="${t.id_thematique}">${escapeHtml(t.nomtheme)} (${t.nb_defis} defi(s))</option>`).join('');
+    }
+
+    function buildSlot(defis, selectedDefiId = 0) {
+        const select = document.createElement('select');
+        select.className = 'slot-select';
+        select.innerHTML = '<option value="">-- Choisir un defi --</option>' +
+            defis.map(d => `<option value="${d.id_defi}"${d.id_defi === selectedDefiId ? ' selected' : ''}>${escapeHtml(d.nomdefi)} (${d.nbpointsdefi}pts)</option>`).join('');
+        select.addEventListener('change', syncSelectedDefiIds);
+        return select;
+    }
+
+    function syncSelectedDefiIds() {
+        state.selectedDefiIds = Array.from(
+            el.defiSlots?.querySelectorAll('.slot-select') || []
+        ).map(s => parseInt(s.value, 10)).filter(v => v > 0);
+        if (el.saveMonthBtn) {
+            el.saveMonthBtn.classList.toggle('hidden', state.selectedDefiIds.length === 0);
+        }
+    }
+
+    function addDefiSlot() {
+        if (!el.defiSlots) return;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'slot-row';
+        const select = buildSlot(state.availableDefis);
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'ghost-btn slot-remove';
+        removeBtn.textContent = '×';
+        removeBtn.addEventListener('click', () => { wrapper.remove(); syncSelectedDefiIds(); });
+        wrapper.appendChild(select);
+        wrapper.appendChild(removeBtn);
+        // Insérer avant le bouton "+"
+        const addBtn = el.defiSlots.querySelector('.add-slot-btn');
+        if (addBtn) el.defiSlots.insertBefore(wrapper, addBtn);
+        else el.defiSlots.appendChild(wrapper);
+        syncSelectedDefiIds();
+    }
+
+    async function onThemeChange() {
+        const themeId = parseInt(el.setupThemeSelect?.value || '0', 10);
+        state.selectedThemeId = themeId;
+        state.availableDefis = [];
+        state.selectedDefiIds = [];
+        if (!el.defiSlots) return;
+        el.defiSlots.innerHTML = '';
+        if (el.saveMonthBtn) el.saveMonthBtn.classList.add('hidden');
+
+        if (!themeId) return;
+
+        try {
+            const res = await apiReq(`catalogue_defis_available&theme_id=${themeId}`);
+            state.availableDefis = res?.data || [];
+            if (!state.availableDefis.length) {
+                el.defiSlots.innerHTML = '<p class="setup-empty">Aucun defi disponible pour cette thematique. <a href="gestionCatalogue.html">Creez-en dans le catalogue</a>.</p>';
+                return;
+            }
+            // Bouton "+" pour ajouter un slot
+            const addBtn = document.createElement('button');
+            addBtn.type = 'button';
+            addBtn.className = 'ghost-btn add-slot-btn';
+            addBtn.textContent = '+ Ajouter un defi';
+            addBtn.addEventListener('click', addDefiSlot);
+            el.defiSlots.appendChild(addBtn);
+            addDefiSlot();
+        } catch (err) {
+            el.defiSlots.innerHTML = `<p class="setup-empty">Erreur: ${escapeHtml(err.message)}</p>`;
+        }
+    }
+
+    async function saveMonthDefis() {
+        syncSelectedDefiIds();
+        const defiIds = state.selectedDefiIds;
+        if (!defiIds.length) { setPageAlert('Selectionnez au moins un defi.'); return; }
+        if (!state.selectedThemeId) { setPageAlert('Choisissez une thematique.'); return; }
+
+        try {
+            await apiReq('defis_month_save', {
+                method: 'POST',
+                body: { thematique_id: state.selectedThemeId, defi_ids: defiIds, mois: getCurrentMonth() },
             });
+            setPageAlert('Defis du mois sauvegardes !');
+            await init();
+        } catch (err) {
+            setPageAlert(err.message || 'Sauvegarde impossible.');
         }
-
-        setDefaultOrderFromTheme();
     }
 
-    async function loadChallenges() {
-        const response = await apiRequest("challenges");
-        state.challenges = response?.data || [];
-        formatThemeOptions();
-        renderChallenges();
-    }
-
-    async function loadChallengeForEdit(challengeId) {
-        const response = await apiRequest("challenge_detail", { params: { id: challengeId } });
-        const challenge = response?.data?.challenge;
-        const actions = response?.data?.actions || [];
-
-        if (!challenge) {
-            throw new Error("Defi introuvable pour modification.");
-        }
-
-        state.editingId = Number(challengeId);
-        elements.challengeFormTitle.textContent = "Modifier le defi";
-        elements.submitChallengeBtn.textContent = "Enregistrer les modifications";
-
-        elements.challengeName.value = challenge.nomdefi || "";
-        elements.challengeDescription.value = challenge.descriptiondefi || "";
-        elements.challengeTheme.value = String(challenge.id_thematique || "");
-        elements.challengeMonth.value = challenge.mois || getCurrentMonth();
-        elements.challengeOrder.value = String(challenge.ordre || 1);
-        elements.challengePoints.value = String(challenge.nbpointsdefi || 1);
-        elements.challengeCo2.value = String(challenge.nbco2defi || 0);
-        elements.challengeLevel.value = String(challenge.niveaudefi || 1);
-        elements.challengeForumName.value = challenge.nomforum || "";
-        elements.challengeForumDescription.value = challenge.descriptionforum || "";
-
-        elements.actionsContainer.innerHTML = "";
-        if (!actions.length) {
-            addActionRow();
-        } else {
-            actions.forEach((action) => addActionRow(action));
-        }
-
-        openModal();
-    }
+    // ── Suppression ────────────────────────────────────────────────────────────
 
     async function deleteChallenge(challengeId) {
-        const confirmed = await askConfirm("Confirmer la suppression de ce defi ?", {
-            title: "Suppression du defi",
-            confirmText: "Supprimer",
-            cancelText: "Annuler",
-            tone: "danger",
+        const confirmed = await askConfirm('Confirmer la suppression de ce defi ?', {
+            title: 'Suppression', confirmText: 'Supprimer', cancelText: 'Annuler', tone: 'danger',
         });
-        if (!confirmed) {
-            return;
-        }
-
-        await apiRequest("challenge_delete", {
-            method: "POST",
-            params: { id: String(challengeId) },
-        });
-
-        await Promise.all([loadThemes(), loadChallenges()]);
-        setPageAlert("Defi supprime avec succes.");
-    }
-
-    async function submitChallengeForm(event) {
-        event.preventDefault();
-        setFormAlert("", "");
-        setPageAlert("");
-
+        if (!confirmed) return;
         try {
-            const payload = buildChallengePayload();
-            const isEditing = Boolean(state.editingId);
-
-            if (isEditing) {
-                await apiRequest("challenge_update", {
-                    method: "POST",
-                    params: { id: String(state.editingId) },
-                    body: payload,
-                });
-                setFormAlert("Defi mis a jour avec succes.", "success");
-            } else {
-                await apiRequest("challenge_create", {
-                    method: "POST",
-                    body: payload,
-                });
-                setFormAlert("Defi cree avec succes.", "success");
-            }
-
-            await Promise.all([loadThemes(), loadChallenges()]);
-            resetForm();
-            closeModal();
-            setPageAlert(isEditing ? "Defi mis a jour avec succes." : "Defi cree avec succes.");
-        } catch (error) {
-            setFormAlert(error?.message || "Operation impossible.", "error");
+            await apiReq('challenge_delete', { method: 'POST', params: { id: String(challengeId) } });
+            setPageAlert('Defi supprime.');
+            await init();
+        } catch (err) {
+            setPageAlert(err.message || 'Suppression impossible.');
         }
     }
 
-    async function handleChallengeListClick(event) {
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) {
-            return;
-        }
-
-        // Ignore les liens (permet au navigateur de les suivre)
-        if (target.tagName === 'A') {
-            return;
-        }
-
-        const action = target.dataset.action;
-        const challengeId = Number(target.dataset.id || 0);
-        if (!action || challengeId <= 0) {
-            return;
-        }
-
-        try {
-            if (action === "edit") {
-                await loadChallengeForEdit(challengeId);
-            } else if (action === "delete") {
-                await deleteChallenge(challengeId);
-            }
-        } catch (error) {
-            setPageAlert(error?.message || "Impossible de traiter cette action.");
-        }
-    }
+    // ── Init ───────────────────────────────────────────────────────────────────
 
     async function init() {
-        if (!token) {
-            setPageAlert("Session invalide. Merci de vous reconnecter.");
-            return;
-        }
-
-        elements.challengeForm?.addEventListener("submit", submitChallengeForm);
-        elements.addActionBtn?.addEventListener("click", () => addActionRow());
-        elements.cancelEditBtn?.addEventListener("click", () => {
-            resetForm();
-            closeModal();
-        });
-        elements.openCreateModalBtn?.addEventListener("click", async () => {
-            resetForm();
-            try {
-                await loadThemes();
-            } catch (error) {
-                setFormAlert(error?.message || "Chargement des thematiques impossible.", "error");
-            }
-            openModal();
-        });
-        elements.closeModalBtn?.addEventListener("click", () => {
-            closeModal();
-        });
-        elements.modalOverlay?.addEventListener("click", (event) => {
-            if (event.target === elements.modalOverlay) {
-                closeModal();
-            }
-        });
-        elements.challengeTheme?.addEventListener("change", setDefaultOrderFromTheme);
-        elements.challengeMonth?.addEventListener("change", async () => {
-            try {
-                await loadThemes();
-            } catch (error) {
-                setFormAlert(error?.message || "Chargement des thematiques impossible.", "error");
-            }
-        });
-        elements.filtreTheme?.addEventListener("change", renderChallenges);
-        elements.refreshChallengesBtn?.addEventListener("click", async () => {
-            try {
-                await Promise.all([loadThemes(), loadChallenges()]);
-                setPageAlert("");
-            } catch (error) {
-                setPageAlert(error?.message || "Actualisation impossible.");
-            }
-        });
-
-        elements.challengeList?.addEventListener("click", handleChallengeListClick);
-
         try {
-            await loadThemes();
-            await loadChallenges();
-            resetForm();
-            closeModal();
-            setPageAlert("");
-        } catch (error) {
-            setPageAlert(error?.message || "Chargement initial impossible.");
+            const challenges = await loadCurrentMonthChallenges();
+
+            if (challenges.length > 0) {
+                // Des défis existent pour ce mois → afficher la liste
+                el.monthSetup?.classList.add('hidden');
+                el.challengeList && (el.challengeList.innerHTML = '');
+                renderChallenges();
+            } else {
+                // Aucun défi ce mois → afficher le setup
+                el.challengeList && (el.challengeList.innerHTML = '');
+                el.emptyState?.classList.add('hidden');
+                el.monthSetup?.classList.remove('hidden');
+                el.defiSlots && (el.defiSlots.innerHTML = '');
+                el.saveMonthBtn?.classList.add('hidden');
+                await loadSetupThemes();
+            }
+        } catch (err) {
+            setPageAlert(err.message || 'Chargement impossible.');
         }
     }
 
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener('DOMContentLoaded', () => {
+        el.filtreTheme?.addEventListener('change', renderChallenges);
+        el.refreshBtn?.addEventListener('click', async () => { setPageAlert(''); await init(); });
+        el.setupThemeSelect?.addEventListener('change', onThemeChange);
+        el.saveMonthBtn?.addEventListener('click', saveMonthDefis);
+
+        el.challengeList?.addEventListener('click', async e => {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            if (btn.tagName === 'A') return;
+            const action = btn.dataset.action;
+            const id = parseInt(btn.dataset.id || '0', 10);
+            if (!id) return;
+            try {
+                if (action === 'delete') await deleteChallenge(id);
+            } catch (err) {
+                setPageAlert(err.message || 'Erreur.');
+            }
+        });
+
+        if (!token) { setPageAlert('Session invalide.'); return; }
+        init();
+    });
 })();

@@ -53,6 +53,7 @@
         roleField: document.getElementById("roleField"),
         teamField: document.getElementById("teamField"),
         statusField: document.getElementById("statusField"),
+        deptField: document.getElementById("deptField"),
         passwordField: document.getElementById("passwordField"),
         saveUserBtn: document.getElementById("saveUserBtn"),
         teamForm: document.getElementById("teamForm"),
@@ -62,6 +63,14 @@
         selectedFileName: document.getElementById("selectedFileName"),
         importBtn: document.getElementById("importBtn"),
     };
+
+    // Décode le JWT pour obtenir l'ID de l'utilisateur courant
+    function getCurrentUserId() {
+        const t = localStorage.getItem("gp_token");
+        if (!t) return null;
+        try { return JSON.parse(atob(t.split(".")[1])).sub ?? null; } catch (_) { return null; }
+    }
+    const currentUserId = getCurrentUserId();
 
     // Récupère le token JWT de la session locale
     function getToken() {
@@ -214,16 +223,19 @@
                             <td><span class="badge-role ${escapeHtml(role)}">${escapeHtml(getRoleLabel(role))}</span></td>
                             <td>${teamDisplay(u)}</td>
                             <td class="action-cells">
-                                <button class="btn-icon edit" data-action="edit" data-id="${u.id_user}" title="Modifier" aria-label="Modifier">
-                                    <svg class="btn-icon__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                        <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.33H5v-.92l9.06-9.06.92.92L5.92 19.58zM20.71 7.04a1.003 1.003 0 0 0 0-1.42L18.37 3.29a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.83z"/>
-                                    </svg>
-                                </button>
-                                <button class="btn-icon delete" data-action="delete" data-id="${u.id_user}" title="Supprimer" aria-label="Supprimer">
-                                    <svg class="btn-icon__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                        <path fill="currentColor" d="M6 7h12v2H6V7zm2 3h8l-1 10H9L8 10zm3-6h2l1 1h4v2H6V5h4l1-1z"/>
-                                    </svg>
-                                </button>
+                                ${String(u.id_user) === String(currentUserId)
+                                    ? `<span class="self-note">Modifier via <a href="compteRH.html">Compte</a></span>`
+                                    : `<button class="btn-icon edit" data-action="edit" data-id="${u.id_user}" title="Modifier" aria-label="Modifier">
+                                        <svg class="btn-icon__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                            <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.33H5v-.92l9.06-9.06.92.92L5.92 19.58zM20.71 7.04a1.003 1.003 0 0 0 0-1.42L18.37 3.29a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.83z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn-icon delete" data-action="delete" data-id="${u.id_user}" title="Supprimer" aria-label="Supprimer">
+                                        <svg class="btn-icon__svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                            <path fill="currentColor" d="M6 7h12v2H6V7zm2 3h8l-1 10H9L8 10zm3-6h2l1 1h4v2H6V5h4l1-1z"/>
+                                        </svg>
+                                    </button>`
+                                }
                             </td>
                         </tr>
                     `;
@@ -309,6 +321,7 @@
             idEquipe: els.teamField.disabled ? "" : (els.teamField.value || ""),
             statutUser: (els.statusField.value || "actif").toLowerCase(),
             mdp: els.passwordField.value || "",
+            departement: (els.deptField?.value || "").trim(),
         };
     }
 
@@ -335,6 +348,7 @@
         toggleTeamFieldByRole();
         els.teamField.value = user.id_equipe ? String(user.id_equipe) : "";
         els.statusField.value = (user.statutuser || "actif").toLowerCase();
+        if (els.deptField) els.deptField.value = user.departement || "";
         els.passwordField.value = "";
         els.userModalTitle.textContent = "Modifier un Utilisateur";
         els.saveUserBtn.textContent = "Mettre à jour";

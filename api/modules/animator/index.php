@@ -775,6 +775,169 @@ try {
         ]);
     }
 
+    // ─── CATALOGUE : thematiques ───────────────────────────────────────────────
+
+    if ($method === 'GET' && $action === 'catalogue_themes') {
+        $stmt = $pdo->query(
+            'SELECT t.Id_thematique, t.nomTheme, t.descriptionTheme,
+                    COUNT(a.Id_defi) AS nb_defis
+             FROM Thematique t
+             LEFT JOIN Appartenir a ON a.Id_thematique = t.Id_thematique
+             GROUP BY t.Id_thematique, t.nomTheme, t.descriptionTheme
+             ORDER BY t.nomTheme ASC'
+        );
+        gp_send_json(200, ['status' => 'success', 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+    }
+
+    if ($method === 'POST' && $action === 'catalogue_theme_create') {
+        $body = gp_read_json_body();
+        $nomTheme = trim((string)($body['nomTheme'] ?? ''));
+        $descriptionTheme = trim((string)($body['descriptionTheme'] ?? ''));
+        if ($nomTheme === '') {
+            gp_send_json(400, ['message' => 'Le nom de la thematique est obligatoire']);
+        }
+        $stmt = $pdo->prepare(
+            'INSERT INTO Thematique (nomTheme, descriptionTheme) VALUES (:nom, :desc) RETURNING Id_thematique'
+        );
+        $stmt->execute([':nom' => substr($nomTheme, 0, 100), ':desc' => $descriptionTheme !== '' ? $descriptionTheme : null]);
+        $id = (int)$stmt->fetchColumn();
+        gp_send_json(201, ['status' => 'success', 'data' => ['id_thematique' => $id, 'nomTheme' => $nomTheme]]);
+    }
+
+    // ─── CATALOGUE : défis ─────────────────────────────────────────────────────
+
+    if ($method === 'GET' && $action === 'catalogue_defis_by_theme') {
+        $themeId = (int)($_GET['theme_id'] ?? 0);
+        if ($themeId <= 0) {
+            gp_send_json(400, ['message' => 'theme_id requis']);
+        }
+        $stmt = $pdo->prepare(
+            'SELECT d.Id_defi, d.nomDefi, d.descriptionDefi, d.nbPointsDefi, d.nbCO2Defi, d.niveauDefi,
+                    EXISTS(SELECT 1 FROM Regroupe r WHERE r.Id_defi = d.Id_defi AND r.Id_thematique = :theme_id) AS is_scheduled
+             FROM Defi d
+             JOIN Appartenir a ON a.Id_defi = d.Id_defi
+             WHERE a.Id_thematique = :theme_id2
+             ORDER BY d.nomDefi ASC'
+        );
+        $stmt->execute([':theme_id' => $themeId, ':theme_id2' => $themeId]);
+        gp_send_json(200, ['status' => 'success', 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+    }
+
+    if ($method === 'POST' && $action === 'catalogue_defi_create') {
+        $body = gp_read_json_body();
+        $nomDefi = trim((string)($body['nomDefi'] ?? ''));
+        $descriptionDefi = trim((string)($body['descriptionDefi'] ?? ''));
+        $nbPointsDefi = (int)($body['nbPointsDefi'] ?? 0);
+        $nbCO2Defi = (int)($body['nbCO2Defi'] ?? 0);
+        $niveauDefi = (int)($body['niveauDefi'] ?? 0);
+        $themeIds = array_values(array_unique(array_filter(array_map('intval', (array)($body['themeIds'] ?? [])))));
+        $actions = is_array($body['actions'] ?? null) ? $body['actions'] : [];
+
+        if ($nomDefi === '') gp_send_json(400, ['message' => 'Le nom du defi est obligatoire']);
+        if ($nbPointsDefi <= 0 || $niveauDefi <= 0) gp_send_json(400, ['message' => 'Points et niveau doivent etre positifs']);
+        if ($nbCO2Defi < 0) gp_send_json(400, ['message' => 'CO2 ne peut pas etre negatif']);
+        if (empty($themeIds)) gp_send_json(400, ['message' => 'Selectionnez au moins une thematique']);
+
+        $normalizedActions = [];
+        foreach ($actions as $item) {
+            $nom = trim((string)($item['nomAction'] ?? ''));
+            if ($nom !== '') {
+                $normalizedActions[] = ['nomAction' => $nom, 'descriptionAction' => trim((string)($item['descriptionAction'] ?? '')) ?: null];
+            }
+        }
+        if (empty($normalizedActions)) gp_send_json(400, ['message' => 'Ajoutez au moins une action']);
+
+        try {
+            $pdo->beginTransaction();
+
+            $stmt = $pdo->prepare(
+                'INSERT INTO Defi (nomDefi, descriptionDefi, nbPointsDefi, nbCO2Defi, niveauDefi, Id_Animateur)
+                 VALUES (:nom, :desc, :pts, :co2, :niveau, :anim) RETURNING Id_defi'
+            );
+            $stmt->execute([':nom' => substr($nomDefi, 0, 150), ':desc' => $descriptionDefi ?: null, ':pts' => $nbPointsDefi, ':co2' => $nbCO2Defi, ':niveau' => $niveauDefi, ':anim' => $animateurId]);
+            $defiId = (int)$stmt->fetchColumn();
+            if ($defiId <= 0) throw new RuntimeException('Creation impossible');
+
+            $pdo->prepare('INSERT INTO Forum (nomForum, descriptionForum, Id_defi) VALUES (:nom, :desc, :id)')
+                ->execute([':nom' => 'Forum - ' . substr($nomDefi, 0, 140), ':desc' => null, ':id' => $defiId]);
+
+            $stmtApp = $pdo->prepare('INSERT INTO Appartenir (Id_defi, Id_thematique) VALUES (:defi, :theme)');
+            foreach ($themeIds as $tid) {
+                $stmtApp->execute([':defi' => $defiId, ':theme' => $tid]);
+            }
+
+            $insertAction = $pdo->prepare('INSERT INTO Actions (nomAction, descriptionAction) VALUES (:nom, :desc) RETURNING Id_actions');
+            $linkAction = $pdo->prepare('INSERT INTO Faire_partie (Id_defi, Id_actions) VALUES (:defi, :action)');
+            foreach ($normalizedActions as $a) {
+                $insertAction->execute([':nom' => $a['nomAction'], ':desc' => $a['descriptionAction']]);
+                $actionId = (int)$insertAction->fetchColumn();
+                $linkAction->execute([':defi' => $defiId, ':action' => $actionId]);
+            }
+
+            $pdo->commit();
+            gp_send_json(201, ['status' => 'success', 'message' => 'Defi cree dans le catalogue', 'data' => ['id_defi' => $defiId]]);
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            gp_send_json(400, ['message' => gp_clean_db_message($e->getMessage())]);
+        }
+    }
+
+    if ($method === 'GET' && $action === 'catalogue_defis_available') {
+        $themeId = (int)($_GET['theme_id'] ?? 0);
+        if ($themeId <= 0) gp_send_json(400, ['message' => 'theme_id requis']);
+
+        $stmt = $pdo->prepare(
+            'SELECT d.Id_defi, d.nomDefi, d.nbPointsDefi, d.nbCO2Defi, d.niveauDefi
+             FROM Defi d
+             JOIN Appartenir a ON a.Id_defi = d.Id_defi
+             WHERE a.Id_thematique = :theme_id
+               AND d.Id_defi NOT IN (
+                   SELECT r.Id_defi FROM Regroupe r WHERE r.Id_thematique = :theme_id2
+               )
+             ORDER BY d.nomDefi ASC'
+        );
+        $stmt->execute([':theme_id' => $themeId, ':theme_id2' => $themeId]);
+        gp_send_json(200, ['status' => 'success', 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+    }
+
+    // ─── PLANNING MENSUEL ──────────────────────────────────────────────────────
+
+    if ($method === 'POST' && $action === 'defis_month_save') {
+        $body = gp_read_json_body();
+        $themeId = (int)($body['thematique_id'] ?? 0);
+        $defiIds = array_values(array_unique(array_filter(array_map('intval', (array)($body['defi_ids'] ?? [])))));
+        $moisInput = trim((string)($body['mois'] ?? ''));
+
+        if ($themeId <= 0) gp_send_json(400, ['message' => 'thematique_id requis']);
+        if (empty($defiIds)) gp_send_json(400, ['message' => 'Selectionnez au moins un defi']);
+        if (!preg_match('/^\d{4}-\d{2}$/', $moisInput)) gp_send_json(400, ['message' => 'mois doit etre au format YYYY-MM']);
+
+        $moisDate = $moisInput . '-01';
+        $placeholders = implode(',', array_fill(0, count($defiIds), '?'));
+        $check = $pdo->prepare("SELECT COUNT(*) FROM Appartenir WHERE Id_thematique = ? AND Id_defi IN ($placeholders)");
+        $check->execute(array_merge([$themeId], $defiIds));
+        if ((int)$check->fetchColumn() !== count($defiIds)) {
+            gp_send_json(400, ['message' => 'Certains defis n\'appartiennent pas a cette thematique']);
+        }
+
+        try {
+            $pdo->beginTransaction();
+            $pdo->prepare(
+                'DELETE FROM Regroupe WHERE Id_thematique = :theme AND date_trunc(\'month\', mois) = date_trunc(\'month\', :mois::date)'
+            )->execute([':theme' => $themeId, ':mois' => $moisDate]);
+
+            $insert = $pdo->prepare('INSERT INTO Regroupe (Id_defi, Id_thematique, mois, ordre) VALUES (:defi, :theme, :mois, :ordre)');
+            foreach ($defiIds as $i => $defiId) {
+                $insert->execute([':defi' => $defiId, ':theme' => $themeId, ':mois' => $moisDate, ':ordre' => $i + 1]);
+            }
+            $pdo->commit();
+            gp_send_json(200, ['status' => 'success', 'message' => 'Defis du mois sauvegardes']);
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            gp_send_json(400, ['message' => gp_clean_db_message($e->getMessage())]);
+        }
+    }
+
     gp_send_json(404, ['message' => 'Action inconnue']);
 } catch (Throwable $e) {
     $message = !empty($config['debug'])

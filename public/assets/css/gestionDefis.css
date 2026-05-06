@@ -539,3 +539,80 @@
         min-width: 0;
     }
 }
+
+/* ── Setup mensuel ── */
+.month-setup {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.month-setup.hidden { display: none; }
+
+.month-setup-header h3 { margin: 0 0 4px; font-size: 18px; }
+.month-setup-header p { margin: 0; color: var(--shell-muted); font-size: 13px; }
+
+.setup-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--shell-muted);
+}
+
+.setup-label select {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--shell-text);
+    font-size: 14px;
+    outline: none;
+    max-width: 360px;
+}
+
+.defi-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.slot-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.slot-select {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 9px 12px;
+    color: var(--shell-text);
+    font-size: 14px;
+    outline: none;
+}
+
+.slot-remove {
+    padding: 8px 12px;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.add-slot-btn {
+    align-self: flex-start;
+}
+
+.setup-actions { display: flex; justify-content: flex-end; }
+
+.setup-empty {
+    color: var(--shell-muted);
+    font-size: 13px;
+    font-style: italic;
+}
+.setup-empty a { color: var(--shell-accent); }

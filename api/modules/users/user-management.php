@@ -229,7 +229,8 @@ function users_list(PDO $pdo): void
                 ELSE NULL
             END AS role,
             emp.id_equipe,
-            eq.nomequipe
+            eq.nomequipe,
+            emp.departementemploye AS departement
         FROM utilisateur u
         LEFT JOIN employe emp ON emp.id_employe = u.id_user
         LEFT JOIN admin adm ON adm.id_admin = u.id_user
@@ -456,10 +457,11 @@ function users_update(PDO $pdo, int $id): void
                 gp_insert_user_role($pdo, $id, $newRole);
             }
 
-            // Met à jour l'équipe si c'est un employé
+            // Met à jour l'équipe et le département si c'est un employé
             if ($newRole === 'employe') {
-                $stmt = $pdo->prepare('UPDATE employe SET id_equipe = :teamId WHERE id_employe = :id');
-                $stmt->execute([':teamId' => $teamId, ':id' => $id]);
+                $dept = substr(trim((string)($body['departement'] ?? '')), 0, 100);
+                $stmt = $pdo->prepare('UPDATE employe SET id_equipe = :teamId, departementemploye = :dept WHERE id_employe = :id');
+                $stmt->execute([':teamId' => $teamId, ':dept' => $dept !== '' ? $dept : null, ':id' => $id]);
             }
 
             // Valide la transaction

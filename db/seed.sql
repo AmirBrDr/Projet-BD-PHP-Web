@@ -67,12 +67,13 @@ INSERT INTO Equipe (nomEquipe, nbPointsEquipe, nbCO2Equipe) VALUES
 INSERT INTO Badge (nomBadge, descriptionBadge, iconeBadge) VALUES
 ('Premier Pas',      'Valider sa première action',                   '🌱'),
 ('Écolo Confirmé',   'Valider 10 actions au total',                  '🌿'),
-('Champion Vert',    'Valider 25 actions au total',                  '🏆'),
-('Zéro Carbone',     'Atteindre 100 kg CO₂ économisé',              '💚'),
+('Champion Vert',    'Valider 25 actions au total',                  '🍀'),
+('Super Héros',      'Valider 50 actions au total',                  '🦸‍♂️'),
+('Zéro Carbone',     'Atteindre 100 kg CO₂ économisé',              '🌍'),
 ('Mobilité Douce',   'Valider toutes les actions mobilité',          '🚲'),
-('Énergie Sage',     'Valider toutes les actions énergie',           '⚡'),
+('Énergie Sage',     'Valider toutes les actions énergie',           '💡'),
 ('Zéro Déchet',      'Valider toutes les actions déchets',           '♻️'),
-('Végéhéros',        'Valider toutes les actions alimentation',      '🥗'),
+('Végéhéros',        'Valider toutes les actions alimentation',      '🥕'),
 ('Équipe Unie',       'Toute l''équipe valide un même défi',          '🤝'),
 ('Podium Équipe',    'Équipe dans le top 3 mensuel',                 '🥇');
 

@@ -197,6 +197,13 @@ CREATE TABLE Faire_partie (
     CONSTRAINT pk_Faire_partie PRIMARY KEY (Id_defi, Id_actions)
 );
 
+-- Appartenir : catalogue — un défi peut appartenir à plusieurs thématiques (sans date)
+CREATE TABLE Appartenir (
+    Id_defi       INT CONSTRAINT fk_Appartenir_Defi       REFERENCES Defi(Id_defi),
+    Id_thematique INT CONSTRAINT fk_Appartenir_Thematique REFERENCES Thematique(Id_thematique),
+    CONSTRAINT pk_Appartenir PRIMARY KEY (Id_defi, Id_thematique)
+);
+
 -- Reponse_Defi : reponses employees en attente de moderation animateur
 CREATE TABLE Reponse_Defi (
     Id_reponse             SERIAL       CONSTRAINT pk_Reponse_Defi PRIMARY KEY,
