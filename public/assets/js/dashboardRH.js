@@ -12,7 +12,7 @@
         return await apiGet("/modules/admin/dashboardRH.php");
     }
 
-    function exportCSV(data, co2ParCategorie, engagementParDept) {
+    function exportCSV(data, co2ParCategorie, engagementParEquipe) {
         const rows = [];
 
         rows.push(["=== KPIs GLOBAUX ==="]);
@@ -31,10 +31,10 @@
 
         rows.push([]);
 
-        rows.push(["=== TAUX D'ENGAGEMENT PAR DÉPARTEMENT ==="]);
-        rows.push(["Département", "Taux d'engagement (%)"]);
-        engagementParDept.forEach((item) => {
-            rows.push([item.departement, item.engagementParDept]);
+        rows.push(["=== TAUX D'ENGAGEMENT PAR EQUIPE ==="]);
+        rows.push(["Equipe", "Taux d'engagement (%)"]);
+        engagementParEquipe.forEach((item) => {
+            rows.push([item.equipe, item.engagementParEquipe]);
         });
 
         const csvContent = rows.map((r) => r.join(";")).join("\n");
@@ -105,7 +105,7 @@ function generateGroupedPalette(baseColors, count) {
     return colors;
 }
 
-    function renderCharts(co2ParCategorie, engagementParDept) {
+    function renderCharts(co2ParCategorie, engagementParEquipe) {
          const colors = generateGroupedPalette( ["#94BB39", "#2A997F", "#298E77"] ,co2ParCategorie.length);
         if (typeof window.Chart !== "function") {
             console.warn("Chart.js n'est pas disponible (CSP ou chargement script)");
@@ -143,10 +143,10 @@ function generateGroupedPalette(baseColors, count) {
             new Chart(ctxEngagement, {
                 type: "bar",
                 data: {
-                    labels: engagementParDept.map((item) => item.departement),
+                    labels: engagementParEquipe.map((item) => item.equipe),
                     datasets: [{
                         label: "Taux de participation (%)",
-                        data: engagementParDept.map((item) => item.engagementParDept),
+                        data: engagementParEquipe.map((item) => item.engagementParEquipe),
                         backgroundColor: "rgba(148, 187, 57, 0.8)",
                         borderRadius: 6
                     }]
@@ -220,7 +220,7 @@ function generateGroupedPalette(baseColors, count) {
         const csvBtn = document.getElementById("btn-export-csv");
         if (csvBtn) {
             csvBtn.addEventListener("click", () => {
-                exportCSV(window.dashboardData, window.co2ParCategorie, window.engagementParDept);
+                exportCSV(window.dashboardData, window.co2ParCategorie, window.engagementParEquipe);
             });
         }
     }
@@ -233,7 +233,7 @@ function generateGroupedPalette(baseColors, count) {
         const tauxParticipation = data?.tauxParticipation ?? "0%";
         const actionsValides = data?.actionsValides ?? 0;
 
-        const co2ParCategorie = Array.isArray(data?.engagementParDept)
+        const co2ParCategorie = Array.isArray(data?.engagementParEquipe)
             ? data.co2ParCategorie.map(d => ({
             categorie: d.categorie,
             co2: Number(d.co2), 
@@ -241,16 +241,16 @@ function generateGroupedPalette(baseColors, count) {
          }))
         : [];
 
-        const engagementParDept = Array.isArray(data?.engagementParDept)
-            ? data.engagementParDept.map(d => ({
-            departement: d.departement,
-            engagementParDept: Number(d.engagementpardept)
+        const engagementParEquipe = Array.isArray(data?.engagementParEquipe)
+            ? data.engagementParEquipe.map(d => ({
+            equipe: d.equipe,
+            engagementParEquipe: Number(d.engagementparequipe)
          }))
         : [];
 
         window.dashboardData = { co2Tot, tauxParticipation, actionsValides };
         window.co2ParCategorie = co2ParCategorie;
-        window.engagementParDept = engagementParDept;
+        window.engagementParEquipe = engagementParEquipe;
 
         const co2El = document.getElementById("co2");
         const participationEl = document.getElementById("participation");
@@ -260,7 +260,7 @@ function generateGroupedPalette(baseColors, count) {
         if (participationEl) participationEl.textContent = tauxParticipation;
         if (actionsEl) actionsEl.textContent = actionsValides;
 
-        renderCharts(co2ParCategorie, engagementParDept);
+        renderCharts(co2ParCategorie, engagementParEquipe);
         bindActions();
     });
 })();

@@ -24,20 +24,19 @@ FROM Valider v
 
 $sql_actions_Validees = "SELECT COUNT(*) AS actionsValides FROM Valider";
 
-$sql_engagementParDept = "SELECT
-    e.departementEmploye                                AS departement,
+$sql_engagementParEquipe = "SELECT
+    eq.nomEquipe AS equipe,
     ROUND(
         COUNT(DISTINCT v.Id_Employe) * 100.0
-        / COUNT(DISTINCT e.Id_Employe)
-    , 1)                                                AS engagementParDept
-FROM Employe e
-LEFT JOIN Valider v
+        / COUNT(DISTINCT e.Id_Employe),
+    1) AS engagementParEquipe
+FROM Equipe eq
+JOIN Employe e 
+    ON e.Id_equipe = eq.Id_equipe
+LEFT JOIN Valider v 
     ON v.Id_Employe = e.Id_Employe
-LEFT JOIN Utilisateur u
-    ON u.Id_User = e.Id_Employe
-WHERE u.statutUser = 'actif'
-GROUP BY e.departementEmploye
-ORDER BY engagementParDept DESC";
+GROUP BY eq.nomEquipe
+ORDER BY engagementParEquipe DESC";
 
 $sql_co2ParCategorie = "SELECT 
     t.nomTheme AS categorie,
@@ -60,7 +59,7 @@ $queries = [
     'co2tot' => $sql_co2,
     'tauxparticipation' => $sql_participation,
     'actionsvalides' => $sql_actions_Validees,
-    'engagementParDept' => $sql_engagementParDept, 
+    'engagementParEquipe' => $sql_engagementParEquipe, 
     'co2ParCategorie' => $sql_co2ParCategorie
 ];
 
@@ -74,10 +73,10 @@ foreach ($queries as $key => $sql) {
     $stmt->execute();
 
     // CAS SPÉCIAL : engagement par département
-    if ($key === 'engagementParDept') {
+    if ($key === 'engagementParEquipe') {
         $results[$key] = $stmt->fetchAll(PDO::FETCH_ASSOC);
         for ($i = 0; $i < count($results[$key]); $i++) {
-            $results[$key][$i]['engagementpardept'] = (float) $results[$key][$i]['engagementpardept'];
+            $results[$key][$i]['engagementparequipe'] = (float) $results[$key][$i]['engagementparequipe'];
         }
         continue;
     } else if ($key === 'co2ParCategorie'){
@@ -104,6 +103,6 @@ echo json_encode([
     "co2Tot" => $results["co2tot"],
     "tauxParticipation" => $results["tauxparticipation"]."%",
     "actionsValides" => $results["actionsvalides"],
-    "engagementParDept" => $results["engagementParDept"], 
+    "engagementParEquipe" => $results["engagementParEquipe"], 
     "co2ParCategorie" => $results["co2ParCategorie"]
 ]);
