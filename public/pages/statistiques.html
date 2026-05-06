@@ -37,7 +37,36 @@
 
         <!-- CONTENU -->
         <div id="contenu" class="hidden" style="display:flex; flex-direction:column; gap:18px;">
+            <!-- SÉLECTEUR DE VUE -->
+        <section class="filtre-vue">
+            <div class="filtre-btns">
+                <button class="filtre-btn active" id="btn-global" onclick="changerFiltre('global')">
+                    <i class="fas fa-globe"></i> Vue globale
+                </button>
+                <button class="filtre-btn" id="btn-employe" onclick="changerFiltre('employe')">
+                    <i class="fas fa-user"></i> Par employé
+                </button>
+                <button class="filtre-btn" id="btn-equipe" onclick="changerFiltre('equipe')">
+                    <i class="fas fa-users"></i> Par équipe
+                </button>
+            </div>
 
+            <div id="select-employe" class="filtre-select hidden">
+                <select id="dropdown-employe" onchange="appliquerFiltre()">
+                    <option value="">-- Choisir un employé --</option>
+                </select>
+            </div>
+
+            <div id="select-equipe" class="filtre-select hidden">
+                <select id="dropdown-equipe" onchange="appliquerFiltre()">
+                    <option value="">-- Choisir une équipe --</option>
+                </select>
+            </div>
+
+            <div class="filtre-label" id="filtre-label">
+                <i class="fas fa-chart-line"></i> Statistiques globales du mois
+            </div>
+        </section>
             <!-- KPIs GLOBAUX -->
             <section class="kpi-grid">
                 <div class="kpi-card">
@@ -50,7 +79,7 @@
                 <div class="kpi-card">
                     <div class="kpi-icon"><i class="fas fa-users"></i></div>
                     <div class="kpi-body">
-                        <span class="kpi-label">Participants</span>
+                        <span class="kpi-label">Validations</span>
                         <span class="kpi-value" id="kpi-participants">0</span>
                     </div>
                 </div>
@@ -61,13 +90,13 @@
                         <span class="kpi-value" id="kpi-co2">0</span>
                     </div>
                 </div>
-                <div class="kpi-card">
-                    <div class="kpi-icon"><i class="fas fa-tags"></i></div>
-                    <div class="kpi-body">
-                        <span class="kpi-label">Thématiques</span>
-                        <span class="kpi-value" id="kpi-themes">0</span>
-                    </div>
+            <div class="kpi-card">
+                <div class="kpi-icon"><i class="fas fa-tags"></i></div>
+                <div class="kpi-body">
+                    <span class="kpi-label">Thématique du mois</span>
+                    <span class="kpi-value" id="kpi-themes" style="font-size:18px;"></span>
                 </div>
+            </div>
             </section>
 
             <!-- GRILLE STATS -->
@@ -76,18 +105,18 @@
                 <!-- PARTICIPANTS PAR DÉFI -->
                 <section class="stat-panel">
                     <h2 class="panel-title">
-                        <i class="fas fa-chart-bar"></i> Participants par défi
+                        <i class="fas fa-chart-bar"></i> Validations par défi
                     </h2>
                     <div id="chart-defis" class="bar-chart"></div>
                 </section>
 
-                <!-- STATS PAR THÉMATIQUE -->
-                <section class="stat-panel">
-                    <h2 class="panel-title">
-                        <i class="fas fa-chart-pie"></i> Stats par thématique
-                    </h2>
-                    <div id="chart-themes" class="theme-list"></div>
-                </section>
+            <!-- STATS PAR DÉFI -->
+            <section class="stat-panel">
+                <h2 class="panel-title">
+                    <i class="fas fa-chart-pie"></i> Stats par défi
+                </h2>
+                <div id="chart-themes" class="theme-list"></div>
+            </section>
 
             </div>
 
