@@ -24,10 +24,10 @@ try {
 }
 
 $body            = gp_read_json_body();
-$currentPassword = trim((string) ($body['current_password'] ?? ''));
-$newPassword     = trim((string) ($body['new_password']     ?? ''));
+$currentPassword = (string) ($body['current_password'] ?? '');
+$newPassword     = (string) ($body['new_password']     ?? '');
 
-if ($currentPassword === '' || $newPassword === '') {
+if (trim($currentPassword) === '' || trim($newPassword) === '') {
     gp_send_json(400, ['message' => 'Mot de passe actuel et nouveau requis']);
 }
 
@@ -45,7 +45,17 @@ if (!$user) {
     gp_send_json(404, ['message' => 'Utilisateur introuvable']);
 }
 
-if (!password_verify($currentPassword, (string) $user['mdp'])) {
+$storedHash = (string) $user['mdp'];
+$verified = password_verify($currentPassword, $storedHash);
+
+if (!$verified) {
+    $info = password_get_info($storedHash);
+    if (($info['algo'] ?? 0) === 0 && hash_equals($storedHash, $currentPassword)) {
+        $verified = true;
+    }
+}
+
+if (!$verified) {
     gp_send_json(401, ['message' => 'Mot de passe actuel incorrect']);
 }
 

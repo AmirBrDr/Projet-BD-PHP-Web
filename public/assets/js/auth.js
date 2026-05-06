@@ -98,7 +98,7 @@
       employe: "/pages/dashboardE.html",
       admin: "/pages/gestionUtilisateurs.html",
       rh: "/pages/gestionUtilisateurs.html",
-      animateur: "/pages/parametresAnimateur.html",
+      animateur: "/pages/statistiques.html",
     };
 
     const target = routes[normalizeRole(role)];

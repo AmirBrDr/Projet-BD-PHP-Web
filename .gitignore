@@ -36,3 +36,5 @@ build/
 
 # Claude Code
 .claude/
+
+public/image/preuves/

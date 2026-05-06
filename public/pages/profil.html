@@ -1,151 +1,181 @@
 <!doctype html>
 <html lang="fr">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>GreenPulse - Profil Employe</title>
-        <link rel="stylesheet" href="../assets/css/app-shell.css" />
-        <link rel="stylesheet" href="../assets/css/unified-navbar.css" />
-        <link rel="stylesheet" href="../assets/css/profil.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    </head>
-    <body class="app-page" data-required-role="employe">
-        <nav class="navbar">
-            <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo" />
-            <div class="nav-links">
-                <a href="dashboardE.html">Dashboard</a>
-                <a href="defis.html">Defis</a>
-                <a href="classement.html">Classement</a>
-                <a href="detailEquipe.html?id=current">Equipe</a>
-                <a class="active" href="profil.html">Mon profil</a>
-            </div>
-            <div class="nav-right">
-                <div class="role-badge employe">Employe</div>
-                <button type="button" class="logout-btn" data-logout title="Deconnexion"><i class="fas fa-sign-out-alt"></i></button>
-            </div>
-        </nav>
-        <main class="app-shell employee-layout">
-            <!-- Profile hero -->
-            <section class="panel profile-hero">
-                <div class="avatar-block">
-                    <div class="avatar-wrapper">
-                        <img class="avatar-photo hidden" data-avatar-photo src="" alt="" />
-                        <div class="avatar-circle" data-user-initials>GP</div>
-                    </div>
-                </div>
-                <div class="identity-block">
-                    <h1 data-user-name>Utilisateur</h1>
-                    <p class="profile-email" data-user-email></p>
-                    <div class="team-chip" data-profile-team>Equipe non definie</div>
-                </div>
-                <div class="profile-actions">
-                    <button class="btn-edit-profile" type="button" data-open-edit-modal>Modifier le profil</button>
-                    <button class="btn-edit-pwd" type="button" data-open-pwd-modal>Changer le mot de passe</button>
-                </div>
-            </section>
 
-            <!-- Stats -->
-            <section class="stats-grid" data-profile-stats></section>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GreenPulse - Profil Employe</title>
+    <link rel="stylesheet" href="../assets/css/app-shell.css" />
+    <link rel="stylesheet" href="../assets/css/unified-navbar.css" />
+    <link rel="stylesheet" href="../assets/css/profil.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
 
-            <!-- Badges + historique -->
-            <div class="profile-grid">
-                <article class="panel profile-card">
-                    <h2>Mes badges</h2>
-                    <ul class="badge-list" data-badge-list></ul>
-                </article>
-
-                <article class="panel profile-card">
-                    <h2>Defis termines</h2>
-                    <ul class="history-list" data-history-list></ul>
-                </article>
-
-                <article class="panel profile-card preference-card">
-                    <h2>Parametres</h2>
-                    <form data-preference-form>
-                        <label class="toggle-row" for="notifMail">
-                            <span>Recevoir les notifications email</span>
-                            <input id="notifMail" name="notifMail" type="checkbox" checked />
-                        </label>
-                        <label class="toggle-row" for="notifForum">
-                            <span>Suivre les nouveaux messages forum</span>
-                            <input id="notifForum" name="notifForum" type="checkbox" checked />
-                        </label>
-                        <button class="submit-btn" type="submit">Enregistrer mes preferences</button>
-                    </form>
-                    <p class="feedback-msg" data-pref-feedback></p>
-                </article>
-            </div>
-        </main>
-
-        <!-- Modal: edit profile -->
-        <div class="modal-overlay hidden" id="modal-edit-profile" role="dialog" aria-modal="true" aria-labelledby="modal-edit-title">
-            <div class="modal-box">
-                <div class="modal-header">
-                    <h2 id="modal-edit-title">Modifier le profil</h2>
-                    <button class="modal-close" type="button" data-close-modal="modal-edit-profile" aria-label="Fermer">&times;</button>
-                </div>
-                <div class="modal-photo-section">
-                    <div class="modal-avatar-wrap" data-modal-avatar-wrap title="Changer la photo de profil">
-                        <img class="avatar-photo hidden" data-modal-avatar-photo src="" alt="" />
-                        <div class="avatar-circle" data-modal-initials>GP</div>
-                        <div class="avatar-photo-overlay"><i class="fas fa-camera"></i></div>
-                    </div>
-                    <input id="modalPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" data-modal-photo-input />
-                    <p class="photo-hint">Cliquez sur la photo pour la modifier</p>
-                    <p class="feedback-msg" data-photo-feedback></p>
-                </div>
-                <form data-edit-profile-form>
-                    <label class="field-row" for="editPrenom">
-                        <span>Prénom</span>
-                        <input id="editPrenom" name="prenomUser" type="text" autocomplete="given-name" required />
-                    </label>
-                    <label class="field-row" for="editNom">
-                        <span>Nom</span>
-                        <input id="editNom" name="nomUser" type="text" autocomplete="family-name" required />
-                    </label>
-                    <label class="field-row" for="editEmail">
-                        <span>Adresse email</span>
-                        <input id="editEmail" name="email" type="email" autocomplete="email" />
-                    </label>
-                    <p class="feedback-msg" data-edit-profile-feedback></p>
-                    <div class="modal-footer">
-                        <button class="submit-btn" type="submit">Enregistrer</button>
-                        <button class="btn-cancel" type="button" data-close-modal="modal-edit-profile">Annuler</button>
-                    </div>
-                </form>
-            </div>
+<body class="app-page" data-required-role="employe">
+    <nav class="navbar">
+        <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo" />
+        <div class="nav-links">
+            <a href="dashboardE.html">Dashboard</a>
+            <a href="defis.html">Defis</a>
+            <a href="classement.html">Classement</a>
+            <a href="detailEquipe.html?id=current">Equipe</a>
+            <a class="active" href="profil.html">Mon profil</a>
         </div>
-
-        <!-- Modal: change password -->
-        <div class="modal-overlay hidden" id="modal-edit-password" role="dialog" aria-modal="true" aria-labelledby="modal-pwd-title">
-            <div class="modal-box">
-                <div class="modal-header">
-                    <h2 id="modal-pwd-title">Changer le mot de passe</h2>
-                    <button class="modal-close" type="button" data-close-modal="modal-edit-password" aria-label="Fermer">&times;</button>
-                </div>
-                <form data-pwd-form>
-                    <label class="field-row" for="currentPwd">
-                        <span>Mot de passe actuel</span>
-                        <input id="currentPwd" name="current_password" type="password" required autocomplete="current-password" />
-                    </label>
-                    <label class="field-row" for="newPwd">
-                        <span>Nouveau mot de passe</span>
-                        <input id="newPwd" name="new_password" type="password" required autocomplete="new-password" minlength="8" />
-                    </label>
-                    <label class="field-row" for="confirmPwd">
-                        <span>Confirmer le nouveau mot de passe</span>
-                        <input id="confirmPwd" name="confirm_password" type="password" required autocomplete="new-password" minlength="8" />
-                    </label>
-                    <p class="feedback-msg" data-pwd-feedback></p>
-                    <div class="modal-footer">
-                        <button class="submit-btn" type="submit">Modifier</button>
-                        <button class="btn-cancel" type="button" data-close-modal="modal-edit-password">Annuler</button>
-                    </div>
-                </form>
-            </div>
+        <div class="nav-right">
+            <div class="role-badge employe">Employe</div>
+            <button type="button" class="logout-btn" data-logout title="Deconnexion"><i
+                    class="fas fa-sign-out-alt"></i></button>
         </div>
+    </nav>
+    <main class="app-shell employee-layout">
+        <!-- Profile hero -->
+        <section class="panel profile-hero">
+            <div class="avatar-block">
+                <div class="avatar-wrapper">
+                    <img class="avatar-photo hidden" data-avatar-photo src="" alt="" />
+                    <div class="avatar-circle" data-user-initials>GP</div>
+                </div>
+            </div>
+            <div class="identity-block">
+                <h1 data-user-name>Utilisateur</h1>
+                <p class="profile-email" data-user-email></p>
+                <div class="team-chip" data-profile-team>Equipe non definie</div>
+            </div>
+            <div class="profile-actions">
+                <button class="btn-edit-profile" type="button" data-open-edit-modal>Modifier le profil</button>
+                <button class="btn-edit-pwd" type="button" data-open-pwd-modal>Changer le mot de passe</button>
+            </div>
+        </section>
 
-        <script src="../assets/js/app-shell.js" defer></script>
-        <script src="../assets/js/profil.js" defer></script>
-    </body>
+        <!-- Stats -->
+        <section class="stats-grid" data-profile-stats></section>
+
+        <!-- Badges + historique -->
+        <div class="profile-grid">
+            <article class="panel profile-card">
+                <h2>Mes badges</h2>
+                <ul class="badge-list" data-badge-list></ul>
+            </article>
+
+            <article class="panel profile-card">
+                <h2>Defis termines</h2>
+                <ul class="history-list" data-history-list></ul>
+            </article>
+
+            <article class="panel profile-card preference-card">
+                <h2>Parametres</h2>
+                <form data-preference-form>
+                    <label class="toggle-row" for="notifMail">
+                        <span>Recevoir les notifications email</span>
+                        <input id="notifMail" name="notifMail" type="checkbox" checked />
+                    </label>
+                    <label class="toggle-row" for="notifForum">
+                        <span>Suivre les nouveaux messages forum</span>
+                        <input id="notifForum" name="notifForum" type="checkbox" checked />
+                    </label>
+                    <button class="submit-btn" type="submit">Enregistrer mes preferences</button>
+                </form>
+                <p class="feedback-msg" data-pref-feedback></p>
+            </article>
+        </div>
+    </main>
+
+    <!-- Modal: edit profile -->
+    <div class="modal-overlay hidden" id="modal-edit-profile" role="dialog" aria-modal="true"
+        aria-labelledby="modal-edit-title">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="modal-edit-title">Modifier le profil</h2>
+                <button class="modal-close" type="button" data-close-modal="modal-edit-profile"
+                    aria-label="Fermer">&times;</button>
+            </div>
+            <div class="modal-photo-section">
+                <div class="modal-avatar-wrap" data-modal-avatar-wrap title="Changer la photo de profil">
+                    <img class="avatar-photo hidden" data-modal-avatar-photo src="" alt="" />
+                    <div class="avatar-circle" data-modal-initials>GP</div>
+                    <div class="avatar-photo-overlay"><i class="fas fa-camera"></i></div>
+                </div>
+                <input id="modalPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" class="hidden"
+                    data-modal-photo-input />
+                <p class="photo-hint">Cliquez sur la photo pour la modifier</p>
+                <p class="feedback-msg" data-photo-feedback></p>
+            </div>
+            <form data-edit-profile-form>
+                <label class="field-row" for="editPrenom">
+                    <span>Prénom</span>
+                    <input id="editPrenom" name="prenomUser" type="text" autocomplete="given-name" required />
+                </label>
+                <label class="field-row" for="editNom">
+                    <span>Nom</span>
+                    <input id="editNom" name="nomUser" type="text" autocomplete="family-name" required />
+                </label>
+                <label class="field-row" for="editEmail">
+                    <span>Adresse email</span>
+                    <input id="editEmail" name="email" type="email" autocomplete="email" />
+                </label>
+                <p class="feedback-msg" data-edit-profile-feedback></p>
+                <div class="modal-footer">
+                    <button class="submit-btn" type="submit">Enregistrer</button>
+                    <button class="btn-cancel" type="button" data-close-modal="modal-edit-profile">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: change password -->
+    <div class="modal-overlay hidden" id="modal-edit-password" role="dialog" aria-modal="true"
+        aria-labelledby="modal-pwd-title">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="modal-pwd-title">Changer le mot de passe</h2>
+                <button class="modal-close" type="button" data-close-modal="modal-edit-password"
+                    aria-label="Fermer">&times;</button>
+            </div>
+            <form data-pwd-form autocomplete="off">
+                <label class="field-row" for="currentPwd">
+                    <span>Mot de passe actuel</span>
+                    <div class="password-field">
+                        <input id="currentPwd" name="current_password" type="password" required autocomplete="off"
+                            data-lpignore="true" data-1p-ignore="true" />
+                        <button type="button" class="password-toggle" data-toggle-password="currentPwd"
+                            aria-label="Afficher le mot de passe">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </label>
+                <label class="field-row" for="newPwd">
+                    <span>Nouveau mot de passe</span>
+                    <div class="password-field">
+                        <input id="newPwd" name="new_password" type="password" required autocomplete="off" minlength="8"
+                            data-lpignore="true" data-1p-ignore="true" />
+                        <button type="button" class="password-toggle" data-toggle-password="newPwd"
+                            aria-label="Afficher le mot de passe">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </label>
+                <label class="field-row" for="confirmPwd">
+                    <span>Confirmer le nouveau mot de passe</span>
+                    <div class="password-field">
+                        <input id="confirmPwd" name="confirm_password" type="password" required autocomplete="off"
+                            minlength="8" data-lpignore="true" data-1p-ignore="true" />
+                        <button type="button" class="password-toggle" data-toggle-password="confirmPwd"
+                            aria-label="Afficher le mot de passe">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </label>
+                <p class="feedback-msg" data-pwd-feedback></p>
+                <div class="modal-footer">
+                    <button class="submit-btn" type="submit">Modifier</button>
+                    <button class="btn-cancel" type="button" data-close-modal="modal-edit-password">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../assets/js/app-shell.js" defer></script>
+    <script src="../assets/js/profil.js" defer></script>
+</body>
+
 </html>

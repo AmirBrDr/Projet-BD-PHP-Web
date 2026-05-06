@@ -1,81 +1,81 @@
 <!doctype html>
 <html lang="fr">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>GreenPulse - Detail Defi</title>
-        <link rel="stylesheet" href="../assets/css/app-shell.css" />
-        <link rel="stylesheet" href="../assets/css/unified-navbar.css" />
-        <link rel="stylesheet" href="../assets/css/detailDefi.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    </head>
-    <body class="app-page" data-required-role="employe">
-        <nav class="navbar">
-            <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo" />
-            <div class="nav-links">
-                <a href="dashboardE.html">Dashboard</a>
-                <a class="active" href="defis.html">Defis</a>
-                <a href="classement.html">Classement</a>
-                <a href="detailEquipe.html?id=current">Equipe</a>
-                <a href="profil.html">Mon profil</a>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GreenPulse - Detail Defi</title>
+    <link rel="stylesheet" href="../assets/css/app-shell.css" />
+    <link rel="stylesheet" href="../assets/css/unified-navbar.css" />
+    <link rel="stylesheet" href="../assets/css/detailDefi.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+
+<body class="app-page" data-required-role="employe">
+    <nav class="navbar">
+        <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo" />
+        <div class="nav-links">
+            <a href="dashboardE.html">Dashboard</a>
+            <a class="active" href="defis.html">Defis</a>
+            <a href="classement.html">Classement</a>
+            <a href="detailEquipe.html?id=current">Equipe</a>
+            <a href="profil.html">Mon profil</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge employe">Employe</div>
+            <button type="button" class="logout-btn" data-logout title="Deconnexion"><i
+                    class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </nav>
+    <main class="app-shell employee-layout">
+        <a class="back-link" href="defis.html">Retour aux defis</a>
+
+        <section class="panel challenge-head" data-challenge-head>
+            <p class="eyebrow" data-challenge-theme>Theme du mois</p>
+            <h1 data-challenge-title>Defi</h1>
+            <p data-challenge-description>Description du defi.</p>
+            <div class="head-metrics">
+                <span class="metric-chip" data-challenge-points>+0 pts</span>
+                <span class="metric-chip" data-challenge-co2>0 kg CO2</span>
+                <span class="metric-chip" data-challenge-progress>0% equipe</span>
             </div>
-            <div class="nav-right">
-                <div class="role-badge employe">Employe</div>
-                <button type="button" class="logout-btn" data-logout title="Deconnexion"><i class="fas fa-sign-out-alt"></i></button>
-            </div>
-        </nav>
-        <main class="app-shell employee-layout">
-            <a class="back-link" href="defis.html">Retour aux defis</a>
+        </section>
 
-            <section class="panel challenge-head" data-challenge-head>
-                <p class="eyebrow" data-challenge-theme>Theme du mois</p>
-                <h1 data-challenge-title>Defi</h1>
-                <p data-challenge-description>Description du defi.</p>
-                <div class="head-metrics">
-                    <span class="metric-chip" data-challenge-points>+0 pts</span>
-                    <span class="metric-chip" data-challenge-co2>0 kg CO2</span>
-                    <span class="metric-chip" data-challenge-progress>0% equipe</span>
-                </div>
-            </section>
+        <section class="detail-grid">
+            <article class="panel submission-panel">
+                <h2>Valider une action</h2>
+                <form class="submission-form" data-submission-form enctype="multipart/form-data">
+                    <div class="action-options" data-action-options></div>
+                    <label class="input-label" for="proofPhoto">Photo de preuve (optionnel)</label>
+                    <input id="proofPhoto" name="preuvePhoto" type="file" accept="image/jpeg,image/png,image/webp"
+                        class="file-input" />
+                    <label class="input-label" for="proofText">Commentaire (optionnel si photo fournie)</label>
+                    <textarea id="proofText" name="proofText" rows="3" maxlength="300"
+                        placeholder="Decrivez votre action du jour..."></textarea>
+                    <button class="submit-btn" type="submit">Soumettre pour validation</button>
+                </form>
+                <p class="feedback-msg" data-form-feedback></p>
+            </article>
 
-            <section class="detail-grid">
-                <article class="panel submission-panel">
-                    <h2>Valider une action</h2>
-                    <form class="submission-form" data-submission-form enctype="multipart/form-data">
-                        <div class="action-options" data-action-options></div>
-                        <label class="input-label" for="proofPhoto">Photo de preuve (optionnel)</label>
-                        <input id="proofPhoto" name="preuvePhoto" type="file" accept="image/jpeg,image/png,image/webp" class="file-input" />
-                        <label class="input-label" for="proofText">Commentaire (optionnel si photo fournie)</label>
-                        <textarea
-                            id="proofText"
-                            name="proofText"
-                            rows="3"
-                            maxlength="300"
-                            placeholder="Decrivez votre action du jour..."
-                        ></textarea>
-                        <button class="submit-btn" type="submit">Soumettre pour validation</button>
-                    </form>
-                    <p class="feedback-msg" data-form-feedback></p>
-                </article>
+            <aside class="panel side-panel">
+                <h2>Forum du defi</h2>
+                <ul class="forum-list" data-forum-list></ul>
+                <form class="forum-form" data-forum-form>
+                    <textarea name="message" rows="3" maxlength="500" placeholder="Partagez un conseil..."></textarea>
+                    <button class="submit-btn" type="submit">Publier</button>
+                </form>
+                <p class="feedback-msg" data-forum-feedback></p>
+            </aside>
+        </section>
 
-                <aside class="panel side-panel">
-                    <h2>Forum du defi</h2>
-                    <ul class="forum-list" data-forum-list></ul>
-                    <form class="forum-form" data-forum-form>
-                        <textarea name="message" rows="3" maxlength="500" placeholder="Partagez un conseil..."></textarea>
-                        <button class="submit-btn" type="submit">Publier</button>
-                    </form>
-                    <p class="feedback-msg" data-forum-feedback></p>
-                </aside>
-            </section>
+        <section class="panel history-panel">
+            <h2>Mes dernieres soumissions</h2>
+            <ul class="history-list" data-history-list></ul>
+        </section>
+    </main>
 
-            <section class="panel history-panel">
-                <h2>Mes dernieres soumissions</h2>
-                <ul class="history-list" data-history-list></ul>
-            </section>
-        </main>
+    <script src="../assets/js/app-shell.js" defer></script>
+    <script src="../assets/js/detailDefi.js" defer></script>
+</body>
 
-        <script src="../assets/js/app-shell.js" defer></script>
-        <script src="../assets/js/detailDefi.js" defer></script>
-    </body>
 </html>
