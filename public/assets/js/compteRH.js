@@ -6,7 +6,7 @@ class CompteRHManager {
             profile: 'gp_user_profile',
             security: 'gp_user_security',
             sessions: 'gp_user_sessions',
-            token: 'gp_session_token',
+            token: 'gp_token',
         };
 
         this.user = {
