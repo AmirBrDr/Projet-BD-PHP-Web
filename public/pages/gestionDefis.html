@@ -36,6 +36,7 @@
                 </p>
             </div>
             <div class="header-tools">
+                <button id="open-month-modal-btn" class="primary-btn" type="button">+ Ajouter des defis</button>
                 <button id="refresh-challenges-btn" class="ghost-btn" type="button">Actualiser</button>
             </div>
         </section>
@@ -48,32 +49,49 @@
             </select>
         </div>
 
-        <div id="month-setup" class="month-setup hidden">
-            <div class="month-setup-header">
-                <h3>Aucun defi configure pour ce mois</h3>
-                <p>Choisissez une thematique du catalogue pour programmer les defis du mois.</p>
-            </div>
-            <label class="setup-label">
-                Thematique
-                <select id="setup-theme-select">
-                    <option value="">-- Choisir une thematique --</option>
-                </select>
-            </label>
-            <div id="defi-slots" class="defi-slots"></div>
-            <div class="setup-actions">
-                <button id="save-month-btn" class="primary-btn hidden" type="button">Sauvegarder les defis du mois</button>
-            </div>
-        </div>
-
         <main class="parcours-list" id="challenge-list">
             <div class="loading-state">Chargement des defis...</div>
         </main>
 
         <div class="empty-state hidden" id="empty-state">
-            <p>Aucun defi pour le moment.</p>
+            <p>Aucun defi planifie pour ce mois. Cliquez sur "Ajouter des defis" pour commencer.</p>
         </div>
 
     </main>
+
+    <!-- Modal ajout défis du mois -->
+    <div id="month-modal-overlay" class="modal-overlay hidden" aria-hidden="true">
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="month-modal-title">
+            <div class="modal-head">
+                <h2 id="month-modal-title">Defis du mois</h2>
+                <button class="icon-btn" type="button" data-close-overlay="month-modal-overlay" aria-label="Fermer">&#x2715;</button>
+            </div>
+
+            <p class="setup-label">Mois : <strong id="modal-month-label"></strong></p>
+
+            <div class="setup-label" id="modal-theme-free-row">
+                <label for="modal-theme-select">Thematique</label>
+                <select id="modal-theme-select">
+                    <option value="">-- Choisir une thematique --</option>
+                </select>
+            </div>
+
+            <p class="setup-label hidden" id="modal-theme-locked-row">
+                Thematique : <strong id="modal-theme-locked-name"></strong>
+            </p>
+
+            <div id="modal-slots" class="defi-slots"></div>
+
+            <button id="modal-add-slot-btn" class="ghost-btn hidden" type="button">+ Ajouter un defi</button>
+
+            <div id="month-modal-alert" class="inline-alert" hidden></div>
+
+            <div class="setup-actions">
+                <button type="button" class="ghost-btn" data-close-overlay="month-modal-overlay">Annuler</button>
+                <button id="modal-save-btn" class="primary-btn hidden" type="button">Sauvegarder</button>
+            </div>
+        </section>
+    </div>
 
     <script src="../assets/js/app-shell.js" defer></script>
     <script src="../assets/js/dialog-runtime.js" defer></script>

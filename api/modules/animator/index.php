@@ -813,7 +813,7 @@ try {
         }
         $stmt = $pdo->prepare(
             'SELECT d.Id_defi, d.nomDefi, d.descriptionDefi, d.nbPointsDefi, d.nbCO2Defi, d.niveauDefi,
-                    EXISTS(SELECT 1 FROM Regroupe r WHERE r.Id_defi = d.Id_defi AND r.Id_thematique = :theme_id) AS is_scheduled
+                    EXISTS(SELECT 1 FROM Regroupe r WHERE r.Id_defi = d.Id_defi AND r.Id_thematique = :theme_id AND date_trunc(\'month\', r.mois) = date_trunc(\'month\', CURRENT_DATE)) AS is_scheduled
              FROM Defi d
              JOIN Appartenir a ON a.Id_defi = d.Id_defi
              WHERE a.Id_thematique = :theme_id2
@@ -882,6 +882,7 @@ try {
         }
     }
 
+    // Permet de lister les défis d'une thématique qui ne sont pas encore programmés pour le mois en cours ou les mois suivants
     if ($method === 'GET' && $action === 'catalogue_defis_available') {
         $themeId = (int)($_GET['theme_id'] ?? 0);
         if ($themeId <= 0) gp_send_json(400, ['message' => 'theme_id requis']);
@@ -892,7 +893,9 @@ try {
              JOIN Appartenir a ON a.Id_defi = d.Id_defi
              WHERE a.Id_thematique = :theme_id
                AND d.Id_defi NOT IN (
-                   SELECT r.Id_defi FROM Regroupe r WHERE r.Id_thematique = :theme_id2
+                   SELECT r.Id_defi FROM Regroupe r
+                   WHERE r.Id_thematique = :theme_id2
+                     AND date_trunc(\'month\', r.mois) = date_trunc(\'month\', CURRENT_DATE)
                )
              ORDER BY d.nomDefi ASC'
         );

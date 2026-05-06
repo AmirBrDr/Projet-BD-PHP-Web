@@ -10,7 +10,8 @@
 
     async function apiReq(action, options = {}) {
         const method = options.method || 'GET';
-        const url = `${API}?action=${encodeURIComponent(action)}`;
+        const params = new URLSearchParams({ action, ...(options.params || {}) });
+        const url = `/api/modules/animator/?${params}`;
         const opts = { method, headers: { Authorization: `Bearer ${token}` } };
         if (options.body) {
             opts.headers['Content-Type'] = 'application/json';
@@ -99,7 +100,7 @@
     async function loadDefisForTheme(themeId, wrapper) {
         if (!wrapper || wrapper.dataset.loaded === 'true') return;
         try {
-            const res = await apiReq(`catalogue_defis_by_theme&theme_id=${themeId}`);
+            const res = await apiReq('catalogue_defis_by_theme', { params: { theme_id: themeId } });
             const defis = res?.data || [];
             wrapper.dataset.loaded = 'true';
             if (!defis.length) {

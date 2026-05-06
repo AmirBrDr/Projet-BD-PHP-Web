@@ -616,3 +616,19 @@
     font-style: italic;
 }
 .setup-empty a { color: var(--shell-accent); }
+
+.slot-order-label {
+    min-width: 60px;
+    font-size: 12px;
+    color: var(--shell-muted);
+    white-space: nowrap;
+}
+
+#modal-add-slot-btn {
+    align-self: flex-start;
+    margin-top: 6px;
+}
+
+#month-modal-alert { margin-top: 10px; }
+
+.setup-actions { gap: 10px; }
