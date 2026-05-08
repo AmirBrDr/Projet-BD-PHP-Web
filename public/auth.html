@@ -78,14 +78,6 @@
             </div>
 
             <div class="field">
-              <label class="label" for="regEntreprise">Entreprise</label>
-              <div class="control">
-                <input id="regEntreprise" name="entreprise" type="text" placeholder="GreenPulse SAS" autocomplete="organization" required />
-              </div>
-              <div class="hint" data-hint-for="regEntreprise"></div>
-            </div>
-
-            <div class="field">
               <label class="label" for="regRole">Type de compte</label>
               <div class="control control--select">
                 <select id="regRole" name="role" required>
@@ -95,6 +87,14 @@
                 </select>
               </div>
               <div class="hint" data-hint-for="regRole"></div>
+            </div>
+
+            <div class="field" id="departementField" style="display:none">
+              <label class="label" for="regDepartement">Département</label>
+              <div class="control">
+                <input id="regDepartement" name="departement" type="text" placeholder="Informatique, RH, Finance…" autocomplete="off" />
+              </div>
+              <div class="hint" data-hint-for="regDepartement"></div>
             </div>
 
             <div class="field">

@@ -96,8 +96,10 @@ try {
                 COALESCE(rr.nb_replies_approved, 0) AS nb_replies_approved,
                 COALESCE(rr.nb_replies_rejected, 0) AS nb_replies_rejected
              FROM Defi d
-             LEFT JOIN Regroupe r ON r.Id_defi = d.Id_defi
-             LEFT JOIN Thematique t ON t.Id_thematique = r.Id_thematique
+             INNER JOIN Regroupe r
+                ON r.Id_defi = d.Id_defi
+               AND date_trunc(\'month\', r.mois) = date_trunc(\'month\', CURRENT_DATE)
+             INNER JOIN Thematique t ON t.Id_thematique = r.Id_thematique
              LEFT JOIN LATERAL (
                 SELECT COUNT(*) AS nb_actions
                 FROM Faire_partie fp
@@ -111,10 +113,9 @@ try {
                 FROM Reponse_Defi rd
                 WHERE rd.Id_defi = d.Id_defi
              ) rr ON TRUE
-             WHERE d.Id_Animateur = :animateur_id
-             ORDER BY r.mois DESC NULLS LAST, r.ordre ASC NULLS LAST, d.Id_defi DESC'
+             ORDER BY r.ordre ASC NULLS LAST, d.Id_defi DESC'
         );
-        $stmt->execute([':animateur_id' => $animateurId]);
+        $stmt->execute([]);
 
         gp_send_json(200, [
             'status' => 'success',

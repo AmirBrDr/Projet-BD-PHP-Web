@@ -24,7 +24,8 @@ $pdpUser = $body['pdpUser'] ?? $body['pdp_user'] ?? null;
 $inscriptionUser = $body['inscriptionUser'] ?? $body['inscription_user'] ?? null;
 $idEntreprise = $body['idEntreprise'] ?? $body['id_entreprise'] ?? $body['Id_Entreprise'] ?? null;
 $nomEntreprise = trim((string)($body['nomEntreprise'] ?? $body['nom_entreprise'] ?? $body['entreprise'] ?? ''));
-$secteurEntreprise = trim((string)($body['secteurEntreprise'] ?? $body['secteur_entreprise'] ?? $body['departement'] ?? $body['department'] ?? ''));
+$secteurEntreprise = trim((string)($body['secteurEntreprise'] ?? $body['secteur_entreprise'] ?? ''));
+$departementEmploye = trim((string)($body['departementEmploye'] ?? $body['departement_employe'] ?? ''));
 
 if ($nomUser === '' || $prenomUser === '' || $email === '' || $mdp === '') {
     gp_send_json(400, ['message' => 'Champs requis manquants']);
@@ -45,6 +46,10 @@ if (!in_array($statutUser, $allowedStatuts, true)) {
 
 if (!gp_is_valid_role($role)) {
     gp_send_json(400, ['message' => 'Rôle utilisateur invalide']);
+}
+
+if ($role === 'employe' && $departementEmploye !== '' && preg_match('/\d/', $departementEmploye)) {
+    gp_send_json(400, ['message' => 'Le département ne doit pas contenir de chiffres']);
 }
 
 // Résoudre et créer l'entreprise si nécessaire
@@ -142,6 +147,12 @@ try {
         }
 
         gp_insert_user_role($pdo, $idUser, $role);
+
+        if ($role === 'employe' && $departementEmploye !== '') {
+            $stmtDep = $pdo->prepare('UPDATE employe SET departementemploye = :dep WHERE id_employe = :id');
+            $stmtDep->execute([':dep' => $departementEmploye, ':id' => $idUser]);
+        }
+
         $pdo->commit();
     } catch (Throwable $inner) {
         if ($pdo->inTransaction()) {

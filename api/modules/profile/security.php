@@ -14,30 +14,39 @@ require __DIR__ . '/../../bootstrap.php';
  */
 function security_get_info(PDO $pdo, int $userId): array
 {
-    $stmt = $pdo->prepare('
-        SELECT u.id_user, u.email, u.inscriptionuser, u.dernierchangementmdp, u.derniereconnexion
-        FROM utilisateur u
-        WHERE u.id_user = :id
-    ');
-    $stmt->execute([':id' => $userId]);
-    $info = $stmt->fetch();
+    // Les colonnes dernierchangementmdp et derniereconnexion n'existent que si
+    // les migrations 001/002 ont été appliquées — on retombe sur la requête de base si absent.
+    try {
+        $stmt = $pdo->prepare('
+            SELECT u.id_user, u.email, u.inscriptionuser, u.dernierchangementmdp, u.derniereconnexion
+            FROM utilisateur u
+            WHERE u.id_user = :id
+        ');
+        $stmt->execute([':id' => $userId]);
+        $info = $stmt->fetch();
+    } catch (Throwable $e) {
+        $stmt = $pdo->prepare('SELECT id_user, email, inscriptionuser FROM utilisateur WHERE id_user = :id');
+        $stmt->execute([':id' => $userId]);
+        $info = $stmt->fetch();
+    }
 
     if (!$info) {
         return [];
     }
 
     // Calculer le nombre de jours depuis le dernier changement de mot de passe
-    $lastPwdChange = $info['dernierchangementmdp'] ?? $info['inscriptionuser'];
-    $pwdChangeDate = new DateTime($lastPwdChange);
+    $lastPwdChange = ($info['dernierchangementmdp'] ?? null) ?? ($info['inscriptionuser'] ?? null);
+    $pwdChangeDate = new DateTime($lastPwdChange ?? 'now');
     $now = new DateTime();
     $daysSinceChange = $pwdChangeDate->diff($now)->days;
 
     // Récupérer la date de dernière connexion réelle
-    $lastLoginDate = $info['derniereconnexion'] ? new DateTime($info['derniereconnexion']) : new DateTime();
+    $lastLoginRaw = $info['derniereconnexion'] ?? null;
+    $lastLoginDate = $lastLoginRaw ? new DateTime($lastLoginRaw) : new DateTime();
 
     return [
         'email' => $info['email'],
-        'inscriptionDate' => $info['inscriptionuser'],
+        'inscriptionDate' => $info['inscriptionuser'] ?? null,
         'lastPasswordChange' => $lastPwdChange,
         'daysSincePasswordChange' => $daysSinceChange,
         'lastLogin' => $lastLoginDate->format('Y-m-d H:i:s'),
@@ -152,14 +161,19 @@ function security_toggle_2fa(PDO $pdo, int $userId, bool $enable): array
  */
 function security_get_sessions(PDO $pdo, int $userId): array
 {
-    $stmt = $pdo->prepare('
-        SELECT id_session, adresse_ip, user_agent, date_creation, derniere_activite
-        FROM Session
-        WHERE id_user = :user_id AND active = true
-        ORDER BY derniere_activite DESC
-    ');
-    $stmt->execute([':user_id' => $userId]);
-    $sessions = $stmt->fetchAll();
+    // La table Session n'existe que si la migration 002 a été appliquée.
+    try {
+        $stmt = $pdo->prepare('
+            SELECT id_session, adresse_ip, user_agent, date_creation, derniere_activite
+            FROM Session
+            WHERE id_user = :user_id AND active = true
+            ORDER BY derniere_activite DESC
+        ');
+        $stmt->execute([':user_id' => $userId]);
+        $sessions = $stmt->fetchAll();
+    } catch (Throwable $e) {
+        return [];
+    }
 
     return array_map(function($session) {
         return [

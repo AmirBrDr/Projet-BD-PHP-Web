@@ -159,10 +159,12 @@
         if (!EMAIL_REGEX.test(email)) return "Format d'email invalide";
         return "";
       },
-      regEntreprise: () => {
-        const value = normalizeSpaces(getValue("regEntreprise"));
-        if (!value) return "Entreprise requise";
-        if (value.length < 2) return "Minimum 2 caractères";
+      regDepartement: () => {
+        const role = getValue("regRole").toLowerCase();
+        if (role !== "employe") return "";
+        const value = normalizeSpaces(getValue("regDepartement"));
+        if (!value) return "Département requis pour un employé";
+        if (/\d/.test(value)) return "Le département ne doit pas contenir de chiffres";
         return "";
       },
       regRole: () => {
@@ -251,12 +253,31 @@
     return data;
   }
 
+  // Affiche/masque le champ Département selon le rôle sélectionné
+  const regRoleEl = document.getElementById("regRole");
+  const departementFieldEl = document.getElementById("departementField");
+  function toggleDepartementField() {
+    const isEmploye = regRoleEl && regRoleEl.value.toLowerCase() === "employe";
+    if (departementFieldEl) {
+      departementFieldEl.style.display = isEmploye ? "" : "none";
+    }
+    if (!isEmploye) {
+      const depInput = document.getElementById("regDepartement");
+      if (depInput) depInput.value = "";
+      setHint("regDepartement", "");
+    }
+  }
+  if (regRoleEl) {
+    regRoleEl.addEventListener("change", toggleDepartementField);
+    toggleDepartementField();
+  }
+
   // Initialisation: liaison des validations aux champs
   bindFieldValidation(["loginEmail", "loginPassword"]);
   bindFieldValidation([
     "regFullName",
     "regEmail",
-    "regEntreprise",
+    "regDepartement",
     "regRole",
     "regPassword",
     "regPassword2",
@@ -304,11 +325,13 @@
 
     const fullName = normalizeSpaces(document.getElementById("regFullName").value);
     const email = normalizeSpaces(document.getElementById("regEmail").value);
-    const entreprise = normalizeSpaces(document.getElementById("regEntreprise").value);
     const role = document.getElementById("regRole").value;
     const mdp = document.getElementById("regPassword").value;
+    const departement = normalizeSpaces(document.getElementById("regDepartement")?.value || "");
 
-    if (!validateFields(["regFullName", "regEmail", "regEntreprise", "regRole", "regPassword", "regPassword2"])) return;
+    const fieldsToValidate = ["regFullName", "regEmail", "regRole", "regPassword", "regPassword2"];
+    if (role.toLowerCase() === "employe") fieldsToValidate.splice(2, 0, "regDepartement");
+    if (!validateFields(fieldsToValidate)) return;
 
     const parts = fullName.split(/\s+/).filter(Boolean);
     const prenomUser = parts.shift() || "";
@@ -323,8 +346,8 @@
         mdp,
         inscriptionUser: new Date().toISOString(),
         pdpUser: null,
-        nomEntreprise: entreprise,
         role,
+        departementEmploye: role.toLowerCase() === "employe" ? departement : "",
       });
 
       storeSession(data);
