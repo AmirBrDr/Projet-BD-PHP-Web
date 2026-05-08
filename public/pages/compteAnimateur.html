@@ -71,13 +71,43 @@
                 </ul>
                 <p class="feedback-msg" data-profile-feedback></p>
             </article>
-            <article class="panel profile-card">
-                <h2>Acces rapide</h2>
-                <ul class="info-list">
-                    <li class="info-item"><a class="info-link" href="gestionDefis.html">Gerer les defis</a></li>
-                    <li class="info-item"><a class="info-link" href="moderation.html">Moderation</a></li>
-                    <li class="info-item"><a class="info-link" href="statistiques.html">Statistiques</a></li>
-                </ul>
+            <article class="panel profile-card security-card">
+                <h2><i class="fas fa-shield-alt"></i> Sécurité du compte</h2>
+                <div class="security-info-container">
+                    <div class="security-item">
+                        <div class="security-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="security-details">
+                            <strong>Dernier changement de mot de passe</strong>
+                            <small id="last-pwd-change">Chargement...</small>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon">
+                            <i class="fas fa-laptop"></i>
+                        </div>
+                        <div class="security-details">
+                            <strong>Dernière connexion</strong>
+                            <small id="last-login">Chargement...</small>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="security-details">
+                            <strong>Authentification 2FA</strong>
+                            <small id="twofa-status">Chargement...</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="sessions-container">
+                    <h3><i class="fas fa-history"></i> Sessions actives</h3>
+                    <div id="sessions-list" class="sessions-list">
+                        <p class="sessions-loading">Chargement...</p>
+                    </div>
+                </div>
             </article>
         </div>
     </main>

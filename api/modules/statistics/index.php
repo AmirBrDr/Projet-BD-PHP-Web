@@ -55,29 +55,30 @@ $stmt3 = $pdo->query("
 ");
 $parTheme = $stmt3->fetchAll(PDO::FETCH_ASSOC);
 
-// --- 4. Taux de validation ---
+// --- 4. Taux de validation des défis du mois (par employés en équipe) ---
 $stmt4 = $pdo->query("
     SELECT
         d.nomDefi,
-        COUNT(DISTINCT fp.Id_actions) AS nb_actions_total,
-        COUNT(DISTINCT v.Id_actions) AS nb_actions_validees
+        COUNT(DISTINCT rd.Id_Employe)                                   AS nb_employes_valides,
+        (SELECT COUNT(*) FROM Employe WHERE Id_equipe IS NOT NULL)      AS total_employes_equipes
     FROM Defi d
     JOIN Regroupe r ON r.Id_defi = d.Id_defi
-    JOIN Faire_partie fp ON fp.Id_defi = d.Id_defi
-    LEFT JOIN Valider v ON v.Id_defi = d.Id_defi AND v.Id_actions = fp.Id_actions
+    LEFT JOIN Reponse_Defi rd
+        ON rd.Id_defi = d.Id_defi
+        AND rd.statut_reponse = 'approved'
     WHERE DATE_TRUNC('month', r.mois) = DATE_TRUNC('month', CURRENT_DATE)
     GROUP BY d.Id_defi, d.nomDefi
-    ORDER BY nb_actions_validees DESC
+    ORDER BY nb_employes_valides DESC
 ");
-$validation = $stmt4->fetchAll(PDO::FETCH_ASSOC);
+$validationMonth = $stmt4->fetchAll(PDO::FETCH_ASSOC);
 
 http_response_code(200);
 echo json_encode([
     'status' => 'success',
     'data' => [
-        'globales'   => $globales,
-        'par_defi'   => $parDefi,
-        'par_theme'  => $parTheme,
-        'validation' => $validation,
+        'globales'          => $globales,
+        'par_defi'          => $parDefi,
+        'par_theme'         => $parTheme,
+        'validation_month'  => $validationMonth,
     ]
 ]);

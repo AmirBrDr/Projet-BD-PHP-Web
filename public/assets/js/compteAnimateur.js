@@ -381,6 +381,111 @@
         });
     }
 
+    const SECURITY_API = "/api/modules/profile/security.php";
+
+    async function loadSecurityInfo() {
+        try {
+            const tk = token();
+            const res = await fetch(`${SECURITY_API}?action=info`, {
+                headers: { Authorization: `Bearer ${tk}` },
+            });
+            if (!res.ok) return;
+            const json = await res.json();
+            const info = json.data ?? {};
+
+            const pwdEl = document.getElementById("last-pwd-change");
+            const loginEl = document.getElementById("last-login");
+            const twofaEl = document.getElementById("twofa-status");
+
+            if (pwdEl) pwdEl.textContent = info.password_age ?? "Information indisponible";
+            if (loginEl) loginEl.textContent = info.last_login ?? "Information indisponible";
+            if (twofaEl) {
+                twofaEl.textContent = info.twofa_enabled
+                    ? "Activée"
+                    : "Désactivée";
+            }
+        } catch (_) { /* silencieux */ }
+    }
+
+    function parseUserAgent(ua) {
+        if (!ua) return "Navigateur inconnu";
+        if (/Edg\//i.test(ua))    return "Microsoft Edge";
+        if (/OPR\//i.test(ua))    return "Opera";
+        if (/Chrome\//i.test(ua)) return "Chrome";
+        if (/Firefox\//i.test(ua)) return "Firefox";
+        if (/Safari\//i.test(ua)) return "Safari";
+        return "Navigateur inconnu";
+    }
+
+    function formatDate(isoStr) {
+        if (!isoStr) return "";
+        try {
+            return new Date(isoStr).toLocaleString("fr-FR", {
+                day: "numeric", month: "long", year: "numeric",
+                hour: "2-digit", minute: "2-digit",
+            });
+        } catch (_) { return isoStr; }
+    }
+
+    async function loadSessions() {
+        const listEl = document.getElementById("sessions-list");
+        if (!listEl) return;
+
+        try {
+            const tk = token();
+            const res = await fetch(`${SECURITY_API}?action=sessions`, {
+                headers: { Authorization: `Bearer ${tk}` },
+            });
+            if (!res.ok) { listEl.innerHTML = '<p class="sessions-loading">Indisponible.</p>'; return; }
+            const json = await res.json();
+            const sessions = json.sessions ?? [];
+
+            if (sessions.length === 0) {
+                listEl.innerHTML = '<p class="sessions-loading">Aucune session active.</p>';
+                return;
+            }
+
+            listEl.innerHTML = sessions.map((s, index) => {
+                const id       = s.id_session;
+                const ip       = s.ip_address ?? "IP inconnue";
+                const device   = parseUserAgent(s.user_agent ?? "");
+                const lastSeen = formatDate(s.derniere_activite ?? s.date_creation);
+                const isCurrent = index === 0;
+                return `
+                <div class="session-item">
+                    <div class="session-info">
+                        <span class="session-device">${device}</span>
+                        <span class="session-meta">${ip} · ${lastSeen}</span>
+                    </div>
+                    ${isCurrent
+                        ? '<span class="session-current">Session actuelle</span>'
+                        : `<button class="session-revoke-btn" data-session-id="${id}">Terminer</button>`
+                    }
+                </div>`;
+            }).join('');
+
+            listEl.querySelectorAll("[data-session-id]").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    btn.disabled = true;
+                    try {
+                        const tk2 = token();
+                        await fetch(`${SECURITY_API}?action=logout-session`, {
+                            method: "POST",
+                            headers: {
+                                Authorization: `Bearer ${tk2}`,
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ sessionId: btn.dataset.sessionId }),
+                        });
+                        loadSessions();
+                    } catch (_) { btn.disabled = false; }
+                });
+            });
+        } catch (_) {
+            listEl.innerHTML = '<p class="sessions-loading">Impossible de charger les sessions.</p>';
+        }
+    }
+
     document.addEventListener("DOMContentLoaded", async () => {
         bindModalTriggers();
         bindPasswordToggles();
@@ -416,5 +521,8 @@
         } catch (err) {
             setFeedback(err?.message || "Impossible de charger le profil.", "error");
         }
+
+        loadSecurityInfo();
+        loadSessions();
     });
 })();

@@ -650,6 +650,11 @@ try {
                 JOIN Utilisateur ud ON ud.Id_User = d.Id_Animateur
                 WHERE ua.Id_User = :animateur_id
                   AND ua.Id_Entreprise = ud.Id_Entreprise
+            )
+            AND EXISTS (
+                SELECT 1 FROM Regroupe r
+                WHERE r.Id_defi = rd.Id_defi
+                  AND date_trunc(\'month\', r.mois) = date_trunc(\'month\', CURRENT_DATE)
             )';
 
         if (in_array($status, ['pending', 'approved', 'rejected'], true)) {
@@ -937,6 +942,25 @@ try {
             gp_send_json(200, ['status' => 'success', 'message' => 'Defis du mois sauvegardes']);
         } catch (Throwable $e) {
             if ($pdo->inTransaction()) $pdo->rollBack();
+            gp_send_json(400, ['message' => gp_clean_db_message($e->getMessage())]);
+        }
+    }
+
+    if ($method === 'POST' && $action === 'defi_month_remove') {
+        $challengeId = (int)($_GET['id'] ?? 0);
+        if ($challengeId <= 0) {
+            gp_send_json(400, ['message' => 'Identifiant invalide']);
+        }
+        try {
+            gp_assert_animateur_owns_challenge($pdo, $animateurId, $challengeId);
+            $stmt = $pdo->prepare(
+                "DELETE FROM Regroupe
+                 WHERE Id_defi = :id
+                   AND date_trunc('month', mois) = date_trunc('month', CURRENT_DATE)"
+            );
+            $stmt->execute([':id' => $challengeId]);
+            gp_send_json(200, ['status' => 'success', 'message' => 'Defi retire du mois en cours']);
+        } catch (Throwable $e) {
             gp_send_json(400, ['message' => gp_clean_db_message($e->getMessage())]);
         }
     }

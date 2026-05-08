@@ -75,3 +75,143 @@
     outline: 2px solid var(--shell-accent);
     outline-offset: 2px;
 }
+
+/* --- Sécurité du compte --- */
+.security-card h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+}
+
+.security-info-container {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.security-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--shell-border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.security-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--shell-accent);
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.security-icon.warning {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}
+
+.security-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 13px;
+}
+
+.security-details strong {
+    color: var(--shell-text);
+    font-size: 13px;
+}
+
+.security-details small {
+    color: var(--shell-muted);
+    font-size: 12px;
+}
+
+.sessions-container {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--shell-border);
+}
+
+.sessions-container h3 {
+    font-size: 13px;
+    color: var(--shell-muted);
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sessions-list {
+    display: grid;
+    gap: 8px;
+}
+
+.sessions-loading {
+    font-size: 12px;
+    color: var(--shell-muted);
+}
+
+.session-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px;
+    border: 1px solid var(--shell-border);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    font-size: 12px;
+}
+
+.session-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.session-device {
+    color: var(--shell-text);
+    font-weight: 600;
+}
+
+.session-meta {
+    color: var(--shell-muted);
+}
+
+.session-current {
+    font-size: 11px;
+    color: var(--shell-accent);
+    background: rgba(16, 185, 129, 0.1);
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.session-revoke-btn {
+    font-size: 11px;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 3px 8px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.session-revoke-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.session-revoke-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}

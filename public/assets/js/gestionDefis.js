@@ -340,16 +340,16 @@
     // ── Suppression ────────────────────────────────────────────────────────────
 
     async function deleteChallenge(challengeId) {
-        const confirmed = await askConfirm('Confirmer la suppression de ce defi ?', {
-            title: 'Suppression', confirmText: 'Supprimer', cancelText: 'Annuler', tone: 'danger',
+        const confirmed = await askConfirm('Retirer ce defi du mois en cours ?', {
+            title: 'Retirer du mois', confirmText: 'Retirer', cancelText: 'Annuler', tone: 'danger',
         });
         if (!confirmed) return;
         try {
-            await apiReq('challenge_delete', { method: 'POST', params: { id: String(challengeId) } });
-            setPageAlert('Defi supprime.');
+            await apiReq('defi_month_remove', { method: 'POST', params: { id: String(challengeId) } });
+            setPageAlert('Defi retire du mois.');
             await init();
         } catch (err) {
-            setPageAlert(err.message || 'Suppression impossible.');
+            setPageAlert(err.message || 'Impossible de retirer ce defi.');
         }
     }
 

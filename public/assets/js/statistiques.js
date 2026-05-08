@@ -5,6 +5,8 @@
 
 const API_URL = '/api/modules/statistics/index.php';
 
+let validationChart = null;
+
 // --- Éléments DOM ---
 const loadingEl  = document.getElementById('loading');
 const contenuEl  = document.getElementById('contenu');
@@ -89,36 +91,81 @@ function afficherThemes(parTheme) {
     });
 }
 
-// --- Construit le taux de validation ---
-function afficherValidation(validation) {
-    const el = document.getElementById('chart-validation');
-    el.innerHTML = '';
+// --- Construit le graphique Chart.js de validation des défis du mois ---
+function afficherValidation(validationMonth) {
+    const canvas = document.getElementById('chart-validation');
 
-    if (!validation || validation.length === 0) {
-        el.innerHTML = '<p style="color:var(--shell-muted);font-size:13px">Aucune donnée.</p>';
+    if (validationChart) {
+        validationChart.destroy();
+        validationChart = null;
+    }
+
+    if (!validationMonth || validationMonth.length === 0) {
+        const wrapper = canvas.parentElement;
+        wrapper.innerHTML = '<p style="color:var(--shell-muted);font-size:13px">Aucune donnée pour ce mois.</p>';
         return;
     }
 
-    validation.forEach(item => {
-        const total  = parseInt(item.nb_actions_total) || 0;
-        const valide = parseInt(item.nb_actions_validees) || 0;
-        const pct    = total > 0 ? Math.round((valide / total) * 100) : 0;
+    const labels  = validationMonth.map(d => d.nomdefi ?? d.nomDefi ?? '');
+    const valides = validationMonth.map(d => parseInt(d.nb_employes_valides) || 0);
+    const totaux  = validationMonth.map(d => parseInt(d.total_employes_equipes) || 0);
+    const pcts    = valides.map((v, i) => totaux[i] > 0 ? Math.round((v / totaux[i]) * 100) : 0);
 
-        const div = document.createElement('div');
-        div.className = 'validation-item';
-        div.innerHTML = `
-            <div class="validation-nom">${item.nomdefi}</div>
-            <div class="validation-pct">${pct}%</div>
-            <div class="validation-bar-track">
-                <div class="validation-bar-fill ${pct === 0 ? 'zero' : ''}" 
-                     style="width: ${pct}%"></div>
-            </div>
-            <div class="validation-meta">
-                <span>${valide} validée(s)</span>
-                <span>${total} action(s) total</span>
-            </div>
-        `;
-        el.appendChild(div);
+    validationChart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Taux de validation',
+                data: pcts,
+                backgroundColor: 'rgba(43, 212, 124, 0.25)',
+                borderColor: '#2bd47c',
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }],
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const i = ctx.dataIndex;
+                            return ` ${valides[i]} validé(s) sur ${totaux[i]} employé(s) — ${pcts[i]}%`;
+                        },
+                    },
+                    backgroundColor: 'rgba(10, 24, 48, 0.92)',
+                    titleColor: '#2bd47c',
+                    bodyColor: 'rgba(255,255,255,0.8)',
+                    borderColor: 'rgba(43,212,124,0.3)',
+                    borderWidth: 1,
+                    padding: 12,
+                },
+            },
+            scales: {
+                x: {
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        color: 'rgba(255,255,255,0.5)',
+                        callback: (v) => `${v}%`,
+                        font: { size: 11 },
+                    },
+                    grid: { color: 'rgba(255,255,255,0.06)' },
+                },
+                y: {
+                    ticks: {
+                        color: 'rgba(255,255,255,0.8)',
+                        font: { size: 12, weight: '600' },
+                    },
+                    grid: { display: false },
+                },
+            },
+        },
     });
 }
 
@@ -139,12 +186,12 @@ async function chargerStats() {
         const json = await res.json();
         if (json.status !== 'success') throw new Error(json.error ?? 'Erreur inconnue');
 
-        const { globales, par_defi, par_theme, validation } = json.data;
+        const { globales, par_defi, par_theme, validation_month } = json.data;
 
         remplirKpis(globales);
         afficherBarChart(par_defi);
         afficherThemes(par_theme);
-        afficherValidation(validation);
+        afficherValidation(validation_month);
 
         loadingEl.classList.add('hidden');
         contenuEl.classList.remove('hidden');

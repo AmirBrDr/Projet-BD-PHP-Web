@@ -2,13 +2,13 @@
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GreenPulse - Statistiques</title>
-    <link rel="stylesheet" href="../assets/css/app-shell.css">
+    <link rel="stylesheet" href="../assets/css/app-shell.css" />
     <link rel="stylesheet" href="../assets/css/unified-navbar.css" />
-    <link rel="stylesheet" href="../assets/css/statistiques.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/statistiques.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
 
 <body class="app-page" data-required-role="animateur">
@@ -29,7 +29,7 @@
         </div>
     </nav>
 
-    <div class="app-shell">
+    <main class="app-shell">
 
         <!-- LOADING -->
         <div class="loading-state" id="loading">
@@ -95,9 +95,11 @@
             <!-- TAUX DE VALIDATION -->
             <section class="stat-panel full-width">
                 <h2 class="panel-title">
-                    <i class="fas fa-check-double"></i> Taux de validation des actions
+                    <i class="fas fa-check-double"></i> Taux de validation des défis du mois
                 </h2>
-                <div id="chart-validation" class="validation-list"></div>
+                <div class="chart-canvas-wrapper">
+                    <canvas id="chart-validation"></canvas>
+                </div>
             </section>
 
         </div>
@@ -108,8 +110,9 @@
             <p id="erreur-msg"></p>
         </div>
 
-    </div>
+    </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
     <script src="../assets/js/app-shell.js" defer></script>
     <script src="../assets/js/statistiques.js" defer></script>
 </body>
