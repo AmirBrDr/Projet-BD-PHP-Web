@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GreenPulse - Gestion des badges</title>
+    <link rel="stylesheet" href="../assets/css/app-shell.css" />
+    <link rel="stylesheet" href="../assets/css/unified-navbar.css" />
+    <link rel="stylesheet" href="../assets/css/parametresRH.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body class="app-page" data-required-role="animateur">
+    <nav class="navbar">
+        <img src="../assets/logo.png" alt="GreenPulse" class="nav-logo" />
+        <div class="nav-links">
+            <a href="gestionDefis.html">Gestion des defis</a>
+            <a href="gestionCatalogue.html">Catalogue</a>
+            <a href="moderation.html">Moderation</a>
+            <a href="statistiques.html">Statistiques</a>
+            <a class="active" href="gestionBadges.html">Badges</a>
+            <a href="compteAnimateur.html">Compte</a>
+        </div>
+        <div class="nav-right">
+            <div class="role-badge animateur">Animateur DD</div>
+            <button type="button" class="logout-btn" data-logout title="Deconnexion"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </nav>
+
+    <main class="param-main">
+        <header class="admin-header">
+            <div>
+                <h1>Gestion des Badges</h1>
+                <p>Créez et gérez les badges de récompense attribués aux employés.</p>
+            </div>
+        </header>
+
+        <div id="badgeFeedback" class="feedback"></div>
+
+        <div class="param-grid" style="grid-template-columns: 1fr;">
+            <div class="param-col">
+                <section class="param-box">
+                    <div class="box-header-flex">
+                        <h2><i class="fas fa-medal"></i> Catalogue des Badges</h2>
+                        <button id="addBadgeBtn" class="btn-small"><i class="fas fa-plus"></i> Nouveau Badge</button>
+                    </div>
+                    <p class="box-desc">Définissez les conditions d'obtention et les icônes des badges.</p>
+
+                    <div id="badgeList" class="badge-list"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div id="modalBadge" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-award"></i> Configurer un Badge</h3>
+            <p class="modal-desc">Définissez la récompense et téléchargez son icône.</p>
+
+            <div class="form-group">
+                <label>Nom du badge</label>
+                <input id="badgeName" type="text" placeholder="Ex: Maître Composteur">
+            </div>
+
+            <div class="form-group">
+                <label>Icône du badge (PNG/SVG)</label>
+                <div class="icon-upload-zone" onclick="document.querySelector('#modalBadge input[type=file]').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Cliquez ou glissez une image ici</p>
+                </div>
+                <input type="file" accept="image/png, image/svg+xml" class="file-hidden" style="display: none;">
+                <input id="badgeIcon" type="hidden" value="">
+                <div class="icon-preview-container" style="display:none;">
+                    <img id="previewIcon" src="" alt="Aperçu" style="width: 60px; height: 60px; margin-top: 15px;">
+                    <button type="button" class="btn-icon delete" onclick="document.getElementById('previewIcon').parentElement.style.display='none'; document.querySelector('#modalBadge input[type=file]').value=''; document.getElementById('badgeIcon').value='';"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Conditions d'obtention</label>
+                <div class="condition-row-modal">
+                    <select id="badgeConditionType">
+                        <option>Défis "Mobilité"</option>
+                        <option>Défis "Énergie"</option>
+                        <option>Défis "Déchets"</option>
+                        <option>Points Totaux (Global)</option>
+                    </select>
+                    <span>>=</span>
+                    <input id="badgeConditionValue" type="number" value="5" placeholder="Qté">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel">Annuler</button>
+                <button type="button" class="btn-confirm">Enregistrer le badge</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/app-shell.js" defer></script>
+    <script src="../assets/js/gestionBadges.js" defer></script>
+</body>
+
+</html>

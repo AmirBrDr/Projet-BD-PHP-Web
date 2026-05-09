@@ -128,6 +128,12 @@
 
         actionState = new Map(actions.map((a) => [a.id, a]));
 
+        if (alreadyDone) {
+            selectedActionId = 0;
+            host.innerHTML = '<p style="color:var(--shell-muted)">Ce défi a déjà été validé ce mois-ci. ✓</p>';
+            return;
+        }
+
         const selectable = actions.filter((a) => !a.valide && a.reply_status !== 'pending');
         const firstSelectable = selectable[0];
 
@@ -135,11 +141,6 @@
             selectedActionId = firstSelectable ? firstSelectable.id : 0;
         } else {
             selectedActionId = 0;
-        }
-
-        if (alreadyDone && !selectable.length) {
-            host.innerHTML = '<p style="color:var(--shell-muted)">Toutes les actions de ce defi ont ete validees.</p>';
-            return;
         }
 
         host.innerHTML = actions.map((a) => {

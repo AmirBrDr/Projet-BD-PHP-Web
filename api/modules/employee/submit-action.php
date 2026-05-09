@@ -169,34 +169,32 @@ if ($teamId > 0) {
 $stmt = $pdo->prepare("
     SELECT 1
     FROM Valider
-    WHERE Id_defi = :defi AND Id_actions = :action AND Id_Employe = :emp
+    WHERE Id_defi = :defi AND Id_Employe = :emp
       AND date_trunc('month', mois) = date_trunc('month', :mois::date)
 ");
 $stmt->execute([
-    ':defi'   => $defiId,
-    ':action' => $actionId,
-    ':emp'    => $userId,
-    ':mois'   => $challengeRow['mois'],
+    ':defi' => $defiId,
+    ':emp'  => $userId,
+    ':mois' => $challengeRow['mois'],
 ]);
 if ($stmt->fetch()) {
-    gp_send_json(409, ['message' => 'Vous avez déjà validé cette action']);
+    gp_send_json(409, ['message' => 'Vous avez déjà validé ce défi ce mois-ci']);
 }
 
 $stmt = $pdo->prepare("
     SELECT 1
     FROM Reponse_Defi
-    WHERE Id_defi = :defi AND Id_actions = :action AND Id_Employe = :emp
+    WHERE Id_defi = :defi AND Id_Employe = :emp
       AND statut_reponse = 'pending'
       AND date_trunc('month', date_reponse) = date_trunc('month', CURRENT_TIMESTAMP)
     LIMIT 1
 ");
 $stmt->execute([
     ':defi' => $defiId,
-    ':action' => $actionId,
-    ':emp' => $userId,
+    ':emp'  => $userId,
 ]);
 if ($stmt->fetch()) {
-    gp_send_json(409, ['message' => 'Une soumission est déjà en attente pour cette action']);
+    gp_send_json(409, ['message' => 'Une soumission est déjà en attente pour ce défi']);
 }
 
 $stmt = $pdo->prepare("

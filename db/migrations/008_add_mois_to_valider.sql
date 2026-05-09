@@ -8,4 +8,4 @@ UPDATE Valider SET mois = date_trunc('month', date_validation)::DATE;
 ALTER TABLE Valider ALTER COLUMN mois SET NOT NULL;
 ALTER TABLE Valider DROP CONSTRAINT pk_Valider;
 ALTER TABLE Valider ADD CONSTRAINT pk_Valider
-    PRIMARY KEY (Id_defi, Id_actions, Id_Employe, mois);
+    PRIMARY KEY (Id_defi, Id_Employe, mois);
