@@ -17,6 +17,7 @@ $stmt = $pdo->query("
     LEFT JOIN Regroupe r ON r.Id_defi = d.Id_defi
     LEFT JOIN Thematique t ON t.Id_thematique = r.Id_thematique
     LEFT JOIN Valider v ON v.Id_defi = d.Id_defi
+        AND DATE_TRUNC('month', v.mois) = DATE_TRUNC('month', CURRENT_DATE)
     WHERE DATE_TRUNC('month', r.mois) = DATE_TRUNC('month', CURRENT_DATE)
 ");
 $globales = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -32,6 +33,7 @@ $stmt2 = $pdo->query("
     JOIN Regroupe r ON r.Id_defi = d.Id_defi
     JOIN Thematique t ON t.Id_thematique = r.Id_thematique
     LEFT JOIN Valider v ON v.Id_defi = d.Id_defi
+        AND DATE_TRUNC('month', v.mois) = DATE_TRUNC('month', CURRENT_DATE)
     WHERE DATE_TRUNC('month', r.mois) = DATE_TRUNC('month', CURRENT_DATE)
     GROUP BY d.Id_defi, d.nomDefi, t.nomTheme, d.nbPointsDefi
     ORDER BY nb_participants DESC
@@ -49,6 +51,7 @@ $stmt3 = $pdo->query("
     JOIN Regroupe r ON r.Id_thematique = t.Id_thematique
     JOIN Defi d ON d.Id_defi = r.Id_defi
     LEFT JOIN Valider v ON v.Id_defi = d.Id_defi
+        AND DATE_TRUNC('month', v.mois) = DATE_TRUNC('month', CURRENT_DATE)
     WHERE DATE_TRUNC('month', r.mois) = DATE_TRUNC('month', CURRENT_DATE)
     GROUP BY t.Id_thematique, t.nomTheme
     ORDER BY nb_participants DESC
@@ -66,6 +69,7 @@ $stmt4 = $pdo->query("
     LEFT JOIN Reponse_Defi rd
         ON rd.Id_defi = d.Id_defi
         AND rd.statut_reponse = 'approved'
+        AND DATE_TRUNC('month', rd.date_reponse) = DATE_TRUNC('month', CURRENT_DATE)
     WHERE DATE_TRUNC('month', r.mois) = DATE_TRUNC('month', CURRENT_DATE)
     GROUP BY d.Id_defi, d.nomDefi
     ORDER BY nb_employes_valides DESC

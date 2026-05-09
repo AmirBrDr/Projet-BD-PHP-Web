@@ -52,8 +52,12 @@ if ($stmt->fetch()) {
     gp_send_json(403, ['message' => 'Vous etes bloque pour ce defi']);
 }
 
-// Trouver ou créer le forum du défi
-$stmt = $pdo->prepare("SELECT Id_forum FROM Forum WHERE Id_defi = :id LIMIT 1");
+// Trouver ou créer le forum du défi pour le mois courant
+$stmt = $pdo->prepare("
+    SELECT Id_forum FROM Forum
+    WHERE Id_defi = :id AND date_trunc('month', mois) = date_trunc('month', CURRENT_DATE)
+    LIMIT 1
+");
 $stmt->execute([':id' => $defiId]);
 $forumRow = $stmt->fetch();
 
@@ -67,7 +71,9 @@ if (!$forumRow) {
     }
 
     $stmt = $pdo->prepare("
-        INSERT INTO Forum (nomForum, Id_defi) VALUES (:nom, :defi) RETURNING Id_forum
+        INSERT INTO Forum (nomForum, Id_defi, mois)
+        VALUES (:nom, :defi, date_trunc('month', CURRENT_DATE)::DATE)
+        RETURNING Id_forum
     ");
     $stmt->execute([':nom' => 'Forum - ' . $defiRow['nomdefi'], ':defi' => $defiId]);
     $forumId = (int) $stmt->fetchColumn();

@@ -53,12 +53,13 @@ if ($teamId > 0) {
         $allMemberNames[(int) $m['id_employe']] = $m['prenomuser'] . ' ' . substr($m['nomuser'], 0, 1) . '.';
     }
 
-    // Who validated which defi (at least one action)
+    // Who validated which defi (at least one action) — current month only
     $stmt = $pdo->prepare("
         SELECT DISTINCT v.Id_defi, v.Id_Employe
         FROM Valider v
         JOIN Employe e ON e.Id_Employe = v.Id_Employe
         WHERE e.Id_equipe = :team
+          AND date_trunc('month', v.mois) = date_trunc('month', CURRENT_DATE)
     ");
     $stmt->execute([':team' => $teamId]);
     foreach ($stmt->fetchAll() as $row) {
@@ -69,9 +70,11 @@ if ($teamId > 0) {
         $validatedNames[$did][] = $allMemberNames[$eid] ?? 'Membre';
     }
 } else {
-    // Solo (no team) — count self
+    // Solo (no team) — count self, current month only
     $stmt = $pdo->prepare("
-        SELECT DISTINCT v.Id_defi FROM Valider v WHERE v.Id_Employe = :user
+        SELECT DISTINCT v.Id_defi FROM Valider v
+        WHERE v.Id_Employe = :user
+          AND date_trunc('month', v.mois) = date_trunc('month', CURRENT_DATE)
     ");
     $stmt->execute([':user' => $userId]);
     foreach ($stmt->fetchAll() as $row) {

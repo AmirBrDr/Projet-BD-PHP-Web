@@ -112,6 +112,7 @@ try {
                     COALESCE(SUM(CASE WHEN rd.statut_reponse = \'rejected\' THEN 1 ELSE 0 END), 0) AS nb_replies_rejected
                 FROM Reponse_Defi rd
                 WHERE rd.Id_defi = d.Id_defi
+                  AND date_trunc(\'month\', rd.date_reponse) = date_trunc(\'month\', CURRENT_TIMESTAMP)
              ) rr ON TRUE
              ORDER BY r.ordre ASC NULLS LAST, d.Id_defi DESC'
         );
@@ -148,6 +149,7 @@ try {
              LEFT JOIN Regroupe r ON r.Id_defi = d.Id_defi
              LEFT JOIN Thematique t ON t.Id_thematique = r.Id_thematique
              LEFT JOIN Forum f ON f.Id_defi = d.Id_defi
+                 AND date_trunc(\'month\', f.mois) = date_trunc(\'month\', CURRENT_DATE)
              WHERE d.Id_defi = :challenge_id AND d.Id_Animateur = :animateur_id
              LIMIT 1'
         );
@@ -746,7 +748,7 @@ try {
              WHERE rd.Id_reponse = :reply_id
                AND d.Id_defi = rd.Id_defi
                              AND ua.Id_Entreprise = ud.Id_Entreprise
-             RETURNING rd.Id_defi, rd.Id_actions, rd.Id_Employe, rd.reponse_text'
+             RETURNING rd.Id_defi, rd.Id_actions, rd.Id_Employe, rd.reponse_text, rd.date_reponse'
         );
         $stmt->execute([
             ':new_status' => $newStatus,
@@ -762,16 +764,30 @@ try {
         }
 
         if ($newStatus === 'approved' && !empty($reply['id_actions'])) {
+            $stmtMois = $pdo->prepare(
+                'SELECT r.mois FROM Regroupe r
+                 WHERE r.Id_defi = :defi
+                   AND date_trunc(\'month\', r.mois) = date_trunc(\'month\', :date_rep::date)
+                 LIMIT 1'
+            );
+            $stmtMois->execute([
+                ':defi'     => (int) $reply['id_defi'],
+                ':date_rep' => $reply['date_reponse'],
+            ]);
+            $moisRow = $stmtMois->fetch(PDO::FETCH_ASSOC);
+            $mois = $moisRow ? $moisRow['mois'] : date('Y-m-01');
+
             $stmtInsert = $pdo->prepare(
-                'INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, preuve)
-                 VALUES (:defi, :action, :employe, :preuve)
+                'INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, mois, preuve)
+                 VALUES (:defi, :action, :employe, :mois, :preuve)
                  ON CONFLICT DO NOTHING'
             );
             $stmtInsert->execute([
-                ':defi' => (int) $reply['id_defi'],
-                ':action' => (int) $reply['id_actions'],
+                ':defi'    => (int) $reply['id_defi'],
+                ':action'  => (int) $reply['id_actions'],
                 ':employe' => (int) $reply['id_employe'],
-                ':preuve' => $reply['reponse_text'] ?? null,
+                ':mois'    => $mois,
+                ':preuve'  => $reply['reponse_text'] ?? null,
             ]);
         }
 

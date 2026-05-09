@@ -35,6 +35,7 @@ $stmt = $pdo->prepare("
            t.nomTheme
     FROM Defi d
     JOIN Regroupe r ON r.Id_defi = d.Id_defi
+        AND date_trunc('month', r.mois) = date_trunc('month', CURRENT_DATE)
     JOIN Thematique t ON t.Id_thematique = r.Id_thematique
     WHERE d.Id_defi = :id
     LIMIT 1
@@ -46,12 +47,13 @@ if (!$defi) {
     gp_send_json(404, ['message' => 'Défi introuvable']);
 }
 
-// Actions du défi avec statut validé par l'employé
+// Actions du défi avec statut validé par l'employé — mois courant uniquement
 $stmt = $pdo->prepare("
     SELECT a.Id_actions, a.nomAction, a.descriptionAction,
            EXISTS(
                SELECT 1 FROM Valider v
                WHERE v.Id_defi = :defi_id AND v.Id_actions = a.Id_actions AND v.Id_Employe = :emp_id
+                 AND date_trunc('month', v.mois) = date_trunc('month', CURRENT_DATE)
            ) AS valide
     FROM Actions a
     JOIN Faire_partie fp ON fp.Id_actions = a.Id_actions
@@ -66,7 +68,7 @@ $stmt = $pdo->prepare("
     FROM Message m
     JOIN Utilisateur u ON u.Id_User = m.Id_Employe
     JOIN Forum f ON f.Id_forum = m.Id_forum
-    WHERE f.Id_defi = :id
+    WHERE f.Id_defi = :id AND date_trunc('month', f.mois) = date_trunc('month', CURRENT_DATE)
     ORDER BY m.dateMessage DESC
     LIMIT 20
 ");
@@ -87,12 +89,13 @@ $stmt = $pdo->prepare("
     FROM Valider v
     JOIN Actions a ON a.Id_actions = v.Id_actions
     WHERE v.Id_defi = :defi_id AND v.Id_Employe = :emp_id
+      AND date_trunc('month', v.mois) = date_trunc('month', CURRENT_DATE)
     ORDER BY v.date_validation DESC
 ");
 $stmt->execute([':defi_id' => $defiId, ':emp_id' => $userId]);
 $historique = $stmt->fetchAll();
 
-$stmt = $pdo->prepare("\n    SELECT\n        rd.Id_reponse,\n        rd.Id_actions,\n        a.nomAction,\n        rd.reponse_text,\n        rd.statut_reponse,\n        rd.commentaire_animateur,\n        to_char(rd.date_reponse, 'YYYY-MM-DD\"T\"HH24:MI:SS') AS date_reponse,\n        to_char(rd.date_traitement, 'YYYY-MM-DD\"T\"HH24:MI:SS') AS date_traitement\n    FROM Reponse_Defi rd\n    LEFT JOIN Actions a ON a.Id_actions = rd.Id_actions\n    WHERE rd.Id_defi = :defi_id AND rd.Id_Employe = :emp_id\n    ORDER BY rd.date_reponse DESC\n");
+$stmt = $pdo->prepare("\n    SELECT\n        rd.Id_reponse,\n        rd.Id_actions,\n        a.nomAction,\n        rd.reponse_text,\n        rd.statut_reponse,\n        rd.commentaire_animateur,\n        to_char(rd.date_reponse, 'YYYY-MM-DD\"T\"HH24:MI:SS') AS date_reponse,\n        to_char(rd.date_traitement, 'YYYY-MM-DD\"T\"HH24:MI:SS') AS date_traitement\n    FROM Reponse_Defi rd\n    LEFT JOIN Actions a ON a.Id_actions = rd.Id_actions\n    WHERE rd.Id_defi = :defi_id AND rd.Id_Employe = :emp_id\n      AND date_trunc('month', rd.date_reponse) = date_trunc('month', CURRENT_TIMESTAMP)\n    ORDER BY rd.date_reponse DESC\n");
 $stmt->execute([':defi_id' => $defiId, ':emp_id' => $userId]);
 $replies = $stmt->fetchAll();
 
