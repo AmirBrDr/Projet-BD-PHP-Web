@@ -65,6 +65,78 @@
         </div>
     </main>
 
+    <div id="modalBadge" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-award"></i> Configurer un Badge</h3>
+            <p class="modal-desc">Définissez la récompense et téléchargez son icône.</p>
+            
+            <div class="form-group">
+                <label>Nom du badge</label>
+                <input id="badgeName" type="text" placeholder="Ex: Maître Composteur">
+            </div>
+
+            <div class="form-group">
+                <label>Icône du badge (PNG/SVG)</label>
+                <div class="icon-upload-zone" onclick="document.querySelector('#modalBadge input[type=file]').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Cliquez ou glissez une image ici</p>
+                </div>
+                <input type="file" accept="image/png, image/svg+xml" class="file-hidden" style="display: none;">
+                <input id="badgeIcon" type="hidden" value="">
+                <div class="icon-preview-container" style="display:none;">
+                    <img id="previewIcon" src="" alt="Aperçu" style="width: 60px; height: 60px; margin-top: 15px;">
+                    <button type="button" class="btn-icon delete" onclick="document.getElementById('previewIcon').parentElement.style.display='none'; document.querySelector('#modalBadge input[type=file]').value=''; document.getElementById('badgeIcon').value='';"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Conditions d'obtention</label>
+                <div class="condition-row-modal">
+                    <select id="badgeConditionType">
+                        <option>Défis "Mobilité"</option>
+                        <option>Défis "Énergie"</option>
+                        <option>Défis "Déchets"</option>
+                        <option>Points Totaux (Global)</option>
+                    </select>
+                    <span>>=</span>
+                    <input id="badgeConditionValue" type="number" value="5" placeholder="Qté">
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel">Annuler</button>
+                <button type="button" class="btn-confirm">Enregistrer le badge</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalThematique" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-tags"></i> Détails de la Catégorie</h3>
+            <p class="modal-desc">Consultez et modifiez les informations de cette catégorie.</p>
+            
+            <div class="form-group">
+                <label>Nom de la catégorie</label>
+                <input id="thematiqueNom" type="text" placeholder="Nom de la catégorie">
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="thematiqueDesc" placeholder="Description (optionnelle)" style="min-height: 80px; resize: vertical;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Défis associés</label>
+                <div id="thematiquDefis" style="max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 10px;"></div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel">Annuler</button>
+                <button type="button" class="btn-confirm">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../assets/js/parametresRH.js"></script>
 </body>
 </html>
