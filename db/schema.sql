@@ -198,7 +198,9 @@ CREATE TABLE Faire_partie (
 );
 
 -- Appartenir : catalogue — un défi peut appartenir à plusieurs thématiques (sans date)
+DROP TABLE IF EXISTS Appartenir CASCADE;
 CREATE TABLE Appartenir (
+
     Id_defi       INT CONSTRAINT fk_Appartenir_Defi       REFERENCES Defi(Id_defi),
     Id_thematique INT CONSTRAINT fk_Appartenir_Thematique REFERENCES Thematique(Id_thematique),
     CONSTRAINT pk_Appartenir PRIMARY KEY (Id_defi, Id_thematique)
@@ -226,7 +228,9 @@ CREATE TABLE Reponse_Defi (
 );
 
 -- Defi_Employe_Block : blocage d'un employe sur un defi par l'animateur
+DROP TABLE IF EXISTS Defi_Employe_Block CASCADE;
 CREATE TABLE Defi_Employe_Block (
+
     Id_defi        INT        CONSTRAINT nn_Block_Defi NOT NULL
                            CONSTRAINT fk_Block_Defi REFERENCES Defi(Id_defi),
     Id_Employe     INT        CONSTRAINT nn_Block_Employe NOT NULL

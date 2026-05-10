@@ -271,6 +271,25 @@
         const feedback = document.querySelector('[data-form-feedback]');
         if (!form || !feedback) return;
 
+        const fileInput = form.querySelector('#proofPhoto');
+        const clearBtn = form.querySelector('[data-clear-proof]');
+        const updateClearState = () => {
+            const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+            if (clearBtn) {
+                clearBtn.classList.toggle('is-visible', Boolean(hasFile));
+            }
+        };
+        fileInput?.addEventListener('change', updateClearState);
+        clearBtn?.addEventListener('click', () => {
+            if (!fileInput) return;
+            fileInput.value = '';
+            fileInput.dispatchEvent(new Event('change'));
+        });
+        form.addEventListener('reset', () => {
+            requestAnimationFrame(updateClearState);
+        });
+        updateClearState();
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             feedback.className = 'feedback-msg';

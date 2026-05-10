@@ -47,8 +47,13 @@
                 <form class="submission-form" data-submission-form enctype="multipart/form-data">
                     <div class="action-options" data-action-options></div>
                     <label class="input-label" for="proofPhoto">Photo de preuve (optionnel)</label>
-                    <input id="proofPhoto" name="preuvePhoto" type="file" accept="image/jpeg,image/png,image/webp"
-                        class="file-input" />
+                    <div class="file-input-row">
+                        <input id="proofPhoto" name="preuvePhoto" type="file" accept="image/jpeg,image/png,image/webp"
+                            class="file-input" />
+                        <button class="clear-file-btn" type="button" data-clear-proof aria-label="Retirer la photo">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                     <label class="input-label" for="proofText">Commentaire (optionnel si photo fournie)</label>
                     <textarea id="proofText" name="proofText" rows="3" maxlength="300"
                         placeholder="Decrivez votre action du jour..."></textarea>

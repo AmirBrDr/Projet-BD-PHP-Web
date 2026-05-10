@@ -37,6 +37,7 @@ ALTER SEQUENCE actions_id_actions_seq         RESTART WITH 1;
 ALTER SEQUENCE forum_id_forum_seq             RESTART WITH 1;
 ALTER SEQUENCE badge_id_badge_seq             RESTART WITH 1;
 ALTER SEQUENCE notification_id_notif_seq      RESTART WITH 1;
+
 DO $$ BEGIN
     IF to_regclass('public.reponse_defi_id_reponse_seq') IS NOT NULL THEN
         EXECUTE 'ALTER SEQUENCE reponse_defi_id_reponse_seq RESTART WITH 1';
@@ -212,8 +213,20 @@ INSERT INTO Utilisateur (nomUser, prenomUser, email, statutUser, mdp, inscriptio
 ('Teixeira',  'Marion',   'marion.teixeira@verte.fr',        'actif',    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2024-03-11', 3),
 ('Vallee',    'Remi',     'remi.vallee@verte.fr',            'actif',    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2024-03-11', 3);
 
+
+-- Utilisateurs supplémentaires (1 admin RH, 1 animateur, 1 employé)
+INSERT INTO Utilisateur (nomUser, prenomUser, email, statutUser, mdp, inscriptionUser, Id_Entreprise) VALUES
+('Amir',      'amir',    'amir@gmail.com',                   'actif',    '$2y$12$dtlS4SDu6oskNZ6xOcwL2OA84ws5MtX/MN8wTWx2TOJGWJLwQkyDi', '2024-03-12', 1),
+('Amir',      'amir',    'amir2@gmail.com',                  'actif',    '$2y$12$dtlS4SDu6oskNZ6xOcwL2OA84ws5MtX/MN8wTWx2TOJGWJLwQkyDi', '2024-03-12', 1),
+('Amir',      'amir',    'amir3@gmail.com',                  'actif',    '$2y$12$dtlS4SDu6oskNZ6xOcwL2OA84ws5MtX/MN8wTWx2TOJGWJLwQkyDi', '2024-03-12', 1);
+
+INSERT INTO Admin (Id_Admin) VALUES (106);
+INSERT INTO Animateur (Id_Animateur) VALUES (107);
+
+
+
 -- ============================================================
--- 6. TABLE Employe (Id_User 6 à 105 = employés)
+-- 6. TABLE Employe (Id_User 6 à 108 = employés)
 --    Répartition équipes :
 --      Equipe 1 (Les Colibris)      : emp 6-25   (20 emp, GreenPulse)
 --      Equipe 2 (Team Chlorophylle) : emp 26-45  (20 emp, GreenPulse+EcoTech)
@@ -327,7 +340,8 @@ INSERT INTO Employe (Id_Employe, nbPointsEmploye, nbCO2, departementEmploye, Id_
 (102,135, 20, 'Recherche',        5),
 (103,375, 56, 'Communication',    5),
 (104,250, 37, 'Conseil',          5),
-(105,330, 49, 'Recherche',        5);
+(105,330, 49, 'Recherche',        5),
+(108,0,   0,  'RH',                1);
 
 -- ============================================================
 -- 7. MISE À JOUR DES POINTS DES ÉQUIPES (agrégation des membres)
@@ -550,362 +564,188 @@ INSERT INTO Message (contenuMessage, dateMessage, Id_Employe, Id_forum) VALUES
 -- --- MOBILITÉ : défi 1 d'abord, puis 2, puis 3 ---
 
 -- Défi 1 (Zéro Voiture) — validé par de nombreux employés
-INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve) VALUES
-(1, 1, 6,  '2026-04-07', 'Photo de mon vélo devant le bureau'),
-(1, 2, 6,  '2026-04-08', 'Arrivé à pied en 30 min'),
-(1, 3, 6,  '2026-04-09', 'Ticket de bus scanné'),
-(1, 1, 7,  '2026-04-07', 'Selfie sur le trajet vélo'),
-(1, 2, 7,  '2026-04-08', 'Itinéraire pédestre partagé'),
-(1, 3, 7,  '2026-04-10', 'Abonnement bus photo'),
-(1, 1, 8,  '2026-04-07', 'Compteur vélo : 8 km'),
-(1, 2, 8,  '2026-04-09', 'Trajet 2.5 km fait à pied'),
-(1, 1, 9,  '2026-04-07', 'Photo vélo garé'),
-(1, 3, 9,  '2026-04-08', 'Ticket tram photo'),
-(1, 1, 10, '2026-04-06', 'Application Strava : trajet vélo validé'),
-(1, 2, 10, '2026-04-07', 'Marche 2 km domicile-bureau'),
-(1, 3, 10, '2026-04-08', 'Ticket bus photo'),
-(1, 1, 11, '2026-04-09', 'Photo vélo'),
-(1, 1, 12, '2026-04-05', 'Trajet vélo 12 km'),
-(1, 2, 12, '2026-04-06', 'Marche 1.8 km'),
-(1, 3, 12, '2026-04-07', 'Ticket métro'),
-(1, 1, 14, '2026-04-08', 'Photo vélo bureau'),
-(1, 2, 14, '2026-04-09', 'Trajet 2 km à pied'),
-(1, 3, 14, '2026-04-10', 'Ticket bus'),
-(1, 1, 16, '2026-04-04', 'Compteur vélo 9 km'),
-(1, 2, 16, '2026-04-05', 'Pédestre 3 km'),
-(1, 3, 16, '2026-04-06', 'Ticket tram'),
-(1, 1, 24, '2026-04-07', 'Photo vélo parking'),
-(1, 2, 24, '2026-04-08', 'Marche constatée'),
-(1, 3, 24, '2026-04-10', 'Ticket TC'),
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve, mois) VALUES
+(1, 1, 6,  '2026-04-07', 'Photo de mon vélo devant le bureau', '2026-04-01'),
+(1, 1, 7,  '2026-04-07', 'Selfie sur le trajet vélo', '2026-04-01'),
+(1, 1, 8,  '2026-04-07', 'Compteur vélo : 8 km', '2026-04-01'),
+(1, 1, 9,  '2026-04-07', 'Photo vélo garé', '2026-04-01'),
+(1, 1, 10, '2026-04-06', 'Application Strava : trajet vélo validé', '2026-04-01'),
+(1, 1, 11, '2026-04-09', 'Photo vélo', '2026-04-01'),
+(1, 1, 12, '2026-04-05', 'Trajet vélo 12 km', '2026-04-01'),
+(1, 1, 14, '2026-04-08', 'Photo vélo bureau', '2026-04-01'),
+(1, 1, 16, '2026-04-04', 'Compteur vélo 9 km', '2026-04-01'),
+(1, 1, 24, '2026-04-07', 'Photo vélo parking', '2026-04-01'),
 -- Equipe 2
-(1, 1, 26, '2026-04-07', 'Photo vélo'),
-(1, 2, 26, '2026-04-08', 'Marche constatée'),
-(1, 1, 28, '2026-04-06', 'Compteur 7 km'),
-(1, 3, 28, '2026-04-07', 'Ticket bus'),
-(1, 1, 33, '2026-04-08', 'Photo vélo parking'),
-(1, 2, 33, '2026-04-09', 'Marche 2.8 km'),
-(1, 3, 33, '2026-04-10', 'Ticket métro'),
-(1, 1, 40, '2026-04-05', 'Selfie vélo'),
-(1, 2, 40, '2026-04-06', 'Trajet pédestre'),
-(1, 3, 40, '2026-04-07', 'Ticket bus'),
+(1, 1, 26, '2026-04-07', 'Photo vélo', '2026-04-01'),
+(1, 1, 28, '2026-04-06', 'Compteur 7 km', '2026-04-01'),
+(1, 1, 33, '2026-04-08', 'Photo vélo parking', '2026-04-01'),
+(1, 1, 40, '2026-04-05', 'Selfie vélo', '2026-04-01'),
 -- Equipe 3
-(1, 1, 46, '2026-04-07', 'Photo vélo'),
-(1, 2, 46, '2026-04-08', 'Marche 1.5 km'),
-(1, 3, 46, '2026-04-09', 'Ticket tram'),
-(1, 1, 50, '2026-04-06', 'Strava vélo 10 km'),
-(1, 2, 50, '2026-04-07', 'Marche constatée'),
-(1, 3, 50, '2026-04-08', 'Ticket bus'),
+(1, 1, 46, '2026-04-07', 'Photo vélo', '2026-04-01'),
+(1, 1, 50, '2026-04-06', 'Strava vélo 10 km', '2026-04-01'),
 -- Equipe 4
-(1, 1, 66, '2026-04-08', 'Photo vélo'),
-(1, 3, 66, '2026-04-09', 'Ticket TC'),
-(1, 1, 72, '2026-04-06', 'Compteur vélo'),
-(1, 2, 72, '2026-04-07', 'Marche 2 km'),
-(1, 3, 72, '2026-04-08', 'Ticket bus'),
+(1, 1, 66, '2026-04-08', 'Photo vélo', '2026-04-01'),
+(1, 1, 72, '2026-04-06', 'Compteur vélo', '2026-04-01'),
 -- Equipe 5
-(1, 1, 86, '2026-04-07', 'Photo vélo parking sécurisé'),
-(1, 2, 86, '2026-04-08', 'Marche chrono'),
-(1, 3, 86, '2026-04-09', 'Ticket tram numérique'),
-(1, 1, 93, '2026-04-05', 'Strava vélo 11 km'),
-(1, 2, 93, '2026-04-06', 'Trajet pédestre 2 km'),
-(1, 3, 93, '2026-04-07', 'Ticket bus');
+(1, 1, 86, '2026-04-07', 'Photo vélo parking sécurisé', '2026-04-01'),
+(1, 1, 93, '2026-04-05', 'Strava vélo 11 km', '2026-04-01');
 
 -- Défi 2 (Covoiturage Express) — employés ayant déjà validé défi 1
-INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve) VALUES
-(2, 4, 6,  '2026-04-12', 'Trajet publié sur BlaBlaCar Daily'),
-(2, 5, 6,  '2026-04-13', 'Collègue embarqué : Marc Bernard'),
-(2, 6, 6,  '2026-04-14', 'Groupe créé sur WhatsApp bureau'),
-(2, 4, 7,  '2026-04-12', 'Trajet posté application'),
-(2, 5, 7,  '2026-04-13', 'Collègue confirmé : Emma Leclerc'),
-(2, 4, 10, '2026-04-11', 'Trajet publié'),
-(2, 5, 10, '2026-04-12', 'Deux collègues embarqués'),
-(2, 6, 10, '2026-04-13', 'Groupe hebdomadaire actif'),
-(2, 4, 12, '2026-04-13', 'Trajet covoiturage partagé'),
-(2, 5, 12, '2026-04-14', 'Un collègue embarqué'),
-(2, 4, 14, '2026-04-11', 'Publication trajet faite'),
-(2, 5, 14, '2026-04-12', 'Collègue validé'),
-(2, 6, 14, '2026-04-13', 'Groupe de 3 organisé'),
-(2, 4, 16, '2026-04-10', 'Trajet BlaBlaCar Daily'),
-(2, 5, 16, '2026-04-11', 'Passager : Sophie Martin'),
-(2, 4, 24, '2026-04-12', 'Trajet publié'),
-(2, 5, 24, '2026-04-13', 'Collègue: Tristan Gallet'),
-(2, 4, 26, '2026-04-12', 'Trajet partagé'),
-(2, 5, 26, '2026-04-13', 'Collègue embarqué'),
-(2, 4, 28, '2026-04-11', 'Publication app covoiturage'),
-(2, 5, 28, '2026-04-12', 'Passager confirmé'),
-(2, 4, 33, '2026-04-12', 'Trajet publié'),
-(2, 5, 33, '2026-04-13', 'Collègue: Sandrine Imbert'),
-(2, 4, 40, '2026-04-11', 'Trajet BlaBlaCar Daily'),
-(2, 5, 40, '2026-04-12', 'Passager confirmé'),
-(2, 4, 46, '2026-04-13', 'Trajet publié sur app'),
-(2, 5, 46, '2026-04-14', 'Collègue embarqué'),
-(2, 4, 50, '2026-04-12', 'Publication trajet'),
-(2, 5, 50, '2026-04-13', 'Deux passagers'),
-(2, 4, 66, '2026-04-13', 'Trajet partagé'),
-(2, 5, 66, '2026-04-14', 'Collègue confirmé'),
-(2, 4, 72, '2026-04-12', 'BlaBlaCar Daily trajet'),
-(2, 5, 72, '2026-04-13', 'Passager: Franck Ortega'),
-(2, 4, 86, '2026-04-13', 'Trajet covoiturage publié'),
-(2, 5, 86, '2026-04-14', 'Collègue embarqué'),
-(2, 4, 93, '2026-04-12', 'Publication trajet'),
-(2, 5, 93, '2026-04-13', 'Passager confirmé');
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve, mois) VALUES
+(2, 4, 6,  '2026-04-12', 'Trajet publié sur BlaBlaCar Daily', '2026-04-01'),
+(2, 4, 7,  '2026-04-12', 'Trajet posté application', '2026-04-01'),
+(2, 4, 10, '2026-04-11', 'Trajet publié', '2026-04-01'),
+(2, 4, 12, '2026-04-13', 'Trajet covoiturage partagé', '2026-04-01'),
+(2, 4, 14, '2026-04-11', 'Publication trajet faite', '2026-04-01'),
+(2, 4, 16, '2026-04-10', 'Trajet BlaBlaCar Daily', '2026-04-01'),
+(2, 4, 24, '2026-04-12', 'Trajet publié', '2026-04-01'),
+(2, 4, 26, '2026-04-12', 'Trajet partagé', '2026-04-01'),
+(2, 4, 28, '2026-04-11', 'Publication app covoiturage', '2026-04-01'),
+(2, 4, 33, '2026-04-12', 'Trajet publié', '2026-04-01'),
+(2, 4, 40, '2026-04-11', 'Trajet BlaBlaCar Daily', '2026-04-01'),
+(2, 4, 46, '2026-04-13', 'Trajet publié sur app', '2026-04-01'),
+(2, 4, 50, '2026-04-12', 'Publication trajet', '2026-04-01'),
+(2, 4, 66, '2026-04-13', 'Trajet partagé', '2026-04-01'),
+(2, 4, 72, '2026-04-12', 'BlaBlaCar Daily trajet', '2026-04-01'),
+(2, 4, 86, '2026-04-13', 'Trajet covoiturage publié', '2026-04-01'),
+(2, 4, 93, '2026-04-12', 'Publication trajet', '2026-04-01');
 
 -- Défi 3 (Vélo Challenge) — sous-groupe ayant validé défi 2
-INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve) VALUES
-(3, 7, 6,  '2026-04-19', 'Strava : 3 jours consécutifs validés'),
-(3, 8, 6,  '2026-04-20', 'Parking vélo utilisé J1, J2, J3'),
-(3, 9, 6,  '2026-04-21', 'Check freins et pneus effectué'),
-(3, 7, 10, '2026-04-18', '3 jours vélo confirmés sur app'),
-(3, 8, 10, '2026-04-19', 'Place parking vélo sécurisée'),
-(3, 9, 10, '2026-04-20', 'Entretien vélo fait'),
-(3, 7, 14, '2026-04-19', 'Strava 3 jours'),
-(3, 8, 14, '2026-04-20', 'Parking vélo photo'),
-(3, 7, 16, '2026-04-18', 'Strava vélo challenge'),
-(3, 8, 16, '2026-04-19', 'Parking photo'),
-(3, 9, 16, '2026-04-20', 'Vélo entretenu'),
-(3, 7, 33, '2026-04-19', '3 jours vélo bouclés'),
-(3, 8, 33, '2026-04-20', 'Parking sécurisé utilisé'),
-(3, 7, 40, '2026-04-18', 'Strava 3 jours validés'),
-(3, 8, 40, '2026-04-19', 'Photo parking vélo'),
-(3, 9, 40, '2026-04-20', 'Entretien effectué'),
-(3, 7, 50, '2026-04-19', 'App vélo 3 jours'),
-(3, 7, 86, '2026-04-20', 'Strava : 3 jours vélo'),
-(3, 8, 86, '2026-04-21', 'Parking sécurisé photo'),
-(3, 9, 86, '2026-04-22', 'Vélo vérifié avant départ'),
-(3, 7, 93, '2026-04-19', 'Strava validé'),
-(3, 8, 93, '2026-04-20', 'Parking photo');
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve, mois) VALUES
+(3, 7, 6,  '2026-04-19', 'Strava : 3 jours consécutifs validés', '2026-04-01'),
+(3, 7, 10, '2026-04-18', '3 jours vélo confirmés sur app', '2026-04-01'),
+(3, 7, 14, '2026-04-19', 'Strava 3 jours', '2026-04-01'),
+(3, 7, 16, '2026-04-18', 'Strava vélo challenge', '2026-04-01'),
+(3, 7, 33, '2026-04-19', '3 jours vélo bouclés', '2026-04-01'),
+(3, 7, 40, '2026-04-18', 'Strava 3 jours validés', '2026-04-01'),
+(3, 7, 50, '2026-04-19', 'App vélo 3 jours', '2026-04-01'),
+(3, 7, 86, '2026-04-20', 'Strava : 3 jours vélo', '2026-04-01'),
+(3, 7, 93, '2026-04-19', 'Strava validé', '2026-04-01');
 
 -- --- ÉNERGIE ---
 
 -- Défi 4 (Éteignez la lumière)
-INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve) VALUES
-(4, 10, 6,  '2026-04-09', 'Checklist soir remplie'),
-(4, 11, 6,  '2026-04-10', 'Stores ouverts toute la journée'),
-(4, 12, 6,  '2026-04-11', 'Rappel collègues effectué'),
-(4, 10, 7,  '2026-04-09', 'Lumières éteintes en partant'),
-(4, 11, 7,  '2026-04-10', 'Lumière naturelle favorisée'),
-(4, 10, 8,  '2026-04-08', 'Éteint chaque soir'),
-(4, 11, 8,  '2026-04-09', 'Stores utilisés en journée'),
-(4, 12, 8,  '2026-04-10', 'Collègues sensibilisés'),
-(4, 10, 9,  '2026-04-09', 'Check soir fait'),
-(4, 10, 11, '2026-04-10', 'Lumières éteintes'),
-(4, 11, 11, '2026-04-11', 'Lumière naturelle'),
-(4, 10, 13, '2026-04-09', 'Checklist remplie'),
-(4, 12, 13, '2026-04-10', 'Rappel collègues'),
-(4, 10, 15, '2026-04-10', 'Éteint chaque soir'),
-(4, 10, 18, '2026-04-09', 'Check effectué'),
-(4, 11, 18, '2026-04-10', 'Lumière naturelle toute la journée'),
-(4, 10, 20, '2026-04-08', 'Éteint en partant'),
-(4, 10, 25, '2026-04-10', 'Checklist remplie'),
-(4, 10, 31, '2026-04-09', 'Lumières éteintes chaque soir'),
-(4, 11, 31, '2026-04-10', 'Stores utilisés'),
-(4, 12, 31, '2026-04-11', 'Rappel fait à l''équipe'),
-(4, 10, 36, '2026-04-09', 'Éteint le soir'),
-(4, 10, 42, '2026-04-10', 'Checklist soir'),
-(4, 10, 47, '2026-04-09', 'Éteint chaque soir cette semaine'),
-(4, 11, 47, '2026-04-10', 'Lumière naturelle préférée'),
-(4, 10, 54, '2026-04-09', 'Check fait'),
-(4, 10, 67, '2026-04-08', 'Éteint chaque soir'),
-(4, 11, 67, '2026-04-09', 'Stores ouverts'),
-(4, 10, 73, '2026-04-10', 'Lumières éteintes'),
-(4, 10, 80, '2026-04-09', 'Checklist remplie'),
-(4, 10, 87, '2026-04-08', 'Check chaque soir'),
-(4, 11, 87, '2026-04-09', 'Lumière naturelle'),
-(4, 12, 87, '2026-04-10', 'Rappel collègues fait'),
-(4, 10, 94, '2026-04-10', 'Éteint en partant');
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve, mois) VALUES
+(4, 10, 6,  '2026-04-09', 'Checklist soir remplie', '2026-04-01'),
+(4, 10, 7,  '2026-04-09', 'Lumières éteintes en partant', '2026-04-01'),
+(4, 10, 8,  '2026-04-08', 'Éteint chaque soir', '2026-04-01'),
+(4, 10, 9,  '2026-04-09', 'Check soir fait', '2026-04-01'),
+(4, 10, 11, '2026-04-10', 'Lumières éteintes', '2026-04-01'),
+(4, 10, 13, '2026-04-09', 'Checklist remplie', '2026-04-01'),
+(4, 10, 15, '2026-04-10', 'Éteint chaque soir', '2026-04-01'),
+(4, 10, 18, '2026-04-09', 'Check effectué', '2026-04-01'),
+(4, 10, 20, '2026-04-08', 'Éteint en partant', '2026-04-01'),
+(4, 10, 25, '2026-04-10', 'Checklist remplie', '2026-04-01'),
+(4, 10, 31, '2026-04-09', 'Lumières éteintes chaque soir', '2026-04-01'),
+(4, 10, 36, '2026-04-09', 'Éteint le soir', '2026-04-01'),
+(4, 10, 42, '2026-04-10', 'Checklist soir', '2026-04-01'),
+(4, 10, 47, '2026-04-09', 'Éteint chaque soir cette semaine', '2026-04-01'),
+(4, 10, 54, '2026-04-09', 'Check fait', '2026-04-01'),
+(4, 10, 67, '2026-04-08', 'Éteint chaque soir', '2026-04-01'),
+(4, 10, 73, '2026-04-10', 'Lumières éteintes', '2026-04-01'),
+(4, 10, 80, '2026-04-09', 'Checklist remplie', '2026-04-01'),
+(4, 10, 87, '2026-04-08', 'Check chaque soir', '2026-04-01'),
+(4, 10, 94, '2026-04-10', 'Éteint en partant', '2026-04-01');
 
 -- Défi 5 (Mode Veille Interdit) — nécessite défi 4 validé
-INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve) VALUES
-(5, 13, 6,  '2026-04-15', 'PC éteint chaque soir'),
-(5, 14, 6,  '2026-04-16', 'Chargeurs débranchés'),
-(5, 15, 6,  '2026-04-17', 'Aucun écran allumé la nuit'),
-(5, 13, 7,  '2026-04-15', 'PC complètement éteint'),
-(5, 14, 7,  '2026-04-16', 'Multiprise éteinte'),
-(5, 13, 8,  '2026-04-14', 'PC éteint confirmé'),
-(5, 14, 8,  '2026-04-15', 'Chargeurs débranchés'),
-(5, 15, 8,  '2026-04-16', 'Écrans off'),
-(5, 13, 11, '2026-04-15', 'PC éteint'),
-(5, 14, 11, '2026-04-16', 'Chargeurs retirés'),
-(5, 13, 13, '2026-04-14', 'PC hors tension'),
-(5, 15, 13, '2026-04-15', 'Pas d''écran la nuit'),
-(5, 13, 18, '2026-04-15', 'PC éteint'),
-(5, 14, 18, '2026-04-16', 'Chargeurs débranchés'),
-(5, 13, 31, '2026-04-14', 'PC éteint chaque soir'),
-(5, 14, 31, '2026-04-15', 'Multiprise coupée'),
-(5, 15, 31, '2026-04-16', 'Aucun écran la nuit'),
-(5, 13, 36, '2026-04-15', 'PC complètement éteint'),
-(5, 13, 47, '2026-04-15', 'PC off chaque soir'),
-(5, 14, 47, '2026-04-16', 'Chargeurs retirés'),
-(5, 13, 67, '2026-04-16', 'PC éteint'),
-(5, 13, 87, '2026-04-15', 'PC hors tension chaque soir'),
-(5, 14, 87, '2026-04-16', 'Multiprise éteinte'),
-(5, 15, 87, '2026-04-17', 'Aucun écran allumé');
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve, mois) VALUES
+(5, 13, 6,  '2026-04-15', 'PC éteint chaque soir', '2026-04-01'),
+(5, 13, 7,  '2026-04-15', 'PC complètement éteint', '2026-04-01'),
+(5, 13, 8,  '2026-04-14', 'PC éteint confirmé', '2026-04-01'),
+(5, 13, 11, '2026-04-15', 'PC éteint', '2026-04-01'),
+(5, 13, 13, '2026-04-14', 'PC hors tension', '2026-04-01'),
+(5, 13, 18, '2026-04-15', 'PC éteint', '2026-04-01'),
+(5, 13, 31, '2026-04-14', 'PC éteint chaque soir', '2026-04-01'),
+(5, 13, 36, '2026-04-15', 'PC complètement éteint', '2026-04-01'),
+(5, 13, 47, '2026-04-15', 'PC off chaque soir', '2026-04-01'),
+(5, 13, 67, '2026-04-16', 'PC éteint', '2026-04-01'),
+(5, 13, 87, '2026-04-15', 'PC hors tension chaque soir', '2026-04-01');
 
 -- Défi 6 (Thermostat Éco) — nécessite défi 5 validé
-INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve) VALUES
-(6, 16, 6,  '2026-04-22', 'Thermostat réduit d''un degré'),
-(6, 17, 6,  '2026-04-23', 'Pull porté toute la semaine'),
-(6, 18, 6,  '2026-04-24', 'Fenêtres vérifiées chaque matin'),
-(6, 16, 7,  '2026-04-22', 'Thermostat baissé'),
-(6, 17, 7,  '2026-04-23', 'Pull au bureau'),
-(6, 16, 8,  '2026-04-21', 'Réglage thermostat confirmé'),
-(6, 17, 8,  '2026-04-22', 'Pull et plaid utilisés'),
-(6, 18, 8,  '2026-04-23', 'Fenêtres fermées le soir'),
-(6, 16, 31, '2026-04-22', 'Thermostat réduit'),
-(6, 17, 31, '2026-04-23', 'Pull porté'),
-(6, 18, 31, '2026-04-24', 'Fenêtres fermées'),
-(6, 16, 87, '2026-04-22', 'Réglage thermostat'),
-(6, 17, 87, '2026-04-23', 'Pull au travail'),
-(6, 18, 87, '2026-04-24', 'Fenêtres vérifiées');
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve, mois) VALUES
+(6, 16, 6,  '2026-04-22', 'Thermostat réduit d''un degré', '2026-04-01'),
+(6, 16, 7,  '2026-04-22', 'Thermostat baissé', '2026-04-01'),
+(6, 16, 8,  '2026-04-21', 'Réglage thermostat confirmé', '2026-04-01'),
+(6, 16, 31, '2026-04-22', 'Thermostat réduit', '2026-04-01'),
+(6, 16, 87, '2026-04-22', 'Réglage thermostat', '2026-04-01');
 
 -- --- DÉCHETS ---
 
 -- Défi 7 (Lunch Zéro Déchet)
-INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve) VALUES
-(7, 19, 6,  '2026-04-10', 'Lunch box utilisée chaque jour'),
-(7, 20, 6,  '2026-04-11', 'Couverts bambou apportés'),
-(7, 21, 6,  '2026-04-12', 'Gourde inox utilisée'),
-(7, 19, 9,  '2026-04-10', 'Lunch box photo'),
-(7, 20, 9,  '2026-04-11', 'Couverts personnels'),
-(7, 21, 9,  '2026-04-12', 'Gourde photo'),
-(7, 19, 12, '2026-04-09', 'Boîte repas réutilisable'),
-(7, 20, 12, '2026-04-10', 'Couverts en bois'),
-(7, 19, 17, '2026-04-10', 'Lunch box'),
-(7, 21, 17, '2026-04-11', 'Gourde inox'),
-(7, 19, 21, '2026-04-09', 'Boîte repas photo'),
-(7, 20, 21, '2026-04-10', 'Couverts réutilisables'),
-(7, 21, 21, '2026-04-11', 'Gourde photo'),
-(7, 19, 27, '2026-04-10', 'Lunch box utilisée'),
-(7, 19, 32, '2026-04-09', 'Boîte repas'),
-(7, 20, 32, '2026-04-10', 'Couverts bambou'),
-(7, 19, 39, '2026-04-10', 'Lunch box photo'),
-(7, 21, 39, '2026-04-11', 'Gourde'),
-(7, 19, 48, '2026-04-09', 'Boîte repas réutilisable'),
-(7, 20, 48, '2026-04-10', 'Couverts personnels'),
-(7, 21, 48, '2026-04-11', 'Gourde inox photo'),
-(7, 19, 53, '2026-04-10', 'Lunch box'),
-(7, 19, 59, '2026-04-09', 'Boîte repas'),
-(7, 20, 59, '2026-04-10', 'Couverts réutilisables'),
-(7, 19, 69, '2026-04-10', 'Lunch box photo'),
-(7, 21, 69, '2026-04-11', 'Gourde photo'),
-(7, 19, 76, '2026-04-09', 'Boîte repas'),
-(7, 20, 76, '2026-04-10', 'Couverts bambou'),
-(7, 19, 88, '2026-04-10', 'Lunch box utilisée'),
-(7, 20, 88, '2026-04-11', 'Couverts personnels'),
-(7, 21, 88, '2026-04-12', 'Gourde inox'),
-(7, 19, 95, '2026-04-09', 'Boîte repas photo'),
-(7, 21, 95, '2026-04-11', 'Gourde');
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve, mois) VALUES
+(7, 19, 6,  '2026-04-10', 'Lunch box utilisée chaque jour', '2026-04-01'),
+(7, 19, 9,  '2026-04-10', 'Lunch box photo', '2026-04-01'),
+(7, 19, 12, '2026-04-09', 'Boîte repas réutilisable', '2026-04-01'),
+(7, 19, 17, '2026-04-10', 'Lunch box', '2026-04-01'),
+(7, 19, 21, '2026-04-09', 'Boîte repas photo', '2026-04-01'),
+(7, 19, 27, '2026-04-10', 'Lunch box utilisée', '2026-04-01'),
+(7, 19, 32, '2026-04-09', 'Boîte repas', '2026-04-01'),
+(7, 19, 39, '2026-04-10', 'Lunch box photo', '2026-04-01'),
+(7, 19, 48, '2026-04-09', 'Boîte repas réutilisable', '2026-04-01'),
+(7, 19, 53, '2026-04-10', 'Lunch box', '2026-04-01'),
+(7, 19, 59, '2026-04-09', 'Boîte repas', '2026-04-01'),
+(7, 19, 69, '2026-04-10', 'Lunch box photo', '2026-04-01'),
+(7, 19, 76, '2026-04-09', 'Boîte repas', '2026-04-01'),
+(7, 19, 88, '2026-04-10', 'Lunch box utilisée', '2026-04-01'),
+(7, 19, 95, '2026-04-09', 'Boîte repas photo', '2026-04-01');
 
 -- Défi 8 (Semaine sans Plastique) — nécessite défi 7 validé
-INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve) VALUES
-(8, 22, 6,  '2026-04-17', 'Sac tissu systématique'),
-(8, 23, 6,  '2026-04-18',  'Vrac utilisé cette semaine'),
-(8, 24, 6,  '2026-04-19',  'Plastiques évitables listés'),
-(8, 22, 9,  '2026-04-17', 'Sac réutilisable'),
-(8, 23, 9,  '2026-04-18',  'Pas d''emballage plastique'),
-(8, 22, 12, '2026-04-16', 'Sac tissu'),
-(8, 23, 12, '2026-04-17', 'Produits sans plastique choisis'),
-(8, 24, 12, '2026-04-18',  'Plastiques bureau identifiés'),
-(8, 22, 21, '2026-04-17', 'Sac réutilisable'),
-(8, 23, 21, '2026-04-18',  'Vrac favori'),
-(8, 22, 32, '2026-04-16', 'Sac tissu'),
-(8, 23, 32, '2026-04-17', 'Pas d''emballage'),
-(8, 22, 48, '2026-04-17', 'Sac réutilisable'),
-(8, 23, 48, '2026-04-18',  'Produits vrac'),
-(8, 24, 48, '2026-04-19',  'Plastiques identifiés'),
-(8, 22, 59, '2026-04-16', 'Sac tissu'),
-(8, 22, 69, '2026-04-17', 'Sac réutilisable'),
-(8, 23, 69, '2026-04-18',  'Emballages évités'),
-(8, 22, 88, '2026-04-17', 'Sac tissu'),
-(8, 23, 88, '2026-04-18',  'Vrac utilisé'),
-(8, 24, 88, '2026-04-19',  'Plastiques bureau signalés');
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve, mois) VALUES
+(8, 22, 6,  '2026-04-17', 'Sac tissu systématique', '2026-04-01'),
+(8, 22, 9,  '2026-04-17', 'Sac réutilisable', '2026-04-01'),
+(8, 22, 12, '2026-04-16', 'Sac tissu', '2026-04-01'),
+(8, 22, 21, '2026-04-17', 'Sac réutilisable', '2026-04-01'),
+(8, 22, 32, '2026-04-16', 'Sac tissu', '2026-04-01'),
+(8, 22, 48, '2026-04-17', 'Sac réutilisable', '2026-04-01'),
+(8, 22, 59, '2026-04-16', 'Sac tissu', '2026-04-01'),
+(8, 22, 69, '2026-04-17', 'Sac réutilisable', '2026-04-01'),
+(8, 22, 88, '2026-04-17', 'Sac tissu', '2026-04-01');
 
 -- Défi 9 (Tri Master) — nécessite défi 8 validé
-INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve) VALUES
-(9, 25, 6,  '2026-04-24', 'Tri papier/carton chaque jour'),
-(9, 26, 6,  '2026-04-25', 'Plastiques et métaux triés'),
-(9, 27, 6,  '2026-04-26', 'Compost utilisé'),
-(9, 25, 9,  '2026-04-24', 'Tri papier bon'),
-(9, 26, 9,  '2026-04-25', 'Plastiques triés'),
-(9, 25, 12, '2026-04-23', 'Carton trié'),
-(9, 26, 12, '2026-04-24', 'Plastique métal tri'),
-(9, 27, 12, '2026-04-25', 'Compost'),
-(9, 25, 48, '2026-04-24', 'Papier carton trié'),
-(9, 26, 48, '2026-04-25', 'Plastiques triés'),
-(9, 25, 88, '2026-04-24', 'Tri effectué'),
-(9, 26, 88, '2026-04-25', 'Métal trié'),
-(9, 27, 88, '2026-04-26', 'Compost utilisé');
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve, mois) VALUES
+(9, 25, 6,  '2026-04-24', 'Tri papier/carton chaque jour', '2026-04-01'),
+(9, 25, 9,  '2026-04-24', 'Tri papier bon', '2026-04-01'),
+(9, 25, 12, '2026-04-23', 'Carton trié', '2026-04-01'),
+(9, 25, 48, '2026-04-24', 'Papier carton trié', '2026-04-01'),
+(9, 25, 88, '2026-04-24', 'Tri effectué', '2026-04-01');
 
 -- --- ALIMENTATION ---
 
 -- Défi 10 (Repas Veggie)
-INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve) VALUES
-(10, 28, 6,  '2026-04-11', 'Menu végé cantine photo'),
-(10, 29, 6,  '2026-04-12', 'Recette curry pois chiches testée'),
-(10, 30, 6,  '2026-04-13', 'Plat partagé avec l''équipe'),
-(10, 28, 8,  '2026-04-11', 'Repas végétarien midi'),
-(10, 29, 8,  '2026-04-12', 'Nouvelle recette testée'),
-(10, 28, 10, '2026-04-10', 'Menu cantine végé'),
-(10, 29, 10, '2026-04-11', 'Recette veggie testée'),
-(10, 30, 10, '2026-04-12', 'Plat partagé'),
-(10, 28, 19, '2026-04-11', 'Menu végé photo'),
-(10, 29, 19, '2026-04-12', 'Recette testée'),
-(10, 28, 22, '2026-04-10', 'Repas veggie'),
-(10, 28, 35, '2026-04-11', 'Cantine menu végé'),
-(10, 29, 35, '2026-04-12', 'Recette nouvelle'),
-(10, 28, 38, '2026-04-10', 'Repas végétarien'),
-(10, 29, 38, '2026-04-11', 'Recette testée'),
-(10, 30, 38, '2026-04-12', 'Plat partagé collègues'),
-(10, 28, 49, '2026-04-11', 'Menu végé'),
-(10, 28, 54, '2026-04-10', 'Repas veggie midi'),
-(10, 29, 54, '2026-04-11', 'Recette testée'),
-(10, 28, 63, '2026-04-11', 'Menu cantine photo'),
-(10, 28, 70, '2026-04-10', 'Repas végétarien'),
-(10, 29, 70, '2026-04-11', 'Recette veggie'),
-(10, 30, 70, '2026-04-12', 'Plat partagé'),
-(10, 28, 75, '2026-04-11', 'Menu végé photo'),
-(10, 28, 82, '2026-04-10', 'Repas végétarien midi'),
-(10, 29, 82, '2026-04-11', 'Recette testée'),
-(10, 28, 89, '2026-04-11', 'Menu cantine végé'),
-(10, 29, 89, '2026-04-12', 'Recette testée'),
-(10, 30, 89, '2026-04-13', 'Plat maison partagé'),
-(10, 28, 97, '2026-04-10', 'Repas veggie');
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve, mois) VALUES
+(10, 28, 6,  '2026-04-11', 'Menu végé cantine photo', '2026-04-01'),
+(10, 28, 8,  '2026-04-11', 'Repas végétarien midi', '2026-04-01'),
+(10, 28, 10, '2026-04-10', 'Menu cantine végé', '2026-04-01'),
+(10, 28, 19, '2026-04-11', 'Menu végé photo', '2026-04-01'),
+(10, 28, 22, '2026-04-10', 'Repas veggie', '2026-04-01'),
+(10, 28, 35, '2026-04-11', 'Cantine menu végé', '2026-04-01'),
+(10, 28, 38, '2026-04-10', 'Repas végétarien', '2026-04-01'),
+(10, 28, 49, '2026-04-11', 'Menu végé', '2026-04-01'),
+(10, 28, 54, '2026-04-10', 'Repas veggie midi', '2026-04-01'),
+(10, 28, 63, '2026-04-11', 'Menu cantine photo', '2026-04-01'),
+(10, 28, 70, '2026-04-10', 'Repas végétarien', '2026-04-01'),
+(10, 28, 75, '2026-04-11', 'Menu végé photo', '2026-04-01'),
+(10, 28, 82, '2026-04-10', 'Repas végétarien midi', '2026-04-01'),
+(10, 28, 89, '2026-04-11', 'Menu cantine végé', '2026-04-01'),
+(10, 28, 97, '2026-04-10', 'Repas veggie', '2026-04-01');
 
 -- Défi 11 (Local & Saison) — nécessite défi 10 validé
-INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve) VALUES
-(11, 31, 6,  '2026-04-19', 'Marché local samedi matin'),
-(11, 32, 6,  '2026-04-20', 'Étiquettes vérifiées'),
-(11, 33, 6,  '2026-04-21', 'Fraises espagnoles refusées en janvier'),
-(11, 31, 8,  '2026-04-19', 'Marché du quartier'),
-(11, 32, 8,  '2026-04-20', 'Origine produits vérifiée'),
-(11, 31, 10, '2026-04-18', 'Marché local fréquenté'),
-(11, 32, 10, '2026-04-19', 'Étiquettes lues'),
-(11, 33, 10, '2026-04-20', 'Hors-saison refusé'),
-(11, 31, 35, '2026-04-19', 'Marché Capitole'),
-(11, 32, 35, '2026-04-20', 'Étiquettes contrôlées'),
-(11, 31, 38, '2026-04-18', 'Marché local'),
-(11, 32, 38, '2026-04-19', 'Origine vérifiée'),
-(11, 33, 38, '2026-04-20', 'Produits de saison uniquement'),
-(11, 31, 70, '2026-04-19', 'Marché local fréquenté'),
-(11, 32, 70, '2026-04-20', 'Étiquettes vérifiées'),
-(11, 31, 89, '2026-04-19', 'Marché du quartier'),
-(11, 32, 89, '2026-04-20', 'Étiquettes contrôlées'),
-(11, 33, 89, '2026-04-21', 'Hors-saison refusé');
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve, mois) VALUES
+(11, 31, 6,  '2026-04-19', 'Marché local samedi matin', '2026-04-01'),
+(11, 31, 8,  '2026-04-19', 'Marché du quartier', '2026-04-01'),
+(11, 31, 10, '2026-04-18', 'Marché local fréquenté', '2026-04-01'),
+(11, 31, 35, '2026-04-19', 'Marché Capitole', '2026-04-01'),
+(11, 31, 38, '2026-04-18', 'Marché local', '2026-04-01'),
+(11, 31, 70, '2026-04-19', 'Marché local fréquenté', '2026-04-01'),
+(11, 31, 89, '2026-04-19', 'Marché du quartier', '2026-04-01');
 
 -- Défi 12 (Zéro Gaspi) — nécessite défi 11 validé
-INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve) VALUES
-(12, 34, 6,  '2026-04-25', 'Assiette finie chaque jour'),
-(12, 35, 6,  '2026-04-26', 'Restes conservés au frigo'),
-(12, 36, 6,  '2026-04-27',     'Liste de courses faite le dimanche'),
-(12, 34, 8,  '2026-04-25', 'Rien jeté cette semaine'),
-(12, 35, 8,  '2026-04-26', 'Restes en lunch box'),
-(12, 34, 10, '2026-04-24', 'Assiette terminée'),
-(12, 35, 10, '2026-04-25', 'Restes conservés'),
-(12, 36, 10, '2026-04-26', 'Planning repas semaine fait'),
-(12, 34, 38, '2026-04-25', 'Rien gaspillé'),
-(12, 35, 38, '2026-04-26', 'Restes frigo'),
-(12, 36, 38, '2026-04-27',     'Liste de courses'),
-(12, 34, 89, '2026-04-25', 'Assiette finie'),
-(12, 35, 89, '2026-04-26', 'Restes conservés');
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, preuve, mois) VALUES
+(12, 34, 6,  '2026-04-25', 'Assiette finie chaque jour', '2026-04-01'),
+(12, 34, 8,  '2026-04-25', 'Rien jeté cette semaine', '2026-04-01'),
+(12, 34, 10, '2026-04-24', 'Assiette terminée', '2026-04-01'),
+(12, 34, 38, '2026-04-25', 'Rien gaspillé', '2026-04-01'),
+(12, 34, 89, '2026-04-25', 'Assiette finie', '2026-04-01');
 
 -- ============================================================
 -- 15. RÉPONSES À LA MODÉRATION (Reponse_Defi)
