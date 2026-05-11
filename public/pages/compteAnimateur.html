@@ -103,6 +103,18 @@
                         </div>
                     </div>
                 </div>
+                <div class="two-factor-section" id="twoFactorSection" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--gp-border);">
+                    <h3>Gérer l'authentification 2FA</h3>
+                    <p style="margin-bottom: 16px; font-size: 0.9em; color: var(--gp-text-muted);">Protégez votre compte avec la double authentification par email.</p>
+                    <div id="twoFactorStatus" style="margin-bottom: 16px; font-weight: bold;">Statut : Chargement...</div>
+                    <button id="btnToggle2FA" class="submit-btn" style="width: auto; margin-top: 0;">Activer / Désactiver</button>
+                    <div id="twoFactorOtpForm" style="display: none; margin-top: 16px;">
+                        <input type="text" id="twoFactorOtpInput" placeholder="Code à 6 chiffres" maxlength="6" style="padding: 8px; border-radius: 4px; border: 1px solid var(--gp-border); background: var(--gp-surface); color: var(--gp-text); width: 100%; margin-bottom: 8px;" />
+                        <button id="btnConfirm2FA" class="submit-btn">Confirmer le code</button>
+                        <button id="btnCancel2FA" class="btn-cancel" style="margin-top: 8px; display: block; width: 100%;">Annuler</button>
+                    </div>
+                    <p class="feedback-msg" id="twoFactorFeedback" style="margin-top: 8px;"></p>
+                </div>
                 <div class="sessions-container">
                     <h3><i class="fas fa-history"></i> Sessions actives</h3>
                     <div id="sessions-list" class="sessions-list">
@@ -207,6 +219,7 @@
 
     <script src="../assets/js/app-shell.js" defer></script>
     <script src="../assets/js/compteAnimateur.js" defer></script>
+    <script src="../assets/js/2fa.js" defer></script>
 </body>
 
 </html>

@@ -112,7 +112,12 @@ CREATE TABLE Utilisateur (
     inscriptionUser DATE          DEFAULT CURRENT_DATE
                                   CONSTRAINT nn_inscription_User NOT NULL,
     Id_Entreprise   INT           CONSTRAINT nn_Entreprise_User NOT NULL
-                                  CONSTRAINT fk_User_Entreprise REFERENCES Entreprise(Id_Entreprise)
+                                  CONSTRAINT fk_User_Entreprise REFERENCES Entreprise(Id_Entreprise),
+    dernierChangementMdp DATE     DEFAULT CURRENT_DATE,
+    derniereConnexion TIMESTAMP,
+    two_factor_enabled BOOLEAN DEFAULT FALSE,
+    two_factor_code VARCHAR(255),
+    two_factor_expires_at TIMESTAMP
 );
 
 -- Spécialisation : Employé (hérite de Utilisateur)

@@ -292,11 +292,34 @@
 
     const email = normalizeSpaces(document.getElementById("loginEmail").value);
     const mdp = document.getElementById("loginPassword").value;
+    const otpInput = document.getElementById("loginOtp");
+    const otp = otpInput ? otpInput.value.trim() : "";
 
     if (!validateFields(["loginEmail", "loginPassword"])) return;
+    if (otpInput && otpInput.required && !otp) {
+        setHint("loginOtp", "Le code 2FA est requis");
+        return;
+    }
 
     try {
-      const data = await apiPost("/auth/login.php", { email, mdp });
+      const data = await apiPost("/auth/login.php", { email, mdp, otp });
+
+      if (data && data.requires_2fa) {
+        setAlert(loginAlert, data.message || "Code 2FA envoyé.", "success");
+        const otpField = document.getElementById("loginOtpField");
+        if (otpField) {
+            otpField.style.display = "";
+        }
+        const submitBtn = document.getElementById("loginSubmitBtn");
+        if (submitBtn) {
+            submitBtn.textContent = "Vérifier le code";
+        }
+        if (otpInput) {
+            otpInput.required = true;
+            otpInput.focus();
+        }
+        return;
+      }
       const roleFromResponse = normalizeRole(data?.user?.role);
       const roleFromToken = normalizeRole(decodeJwtPayload(data?.token)?.role);
       const resolvedRole = roleFromResponse || roleFromToken;

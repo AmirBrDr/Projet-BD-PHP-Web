@@ -44,7 +44,16 @@
               <div class="hint" data-hint-for="loginPassword"></div>
             </div>
 
-            <button class="btn" type="submit">Se connecter</button>
+            <div class="field" id="loginOtpField" style="display: none;">
+              <label class="label" for="loginOtp">Code de vérification (2FA)</label>
+              <div class="control">
+                <span class="icon" aria-hidden="true">🔢</span>
+                <input id="loginOtp" name="otp" type="text" placeholder="123456" autocomplete="one-time-code" maxlength="6" />
+              </div>
+              <div class="hint" data-hint-for="loginOtp">Veuillez entrer le code reçu par email.</div>
+            </div>
+
+            <button class="btn" type="submit" id="loginSubmitBtn">Se connecter</button>
 
             <div class="linkrow">
               <a href="#" class="link" id="forgotLink">Mot de passe oublié ?</a>
