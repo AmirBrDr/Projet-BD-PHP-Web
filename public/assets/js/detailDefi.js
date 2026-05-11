@@ -57,6 +57,8 @@
     let isBlocked = false;
     let hasPendingSubmission = false;
     let actionState = new Map();
+    let forumPollTimer = null;
+    let lastForumSignature = '';
 
     function setBlockedState(blocked, reason, date) {
         isBlocked = Boolean(blocked);
@@ -198,6 +200,35 @@
             </li>`).join('');
     }
 
+    function getForumSignature(messages) {
+        return (messages || [])
+            .map((m) => `${m.date || ''}|${m.auteur || ''}|${m.texte || ''}`)
+            .join('||');
+    }
+
+    async function refreshForum() {
+        try {
+            const data = await apiGet('/modules/employee/challenge-detail.php?id=' + defiId);
+            const signature = getForumSignature(data.messages || []);
+            if (signature !== lastForumSignature) {
+                lastForumSignature = signature;
+                renderForum(data.messages || []);
+            }
+        } catch (err) {
+            console.error('Erreur refresh forum:', err);
+        }
+    }
+
+    function startForumPolling() {
+        if (forumPollTimer) {
+            clearInterval(forumPollTimer);
+        }
+        forumPollTimer = setInterval(() => {
+            if (document.hidden) return;
+            refreshForum();
+        }, 1000);
+    }
+
     function renderHistory(reponses, historique = []) {
         const host = document.querySelector('[data-history-list]');
         if (!host) return;
@@ -257,6 +288,7 @@
         renderActions(data.actions || [], data.deja_valide);
         setPendingState(hasPendingSubmission);
         renderForum(data.messages || []);
+        lastForumSignature = getForumSignature(data.messages || []);
         renderHistory(data.reponses || [], data.historique || []);
 
         if (data.deja_valide) {
@@ -269,6 +301,8 @@
     function bindSubmissionForm() {
         const form = document.querySelector('[data-submission-form]');
         const feedback = document.querySelector('[data-form-feedback]');
+        const aiCheck = document.querySelector('[data-ai-check]');
+        const aiCheckText = document.querySelector('[data-ai-check-text]');
         if (!form || !feedback) return;
 
         const fileInput = form.querySelector('#proofPhoto');
@@ -294,6 +328,10 @@
             e.preventDefault();
             feedback.className = 'feedback-msg';
             feedback.textContent = '';
+
+            if (aiCheck) {
+                aiCheck.classList.remove('is-active');
+            }
 
             if (isBlocked) {
                 feedback.className = 'feedback-msg is-warning';
@@ -342,6 +380,13 @@
             const submitBtn = form.querySelector('[type=submit]');
             submitBtn.disabled = true;
             try {
+                if (aiCheck) {
+                    if (aiCheckText) {
+                        aiCheckText.textContent = 'IA en cours de verification...';
+                    }
+                    aiCheck.classList.add('is-active');
+                }
+
                 const res = await fetch(API_BASE + '/modules/employee/submit-action.php', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token() },
@@ -349,8 +394,14 @@
                 });
                 const json = await res.json();
                 if (!res.ok) throw new Error(json.message || 'HTTP ' + res.status);
-                feedback.className = 'feedback-msg is-success';
-                feedback.textContent = 'Soumission envoyee. En attente de validation.';
+
+                const aiStatus = json.ai_status || 'needs_review';
+                if (aiStatus === 'approved') {
+                    feedback.className = 'feedback-msg is-success';
+                } else {
+                    feedback.className = 'feedback-msg is-warning';
+                }
+                feedback.textContent = json.message || 'Soumission envoyee.';
                 form.reset();
                 submitBtn.disabled = false;
                 const data = await apiGet('/modules/employee/challenge-detail.php?id=' + defiId);
@@ -358,6 +409,10 @@
             } catch (err) {
                 feedback.textContent = err.message || 'Erreur lors de la soumission.';
                 submitBtn.disabled = false;
+            } finally {
+                if (aiCheck) {
+                    aiCheck.classList.remove('is-active');
+                }
             }
         });
     }
@@ -388,6 +443,7 @@
                 // Refresh forum
                 const data = await apiGet('/modules/employee/challenge-detail.php?id=' + defiId);
                 renderForum(data.messages);
+                lastForumSignature = getForumSignature(data.messages || []);
             } catch (err) {
                 feedback.textContent = err.message || 'Erreur.';
             }
@@ -410,6 +466,7 @@
         try {
             const data = await apiGet('/modules/employee/challenge-detail.php?id=' + defiId);
             applyChallengeData(data);
+            startForumPolling();
         } catch (err) {
             console.error('Erreur détail défi:', err);
             setText('[data-challenge-title]', 'Erreur de chargement');

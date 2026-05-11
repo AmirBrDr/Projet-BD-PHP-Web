@@ -57,6 +57,10 @@
                     <label class="input-label" for="proofText">Commentaire (optionnel si photo fournie)</label>
                     <textarea id="proofText" name="proofText" rows="3" maxlength="300"
                         placeholder="Decrivez votre action du jour..."></textarea>
+                    <div class="ai-check" data-ai-check aria-live="polite">
+                        <span class="ai-spinner" aria-hidden="true"></span>
+                        <span data-ai-check-text>IA en cours de verification...</span>
+                    </div>
                     <button class="submit-btn" type="submit">Soumettre pour validation</button>
                 </form>
                 <p class="feedback-msg" data-form-feedback></p>

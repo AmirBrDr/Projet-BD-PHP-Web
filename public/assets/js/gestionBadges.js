@@ -1,9 +1,22 @@
 (() => {
     const API_BADGES = "/api/modules/animator/badges.php";
+    const API_THEMES = "/api/modules/animator/?action=themes";
+    const EMOJI_LIST = [
+        "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😤","😠","😡","🤬","😳","🥵","🥶","😱","😨","😰","😥","😓","🤗","🤔","🫡","🤭","🤫","🤥","😶","😶‍🌫️","😐","😑","😬","🙄","😯","😦","😧","😮","😲","😴","🤤","😪","😵","😵‍💫","🤐","🥴","🤢","🤮","🤧","😷","🤒","🤕","🤑","🤠","😈","👿","👹","👺","💀","👻","👽","🤖","💩",
+        "👍","👎","👊","✊","🤛","🤜","👏","🙌","🫶","🤝","🙏","✋","🤚","🖐️","🖖","👌","🤌","🤏","✌️","🤞","🤟","🤘","🤙","🫰","🫵","👈","👉","👆","👇","☝️","✍️","💪","🦾","🦿","🦵","🦶","👂","🦻","👃","🧠","🫀","🫁","🦴","🦷","👀","👁️",
+        "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐻‍❄️","🐨","🐯","🦁","🐮","🐷","🐽","🐸","🐵","🙈","🙉","🙊","🐒","🐔","🐧","🐦","🐤","🐣","🐥","🪿","🦆","🦅","🦉","🦇","🐺","🐗","🐴","🦄","🐝","🪲","🐞","🦋","🐌","🐛","🪱","🦟","🪳","🕷️","🦂","🐢","🐍","🦎","🐙","🦑","🦐","🦞","🦀","🐡","🐠","🐟","🐬","🐳","🐋","🦈","🐊","🦦","🦥","🦨","🦘","🦬","🦣",
+        "🌸","🌼","🌻","🌹","🥀","🌺","🌷","🌱","🌲","🌳","🌴","🌵","🌾","🌿","☘️","🍀","🍁","🍂","🍃","🍄","🌍","🌎","🌏","🌙","⭐","🌟","✨","⚡","🔥","💧","🌈","☀️","🌤️","⛅","🌧️","⛈️","❄️","☃️",
+        "🍎","🍏","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍒","🍑","🥭","🍍","🥥","🥝","🍅","🍆","🥑","🥦","🥬","🥒","🌶️","🌽","🥕","🧄","🧅","🥔","🍠","🫛","🍞","🥖","🥨","🥯","🥞","🧇","🧀","🍗","🍖","🥩","🍔","🍟","🍕","🌭","🥪","🌮","🌯","🥙","🍝","🍜","🍲","🥣","🍣","🍱","🍤","🍙","🍚","🍛","🍪","🎂","🍰","🧁","🍩","🍫","🍬","🍭","☕","🫖","🍵","🥤","🧃","🧉","🍺","🍷","🍸","🍹","🍾",
+        "⚽","🏀","🏈","⚾","🥎","🎾","🏐","🏉","🥏","🎱","🏓","🏸","🥅","🏒","🏑","🥍","🏏","⛳","🎯","🪀","🪁","🎣","🤿","🎽","🛹","🛼","🛷","⛷️","🏂","🏋️","🤼","🤸","⛹️","🤺","🤾","🚴","🚵","🏊","🤽","🏆","🥇","🥈","🥉","🏅","🎖️","🎗️","🎟️","🎫","🎪","🎨","🎬","🎤","🎧","🎼","🎹","🥁","🎷","🎺","🎸","🎻",
+        "🚗","🚕","🚙","🚌","🚎","🏎️","🚓","🚑","🚒","🚐","🛻","🚚","🚛","🚜","🛵","🏍️","🚲","🛴","🚨","✈️","🛫","🛬","🛩️","🚀","🛰️","🚁","🚤","⛵","🛶","🛳️","🚢","🚉","🚆","🚄","🚅","🚇","🚊","🚝","🚡","🚠","🚏","🗺️","🗿","🗽","🗼","🏰","🏯","🏟️","🏠","🏡","🏢","🏣","🏥","🏦","🏨","🏫","🏬","🏭","🏙️","🌆","🌇","🌉","🗾",
+        "⌚","📱","💻","🖥️","🖨️","🧮","🎥","📷","📸","📹","📺","📻","🎙️","💡","🔦","🕯️","🪔","🔋","🔌","💾","💿","📀","🧭","⏰","⏳","📡","🔭","🔬","🧪","🧫","🧬","🔑","🔒","🔓","🔨","🪓","⛏️","🛠️","⚙️","🧰","🧲","🧯","📌","📍","✂️","📝","✏️","📚","📖","📎","🔖","📅","📊","📈","📉","💰","💳","🧾","🔔","📣","📯","🎁",
+        "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","💖","💗","💓","💞","💕","💘","💝","✅","☑️","✔️","✖️","❌","⚠️","🚫","❗","❓","💯","🏳️","🏁","🏴","🏳️‍🌈"
+    ];
 
     const state = {
         badges: [],
         editingBadgeId: null,
+        themes: [],
     };
 
     const els = {
@@ -15,6 +28,11 @@
         badgeIcon: document.getElementById("badgeIcon"),
         badgeConditionType: document.getElementById("badgeConditionType"),
         badgeConditionValue: document.getElementById("badgeConditionValue"),
+        emojiPanel: document.querySelector("[data-emoji-panel]"),
+        emojiGrid: document.querySelector("[data-emoji-grid]"),
+        emojiToggle: document.querySelector("[data-emoji-toggle]"),
+        emojiClose: document.querySelector("[data-emoji-close]"),
+        emojiPreview: document.querySelector("[data-emoji-preview]"),
     };
 
     function getToken() {
@@ -82,12 +100,56 @@
         els.feedback.className = "feedback";
     }
 
+    function formatThemeLabel(name) {
+        return `Défis "${name}"`;
+    }
+
+    function getDefaultConditionType() {
+        if (state.themes.length > 0) {
+            return formatThemeLabel(state.themes[0].nom);
+        }
+        return "Points Totaux (Global)";
+    }
+
+    function buildConditionOptions(selectedValue = "") {
+        if (!els.badgeConditionType) return;
+
+        const existingValues = new Set();
+        els.badgeConditionType.innerHTML = "";
+
+        state.themes.forEach((theme) => {
+            const value = formatThemeLabel(theme.nom);
+            existingValues.add(value);
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            if (value === selectedValue) option.selected = true;
+            els.badgeConditionType.appendChild(option);
+        });
+
+        const pointsValue = "Points Totaux (Global)";
+        existingValues.add(pointsValue);
+        const pointsOption = document.createElement("option");
+        pointsOption.value = pointsValue;
+        pointsOption.textContent = pointsValue;
+        if (pointsValue === selectedValue) pointsOption.selected = true;
+        els.badgeConditionType.appendChild(pointsOption);
+
+        if (selectedValue && !existingValues.has(selectedValue)) {
+            const customOption = document.createElement("option");
+            customOption.value = selectedValue;
+            customOption.textContent = selectedValue;
+            customOption.selected = true;
+            els.badgeConditionType.appendChild(customOption);
+        }
+    }
+
     function parseConditionText(text) {
         const match = String(text || "").match(/^(.*)\s*>=\s*(\d+)$/);
         if (match) {
             return { conditionType: match[1].trim(), conditionValue: Number(match[2]) };
         }
-        return { conditionType: 'Défis "Mobilité"', conditionValue: 1 };
+        return { conditionType: getDefaultConditionType(), conditionValue: 1 };
     }
 
     function renderBadges() {
@@ -103,15 +165,7 @@
             const icon = document.createElement("div");
             icon.className = "badge-icon preview-green";
 
-            if (badge.icone && badge.icone.startsWith("data:")) {
-                const img = document.createElement("img");
-                img.src = badge.icone;
-                img.alt = badge.nom || "Badge";
-                img.style.cssText = "width:40px;height:40px;object-fit:contain;";
-                icon.appendChild(img);
-            } else {
-                icon.textContent = badge.icone || "🏅";
-            }
+            icon.textContent = badge.icone || "🏅";
 
             const details = document.createElement("div");
             details.className = "badge-details";
@@ -176,22 +230,27 @@
         if (badge) {
             els.badgeName.value = badge.nom || "";
             els.badgeIcon.value = badge.icone || "";
+            if (els.emojiPreview) {
+                els.emojiPreview.textContent = badge.icone || "🏅";
+            }
             const condition = parseConditionText(badge.description || "");
+            buildConditionOptions(condition.conditionType);
             els.badgeConditionType.value = condition.conditionType;
             els.badgeConditionValue.value = condition.conditionValue;
         } else {
             els.badgeName.value = "";
             els.badgeIcon.value = "";
-            els.badgeConditionType.value = 'Défis "Mobilité"';
+            if (els.emojiPreview) {
+                els.emojiPreview.textContent = "🏅";
+            }
+            buildConditionOptions(getDefaultConditionType());
+            els.badgeConditionType.value = getDefaultConditionType();
             els.badgeConditionValue.value = 1;
         }
 
-        const fileInput = document.querySelector('#modalBadge input[type=file]');
-        const previewContainer = document.querySelector('#modalBadge .icon-preview-container');
-        const previewImg = document.getElementById('previewIcon');
-        if (fileInput) fileInput.value = '';
-        if (previewContainer) previewContainer.style.display = 'none';
-        if (previewImg) previewImg.src = '';
+        if (els.emojiPanel) {
+            els.emojiPanel.hidden = true;
+        }
 
         if (els.modalBadge) els.modalBadge.style.display = "flex";
     }
@@ -228,6 +287,28 @@
         saveBadges();
     }
 
+    function buildEmojiGrid() {
+        if (!els.emojiGrid) return;
+        els.emojiGrid.innerHTML = "";
+
+        EMOJI_LIST.forEach((emoji) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "emoji-btn";
+            btn.textContent = emoji;
+            btn.addEventListener("click", () => {
+                els.badgeIcon.value = emoji;
+                if (els.emojiPreview) {
+                    els.emojiPreview.textContent = emoji;
+                }
+                if (els.emojiPanel) {
+                    els.emojiPanel.hidden = true;
+                }
+            });
+            els.emojiGrid.appendChild(btn);
+        });
+    }
+
     async function loadBadges() {
         try {
             clearFeedback();
@@ -242,6 +323,21 @@
         } catch (error) {
             showFeedback(error.message || "Impossible de charger les badges.", "error");
         }
+    }
+
+    async function loadThemes() {
+        try {
+            const response = await apiRequest(API_THEMES, { method: "GET" });
+            state.themes = (response.data || []).map((t) => ({
+                id: t.id_thematique,
+                nom: t.nomtheme,
+            }));
+        } catch (error) {
+            state.themes = [];
+            showFeedback(error.message || "Impossible de charger les thematiques.", "error");
+        }
+
+        buildConditionOptions(getDefaultConditionType());
     }
 
     async function saveBadges() {
@@ -269,6 +365,24 @@
     }
 
     function attachEvents() {
+                if (els.emojiToggle) {
+                    els.emojiToggle.addEventListener("click", () => {
+                        if (!els.emojiPanel) return;
+                        const willShow = els.emojiPanel.hidden;
+                        els.emojiPanel.hidden = !willShow;
+                        if (willShow) {
+                            buildEmojiGrid();
+                        }
+                    });
+                }
+
+                if (els.emojiClose) {
+                    els.emojiClose.addEventListener("click", () => {
+                        if (els.emojiPanel) {
+                            els.emojiPanel.hidden = true;
+                        }
+                    });
+                }
         if (els.addBadgeBtn) {
             els.addBadgeBtn.addEventListener("click", (e) => {
                 e.preventDefault();
@@ -287,47 +401,12 @@
             if (confirmBtn) confirmBtn.addEventListener("click", (e) => { e.preventDefault(); saveBadgeFromModal(); });
         }
 
-        const fileInput = document.querySelector('#modalBadge input[type=file]');
-        const uploadZone = document.querySelector('#modalBadge .icon-upload-zone');
-        const previewContainer = document.querySelector('#modalBadge .icon-preview-container');
-        const previewImg = document.getElementById('previewIcon');
-
-        if (fileInput && uploadZone) {
-            fileInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
-
-            uploadZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadZone.style.background = 'rgba(148, 187, 57, 0.1)';
-            });
-            uploadZone.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                uploadZone.style.background = '';
-            });
-            uploadZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadZone.style.background = '';
-                if (e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files[0]);
-            });
-
-            function handleFileSelect(file) {
-                if (file && (file.type === 'image/png' || file.type === 'image/svg+xml')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        previewImg.src = e.target.result;
-                        if (previewContainer) previewContainer.style.display = 'flex';
-                        els.badgeIcon.value = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    showFeedback('Veuillez sélectionner une image PNG ou SVG', 'error');
-                }
-            }
-        }
     }
 
-    function initialize() {
+    async function initialize() {
         attachEvents();
-        loadBadges();
+        await loadThemes();
+        await loadBadges();
     }
 
     initialize();

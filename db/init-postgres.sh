@@ -30,9 +30,9 @@ for migration in db/migrations/*.sql; do
 done
 
 # Apply seed data if present
-if [ -f db/seed.sql ]; then
-    echo "Application du seed (db/seed.sql)..."
-	PGPASSWORD="$DB_PASS" psql -v ON_ERROR_STOP=1 -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f db/seed.sql
+if [ -f db/seed_new.sql ]; then
+    echo "Application du seed (db/seed_new.sql)..."
+	PGPASSWORD="$DB_PASS" psql -v ON_ERROR_STOP=1 -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f db/seed_new.sql
 
 	echo "Vérification post-seed..."
 	PGPASSWORD="$DB_PASS" psql -v ON_ERROR_STOP=1 -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" <<'SQL'
@@ -68,7 +68,7 @@ END
 $$;
 SQL
 else
-    echo "Aucun fichier de seed (db/seed.sql) trouve."
+	echo "Aucun fichier de seed (db/seed_new.sql) trouve."
 fi
 
 echo "✓ Base de données initialisée avec succès!"

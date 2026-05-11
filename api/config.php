@@ -55,6 +55,10 @@ $config = [
         'audience' => getenv('GP_JWT_AUDIENCE') ?: 'greenpulse',
         'ttl_seconds' => (int)(getenv('GP_JWT_TTL') ?: 60 * 60 * 24),
     ],
+    'ai' => [
+        'endpoint' => getenv('GP_AI_ENDPOINT') ?: '',
+        'key' => getenv('GP_AI_KEY') ?: '',
+    ],
     'mail' => [
         'from_email' => getenv('GP_MAIL_FROM_EMAIL') ?: 'no-reply@greenpulse.local',
         'from_name' => getenv('GP_MAIL_FROM_NAME') ?: 'GreenPulse',

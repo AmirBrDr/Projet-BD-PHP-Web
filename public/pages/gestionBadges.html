@@ -65,28 +65,27 @@
             </div>
 
             <div class="form-group">
-                <label>Icône du badge (PNG/SVG)</label>
-                <div class="icon-upload-zone" onclick="document.querySelector('#modalBadge input[type=file]').click()">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Cliquez ou glissez une image ici</p>
+                <label>Emoji du badge</label>
+                <div class="emoji-field">
+                    <div class="emoji-preview" data-emoji-preview>🏅</div>
+                    <input id="badgeIcon" type="text" placeholder="Choisir un emoji" readonly>
+                    <button type="button" class="btn-small" data-emoji-toggle>Choisir</button>
                 </div>
-                <input type="file" accept="image/png, image/svg+xml" class="file-hidden" style="display: none;">
-                <input id="badgeIcon" type="hidden" value="">
-                <div class="icon-preview-container" style="display:none;">
-                    <img id="previewIcon" src="" alt="Aperçu" style="width: 60px; height: 60px; margin-top: 15px;">
-                    <button type="button" class="btn-icon delete" onclick="document.getElementById('previewIcon').parentElement.style.display='none'; document.querySelector('#modalBadge input[type=file]').value=''; document.getElementById('badgeIcon').value='';"><i class="fas fa-trash"></i></button>
+                <div class="emoji-panel" data-emoji-panel hidden>
+                    <div class="emoji-panel-head">
+                        <strong>Galerie d'emojis</strong>
+                        <button type="button" class="btn-icon" data-emoji-close aria-label="Fermer">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="emoji-grid" data-emoji-grid></div>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Conditions d'obtention</label>
                 <div class="condition-row-modal">
-                    <select id="badgeConditionType">
-                        <option>Défis "Mobilité"</option>
-                        <option>Défis "Énergie"</option>
-                        <option>Défis "Déchets"</option>
-                        <option>Points Totaux (Global)</option>
-                    </select>
+                    <select id="badgeConditionType"></select>
                     <span>A partir de : </span>
                     <input id="badgeConditionValue" type="number" value="5" placeholder="Qté">
                 </div>

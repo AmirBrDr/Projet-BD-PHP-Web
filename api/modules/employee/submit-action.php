@@ -23,6 +23,110 @@ if (gp_normalize_role($claims['role'] ?? '') !== 'employe') {
     gp_send_json(403, ['message' => 'Accès refusé']);
 }
 
+function gp_ai_parse_decision(string $text): array
+{
+    $clean = trim($text);
+    if ($clean === '') {
+        return ['decision' => 'needs_review', 'reason' => 'Reponse vide'];
+    }
+
+    $clean = preg_replace('/^```[a-z]*\n?/i', '', $clean);
+    $clean = preg_replace('/```$/', '', $clean);
+
+    $decoded = json_decode($clean, true);
+    if (is_array($decoded)) {
+        $decision = strtolower(trim((string)($decoded['decision'] ?? '')));
+        $reason = trim((string)($decoded['reason'] ?? ''));
+        if (in_array($decision, ['approved', 'needs_review'], true)) {
+            return ['decision' => $decision, 'reason' => $reason];
+        }
+    }
+
+    $lower = strtolower($clean);
+    if (str_contains($lower, 'approved') || str_contains($lower, 'valide')) {
+        return ['decision' => 'approved', 'reason' => ''];
+    }
+
+    return ['decision' => 'needs_review', 'reason' => ''];
+}
+
+function gp_ai_verify_submission(array $config, string $comment, ?string $imagePath, ?string $imageMime): array
+{
+    $endpoint = (string)($config['ai']['endpoint'] ?? '');
+    $apiKey = (string)($config['ai']['key'] ?? '');
+    $model = (string)($config['ai']['model'] ?? '');
+
+    if ($endpoint === '' || $apiKey === '' || $model === '') {
+        return ['decision' => 'needs_review', 'reason' => "IA non configuree"]; 
+    }
+
+    $instruction = "Tu es un verificateur de preuves d'actions. Reponds uniquement en JSON valide au format: {\"decision\":\"approved\"|\"needs_review\",\"reason\":\"...\"}. Sois permissif: approuve si une photo est fournie meme avec un commentaire court, ou si le commentaire contient un detail concret (lieu, duree, quantite, action precise). Utilise needs_review seulement si la preuve est clairement insuffisante ou incoherente. Ne retourne rien d'autre.";
+    $commentText = trim($comment) !== '' ? "Commentaire employe: " . trim($comment) : "Commentaire employe: (aucun)";
+
+    $userContent = [
+        ['type' => 'text', 'text' => $commentText],
+    ];
+
+    if ($imagePath && is_file($imagePath)) {
+        $binary = file_get_contents($imagePath);
+        if ($binary !== false) {
+            $mime = $imageMime ?: 'image/jpeg';
+            $userContent[] = [
+                'type' => 'image_url',
+                'image_url' => [
+                    'url' => 'data:' . $mime . ';base64,' . base64_encode($binary),
+                ],
+            ];
+        }
+    }
+
+    $payload = json_encode([
+        'model' => $model,
+        'temperature' => 0.2,
+        'max_tokens' => 200,
+        'messages' => [
+            ['role' => 'system', 'content' => $instruction],
+            ['role' => 'user', 'content' => $userContent],
+        ],
+    ]);
+
+    $ch = curl_init($endpoint);
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $apiKey,
+        ],
+        CURLOPT_POSTFIELDS => $payload,
+        CURLOPT_TIMEOUT => 20,
+    ]);
+
+    $raw = curl_exec($ch);
+    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    if ($raw === false || $httpCode < 200 || $httpCode >= 300) {
+        return ['decision' => 'needs_review', 'reason' => 'Erreur IA'];
+    }
+
+    $decoded = json_decode($raw, true);
+    $text = '';
+    if (is_array($decoded)) {
+        $text = (string)($decoded['choices'][0]['message']['content'] ?? '');
+    }
+
+    $parsed = gp_ai_parse_decision($text);
+    if ($parsed['decision'] !== 'approved' && $parsed['decision'] !== 'needs_review') {
+        if (preg_match('/\{.*\}/s', $text, $match)) {
+            $parsed = gp_ai_parse_decision($match[0]);
+        }
+    }
+    if ($parsed['decision'] !== 'approved' && $parsed['decision'] !== 'needs_review') {
+        return ['decision' => 'needs_review', 'reason' => ''];
+    }
+
+    return $parsed;
+}
+
 $defiId   = (int) ($_POST['defi_id']   ?? 0);
 $actionId = (int) ($_POST['action_id'] ?? 0);
 $proofText = trim((string) ($_POST['proofText'] ?? ''));
@@ -35,6 +139,8 @@ if ($defiId <= 0 || $actionId <= 0) {
 $preuve = '';
 $file   = $_FILES['preuvePhoto'] ?? null;
 $hasPhoto = $file && isset($file['tmp_name']) && $file['error'] === UPLOAD_ERR_OK && $file['size'] > 0;
+$detectedMime = '';
+$photoPathForAi = null;
 
 if ($hasPhoto) {
     $allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
@@ -52,10 +158,12 @@ if ($hasPhoto) {
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0755, true);
     }
-    if (!move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
+    $targetPath = $uploadDir . $filename;
+    if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
         gp_send_json(500, ['message' => "Impossible d'enregistrer la photo"]);
     }
     $preuve = '/image/preuves/' . $filename;
+    $photoPathForAi = $targetPath;
 } elseif ($proofText !== '') {
     $preuve = $proofText;
 } else {
@@ -197,6 +305,51 @@ if ($stmt->fetch()) {
     gp_send_json(409, ['message' => 'Une soumission est déjà en attente pour ce défi']);
 }
 
+$aiResult = gp_ai_verify_submission($config, $proofText, $photoPathForAi, $detectedMime);
+$aiDecision = $aiResult['decision'] ?? 'needs_review';
+$aiReason = trim((string)($aiResult['reason'] ?? ''));
+
+if ($aiDecision === 'approved') {
+    $commentaireAi = $aiReason !== '' ? ('IA: ' . $aiReason) : 'Approuve par IA';
+
+    $stmt = $pdo->prepare("
+        INSERT INTO Reponse_Defi (Id_defi, Id_actions, Id_Employe, reponse_text, statut_reponse, commentaire_animateur, date_traitement)
+        VALUES (:defi, :action, :emp, :reponse, 'approved', :commentaire, CURRENT_TIMESTAMP)
+        RETURNING date_reponse
+    ");
+    $stmt->execute([
+        ':defi' => $defiId,
+        ':action' => $actionId,
+        ':emp' => $userId,
+        ':reponse' => $preuve,
+        ':commentaire' => $commentaireAi,
+    ]);
+
+    $dateReponse = $stmt->fetchColumn();
+    $mois = $challengeRow['mois'] ?? date('Y-m-01');
+    if ($dateReponse) {
+        $mois = $challengeRow['mois'] ?? date('Y-m-01');
+    }
+
+    $stmtInsert = $pdo->prepare(
+        'INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, mois, preuve)
+         VALUES (:defi, :action, :employe, :mois, :preuve)
+         ON CONFLICT DO NOTHING'
+    );
+    $stmtInsert->execute([
+        ':defi'    => $defiId,
+        ':action'  => $actionId,
+        ':employe' => $userId,
+        ':mois'    => $mois,
+        ':preuve'  => $preuve,
+    ]);
+
+    gp_send_json(201, [
+        'ai_status' => 'approved',
+        'message' => 'Votre validation est verifiee par l\'IA.',
+    ]);
+}
+
 $stmt = $pdo->prepare("
     INSERT INTO Reponse_Defi (Id_defi, Id_actions, Id_Employe, reponse_text)
     VALUES (:defi, :action, :emp, :reponse)
@@ -208,4 +361,7 @@ $stmt->execute([
     ':reponse' => $preuve,
 ]);
 
-gp_send_json(201, ['message' => 'Soumission envoyée pour validation']);
+gp_send_json(201, [
+    'ai_status' => 'needs_review',
+    'message' => "L'IA n'a pas pu verifier votre validation. En attente d'un animateur.",
+]);

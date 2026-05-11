@@ -249,6 +249,74 @@ input:checked + .slider:before {
     outline: none;
 }
 
+.emoji-field {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.emoji-preview {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+.emoji-panel {
+    margin-top: 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(13, 28, 33, 0.8);
+    padding: 12px;
+}
+
+.emoji-panel[hidden] {
+    display: none;
+}
+
+.emoji-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.emoji-btn {
+    border: 1px solid transparent;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    height: 34px;
+    width: 34px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.emoji-btn:hover {
+    border-color: rgba(148, 187, 57, 0.35);
+    background: rgba(148, 187, 57, 0.12);
+}
+
 .form-group select {
     appearance: none;
 }
