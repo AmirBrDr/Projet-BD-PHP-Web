@@ -529,11 +529,6 @@ INSERT INTO Message (contenuMessage, dateMessage, Id_Employe, Id_forum) VALUES
 ('Guide de tri actualisé 2024 posté sur lintranet.',                              '2026-04-13', 66, 9),
 ('Les bouteilles en verre vont dans le conteneur jaune ou vert ?',               '2026-04-15', 67, 9),
 ('Réponse : conteneur vert uniquement pour le verre.',                            '2026-04-16', 68, 9),
--- Forum Veggie (forum 10)
-('Recette partagée : curry de pois chiches, 20 minutes et bluffant.',            '2026-04-17', 72, 10),
-('Challenge : manger veggie toute la semaine. Qui est partant ?',                '2026-04-19',  73, 10),
-('Je suis partant ! On se retrouve à la cantine lundi.',                         '2026-04-20',  74, 10),
-('La cantine propose désormais une option végé quotidienne.',                     '2026-04-22',  75, 10),
 -- Forum Local (forum 11)
 ('Marché fermier place du Capitole, mercredi et samedi matin.',                  '2026-04-18',  80, 11),
 ('AMAP disponible : panier de légumes locaux toutes les semaines.',              '2026-04-21',  81, 11),
@@ -1098,7 +1093,6 @@ INSERT INTO Message (contenuMessage, dateMessage, Id_Employe, Id_forum) VALUES
 ('Je viens à vélo depuis Toulouse centre, 7 km, c est vraiment agréable le matin !',  '2026-04-09', 106, 1),
 ('Mon vélo est prêt : freins, pneus et chaîne vérifiés. C est parti pour 3 jours !',  '2026-04-21', 106, 3),
 ('Astuce : éteignez votre multiprise en partant, ça supprime les veilles fantômes.',   '2026-04-17', 106, 5),
-('Je partage ma recette dahl de lentilles : 20 min, économique et délicieux !',        '2026-04-13', 106, 10),
 ('Planning repas de la semaine affiché en cuisine : divise le gaspillage par 2.',      '2026-04-26', 106, 12);
 
 -- ============================================================
