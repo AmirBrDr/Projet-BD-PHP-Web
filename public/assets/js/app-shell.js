@@ -355,4 +355,26 @@
       year: "numeric",
     }).format(new Date());
   }
+
+  function ensureClickSpark() {
+    if (window.GPClickSpark?.init) {
+      window.GPClickSpark.init();
+      return;
+    }
+
+    if (document.getElementById("gp-click-spark-script")) {
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = "gp-click-spark-script";
+    script.src = "/assets/js/click-spark.js";
+    script.defer = true;
+    script.onload = () => {
+      window.GPClickSpark?.init?.();
+    };
+    document.body.appendChild(script);
+  }
+
+  ensureClickSpark();
 })();
