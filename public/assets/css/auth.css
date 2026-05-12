@@ -33,6 +33,19 @@ body {
     linear-gradient(180deg, var(--bg0), var(--bg1));
 }
 
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.aurora-bg canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .page {
   min-height: 100%;
   display: grid;
@@ -40,6 +53,8 @@ body {
   align-items: start;
   justify-items: center;
   padding: 14px 16px 18px;
+  position: relative;
+  z-index: 1;
 }
 
 .brand {
