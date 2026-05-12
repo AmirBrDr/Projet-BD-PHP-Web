@@ -998,7 +998,7 @@ INSERT INTO Equipe (nomEquipe, nbPointsEquipe, nbCO2Equipe) VALUES
 
 -- Utilisateur Romeo (Id_User = 106)
 INSERT INTO Utilisateur (nomUser, prenomUser, email, statutUser, mdp, inscriptionUser, Id_Entreprise) VALUES
-('Andriantsiferana', 'Romeo', 'romeo.andriantsiferana@greenpulse.fr', 'actif',
+('Andriantsiferana', 'Romeo', 'romeo.a@greenpulse.fr', 'actif',
  '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2025-09-01', 1);
 
 -- Employe Romeo dans équipe STRI1A (Id_Employe = 106)
@@ -1128,3 +1128,17 @@ SELECT 106, n.id_notif
 FROM Notification n
 WHERE n.id_notif IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
 ON CONFLICT (Id_User, id_notif) DO NOTHING;
+
+
+insert into appartenir (id_defi, id_thematique) values (1, 1);
+insert into appartenir (id_defi, id_thematique) values (2, 1);
+insert into appartenir (id_defi, id_thematique) values (3, 1);
+insert into appartenir (id_defi, id_thematique) values (4, 2);
+insert into appartenir (id_defi, id_thematique) values (5, 2);
+insert into appartenir (id_defi, id_thematique) values (6, 2);
+insert into appartenir (id_defi, id_thematique) values (7, 3);
+insert into appartenir (id_defi, id_thematique) values (8, 3);
+insert into appartenir (id_defi, id_thematique) values (9, 3);
+insert into appartenir (id_defi, id_thematique) values (10, 4);
+insert into appartenir (id_defi, id_thematique) values (11, 4);
+insert into appartenir (id_defi, id_thematique) values (12, 4);
