@@ -880,9 +880,6 @@ try {
             $defiId = (int)$stmt->fetchColumn();
             if ($defiId <= 0) throw new RuntimeException('Creation impossible');
 
-            $pdo->prepare('INSERT INTO Forum (nomForum, descriptionForum, Id_defi) VALUES (:nom, :desc, :id)')
-                ->execute([':nom' => 'Forum - ' . substr($nomDefi, 0, 140), ':desc' => null, ':id' => $defiId]);
-
             $stmtApp = $pdo->prepare('INSERT INTO Appartenir (Id_defi, Id_thematique) VALUES (:defi, :theme)');
             foreach ($themeIds as $tid) {
                 $stmtApp->execute([':defi' => $defiId, ':theme' => $tid]);

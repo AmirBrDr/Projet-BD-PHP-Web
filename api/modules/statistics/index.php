@@ -62,14 +62,13 @@ $parTheme = $stmt3->fetchAll(PDO::FETCH_ASSOC);
 $stmt4 = $pdo->query("
     SELECT
         d.nomDefi,
-        COUNT(DISTINCT rd.Id_Employe)                                   AS nb_employes_valides,
+        COUNT(DISTINCT v.Id_Employe)                                    AS nb_employes_valides,
         (SELECT COUNT(*) FROM Employe WHERE Id_equipe IS NOT NULL)      AS total_employes_equipes
     FROM Defi d
     JOIN Regroupe r ON r.Id_defi = d.Id_defi
-    LEFT JOIN Reponse_Defi rd
-        ON rd.Id_defi = d.Id_defi
-        AND rd.statut_reponse = 'approved'
-        AND DATE_TRUNC('month', rd.date_reponse) = DATE_TRUNC('month', CURRENT_DATE)
+    LEFT JOIN Valider v
+        ON v.Id_defi = d.Id_defi
+        AND DATE_TRUNC('month', v.mois) = DATE_TRUNC('month', CURRENT_DATE)
     WHERE DATE_TRUNC('month', r.mois) = DATE_TRUNC('month', CURRENT_DATE)
     GROUP BY d.Id_defi, d.nomDefi
     ORDER BY nb_employes_valides DESC

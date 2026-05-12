@@ -51,12 +51,12 @@ BEGIN
  LEFT JOIN Utilisateur u ON u.id_user = e.id_employe
 	 WHERE u.id_user IS NULL;
 
-	IF v_users <> 105 THEN
-		RAISE EXCEPTION 'Vérification seed échouée: Utilisateur attendu=105, obtenu=%', v_users;
+	IF v_users <> 106 THEN
+		RAISE EXCEPTION 'Vérification seed échouée: Utilisateur attendu=106, obtenu=%', v_users;
 	END IF;
 
-	IF v_employes <> 100 THEN
-		RAISE EXCEPTION 'Vérification seed échouée: Employe attendu=100, obtenu=%', v_employes;
+	IF v_employes <> 101 THEN
+		RAISE EXCEPTION 'Vérification seed échouée: Employe attendu=101, obtenu=%', v_employes;
 	END IF;
 
 	IF v_orphan_employes <> 0 THEN
