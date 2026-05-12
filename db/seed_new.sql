@@ -984,3 +984,147 @@ INSERT INTO Recevoir (Id_User, id_notif)
 SELECT e.Id_Employe, 15
 FROM Employe e
 ON CONFLICT (Id_User, id_notif) DO NOTHING;
+
+-- ============================================================
+-- STRI1A — Romeo Andriantsiferana
+-- Équipe mono-membre avec historique riche (Jan → Avr 2026)
+-- 41 défis validés, 3695 pts, 446 kgCO2
+-- Aucune validation en mai 2026 (mois courant)
+-- ============================================================
+
+-- Équipe STRI1A (Id_equipe = 6)
+INSERT INTO Equipe (nomEquipe, nbPointsEquipe, nbCO2Equipe) VALUES
+('STRI1A', 0, 0);
+
+-- Utilisateur Romeo (Id_User = 106)
+INSERT INTO Utilisateur (nomUser, prenomUser, email, statutUser, mdp, inscriptionUser, Id_Entreprise) VALUES
+('Andriantsiferana', 'Romeo', 'romeo.andriantsiferana@greenpulse.fr', 'actif',
+ '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2025-09-01', 1);
+
+-- Employe Romeo dans équipe STRI1A (Id_Employe = 106)
+INSERT INTO Employe (Id_Employe, nbPointsEmploye, nbCO2, departementEmploye, Id_equipe) VALUES
+(106, 0, 0, 'Développement', 6);
+
+-- ============================================================
+-- VALIDATIONS — Janvier 2026 (11 / 12 défis)
+-- Points : 980 | CO2 : 121 kg
+-- ============================================================
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, mois, preuve) VALUES
+(1,  1,  106, '2026-01-12', '2026-01-01', 'Photo vélo, trajet maison-bureau 7 km'),
+(2,  6,  106, '2026-01-15', '2026-01-01', 'Groupe WhatsApp covoiturage STRI1A créé'),
+(3,  7,  106, '2026-01-22', '2026-01-01', 'App vélo : 3 jours consécutifs validés'),
+(4,  10, 106, '2026-01-10', '2026-01-01', 'Check soir lumières, selfie bureau éteint'),
+(5,  13, 106, '2026-01-17', '2026-01-01', 'PC complètement éteint chaque soir'),
+(6,  16, 106, '2026-01-24', '2026-01-01', 'Thermostat baissé à 19°, photo affichage'),
+(7,  19, 106, '2026-01-11', '2026-01-01', 'Lunch box inox + couverts bambou'),
+(8,  22, 106, '2026-01-18', '2026-01-01', 'Zéro sac plastique en courses cette semaine'),
+(9,  25, 106, '2026-01-25', '2026-01-01', 'Tri papier/carton rigoureux toute la semaine'),
+(10, 28, 106, '2026-01-13', '2026-01-01', 'Menu végétarien midi toute la semaine'),
+(11, 31, 106, '2026-01-20', '2026-01-01', 'Marché local samedi, photo des achats locaux');
+
+-- ============================================================
+-- VALIDATIONS — Février 2026 (10 / 12 défis)
+-- Points : 910 | CO2 : 104 kg
+-- ============================================================
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, mois, preuve) VALUES
+(1,  3,  106, '2026-02-10', '2026-02-01', 'Ticket bus TC semaine complète'),
+(2,  5,  106, '2026-02-14', '2026-02-01', 'Collègue embarqué chaque matin'),
+(3,  8,  106, '2026-02-21', '2026-02-01', 'Parking vélo sécurisé, photo'),
+(4,  11, 106, '2026-02-08', '2026-02-01', 'Stores ouverts, lumière naturelle toute la journée'),
+(5,  14, 106, '2026-02-16', '2026-02-01', 'Multiprise débranchée chaque soir'),
+(7,  20, 106, '2026-02-12', '2026-02-01', 'Couverts réutilisables au bureau'),
+(8,  23, 106, '2026-02-19', '2026-02-01', 'Vrac privilégié, zéro emballage plastique'),
+(9,  26, 106, '2026-02-26', '2026-02-01', 'Plastiques et métaux bien triés'),
+(10, 29, 106, '2026-02-11', '2026-02-01', 'Recette veggie découverte : dahl de lentilles'),
+(12, 34, 106, '2026-02-28', '2026-02-01', 'Assiette finie chaque repas, zéro gaspillage');
+
+-- ============================================================
+-- VALIDATIONS — Mars 2026 (10 / 12 défis)
+-- Points : 925 | CO2 : 115 kg
+-- ============================================================
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, mois, preuve) VALUES
+(1,  2,  106, '2026-03-09', '2026-03-01', 'Trajet à pied 2.5 km A/R'),
+(3,  9,  106, '2026-03-20', '2026-03-01', 'Vélo entretenu et inspecté avant départ'),
+(4,  12, 106, '2026-03-07', '2026-03-01', 'Rappel lumières posté sur le slack équipe'),
+(5,  15, 106, '2026-03-15', '2026-03-01', 'Aucun écran allumé la nuit, photo'),
+(6,  18, 106, '2026-03-23', '2026-03-01', 'Fenêtres vérifiées chaque matin'),
+(7,  21, 106, '2026-03-11', '2026-03-01', 'Gourde inox 1L, zéro bouteille plastique'),
+(8,  24, 106, '2026-03-17', '2026-03-01', 'Plastiques évitables listés et signalés'),
+(10, 30, 106, '2026-03-12', '2026-03-01', 'Plat veggie maison partagé avec collègues'),
+(11, 33, 106, '2026-03-19', '2026-03-01', 'Hors-saison systématiquement refusé'),
+(12, 36, 106, '2026-03-26', '2026-03-01', 'Planning repas hebdomadaire tenu 4 semaines');
+
+-- ============================================================
+-- VALIDATIONS — Avril 2026 (10 / 12 défis)
+-- Points : 880 | CO2 : 106 kg
+-- ============================================================
+INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, mois, preuve) VALUES
+(1,  3,  106, '2026-04-08', '2026-04-01', 'Abonnement TC, ticket scanné'),
+(2,  6,  106, '2026-04-14', '2026-04-01', 'Groupe covoiturage hebdomadaire, 3 membres'),
+(3,  7,  106, '2026-04-21', '2026-04-01', 'App vélo : 3 jours validés consécutifs'),
+(4,  10, 106, '2026-04-10', '2026-04-01', 'Check lumières chaque soir de la semaine'),
+(5,  13, 106, '2026-04-17', '2026-04-01', 'PC éteint, chargeurs retirés'),
+(6,  16, 106, '2026-04-24', '2026-04-01', 'Thermostat 19° maintenu toute la semaine'),
+(7,  19, 106, '2026-04-12', '2026-04-01', 'Lunch box + gourde, zéro déchet'),
+(8,  22, 106, '2026-04-18', '2026-04-01', 'Sac tissu utilisé toute la semaine'),
+(9,  25, 106, '2026-04-25', '2026-04-01', 'Tri rigoureux 5 jours, guide intranet suivi'),
+(10, 28, 106, '2026-04-13', '2026-04-01', 'Midi végétarien 5 jours, photo cantine');
+
+-- Mise à jour des points de Romeo (totalise les 4 mois)
+-- Jan(11) + Fév(10) + Mar(10) + Avr(10) = 41 défis
+-- 980+910+925+880 = 3695 pts | 121+104+115+106 = 446 kgCO2
+UPDATE Employe SET nbPointsEmploye = 3695, nbCO2 = 446 WHERE Id_Employe = 106;
+
+-- Mise à jour équipe STRI1A
+UPDATE Equipe SET
+    nbPointsEquipe = (SELECT COALESCE(SUM(nbPointsEmploye),0) FROM Employe WHERE Id_equipe = 6),
+    nbCO2Equipe    = (SELECT COALESCE(SUM(nbCO2),0)           FROM Employe WHERE Id_equipe = 6)
+WHERE Id_equipe = 6;
+
+-- ============================================================
+-- Réponses à la modération — Avril 2026
+-- ============================================================
+INSERT INTO Reponse_Defi (Id_defi, Id_Employe, reponse_text, statut_reponse, commentaire_animateur, date_reponse, date_traitement, Id_Animateur_traitement) VALUES
+(1,  106, 'J ai pris les transports en commun chaque matin, abonnement TC photo jointe.', 'approved', 'Excellent engagement, continuez ainsi !',             '2026-04-09 08:30:00', '2026-04-10 09:00:00', 3),
+(3,  106, 'Vélo 3 jours consécutifs, screenshot application vélo fourni.',                'approved', 'Bravo pour la régularité, super performance !',        '2026-04-22 10:00:00', '2026-04-23 11:30:00', 4),
+(7,  106, 'Lunch box, couverts bambou et gourde inox toute la semaine, zéro plastique.',  'approved', 'Exemplaire ! Continuez à inspirer vos collègues.',     '2026-04-13 09:00:00', '2026-04-14 10:00:00', 5),
+(10, 106, 'Menu végétarien 5 jours consécutifs, recette maison partagée avec l équipe.', 'approved', 'Superbe effort, belle initiative collective !',         '2026-04-14 08:00:00', '2026-04-15 09:00:00', 3),
+(2,  106, 'Groupe covoiturage créé avec 2 collègues de STRI1A, trajets partagés chaque matin.', 'pending', NULL, '2026-04-15 07:30:00', NULL, NULL);
+
+-- ============================================================
+-- Messages de Romeo dans les forums (Avril 2026)
+-- ============================================================
+INSERT INTO Message (contenuMessage, dateMessage, Id_Employe, Id_forum) VALUES
+('Je viens à vélo depuis Toulouse centre, 7 km, c est vraiment agréable le matin !',  '2026-04-09', 106, 1),
+('Mon vélo est prêt : freins, pneus et chaîne vérifiés. C est parti pour 3 jours !',  '2026-04-21', 106, 3),
+('Astuce : éteignez votre multiprise en partant, ça supprime les veilles fantômes.',   '2026-04-17', 106, 5),
+('Je partage ma recette dahl de lentilles : 20 min, économique et délicieux !',        '2026-04-13', 106, 10),
+('Planning repas de la semaine affiché en cuisine : divise le gaspillage par 2.',      '2026-04-26', 106, 12);
+
+-- ============================================================
+-- Badges de Romeo
+-- ============================================================
+INSERT INTO Obtenir_Em (Id_Badge, Id_Employe, dateObtention) VALUES
+(1, 106, '2026-01-10'),   -- Premier Pas
+(2, 106, '2026-01-17'),   -- Écolo Confirmé  (10+ actions)
+(3, 106, '2026-01-25'),   -- Champion Vert   (25+ actions)
+(5, 106, '2026-01-25'),   -- Zéro Carbone    (121 kgCO2 dès janvier)
+(6, 106, '2026-01-22'),   -- Mobilité Douce  (défis 1,2,3 validés en janvier)
+(7, 106, '2026-01-24'),   -- Énergie Sage    (défis 4,5,6 validés en janvier)
+(8, 106, '2026-01-25'),   -- Zéro Déchet     (défis 7,8,9 validés en janvier)
+(9, 106, '2026-02-28')    -- Végéhéros       (défi 12 complété en février)
+ON CONFLICT (Id_Badge, Id_Employe) DO NOTHING;
+
+-- Badge équipe STRI1A (Équipe Unie — Romeo seul membre, valide chaque défi)
+INSERT INTO Obtenir_Eq (Id_equipe, Id_Badge, dateObtention) VALUES
+(6, 9, '2026-01-25')
+ON CONFLICT (Id_equipe, Id_Badge) DO NOTHING;
+
+-- ============================================================
+-- Notifications pour Romeo
+-- ============================================================
+INSERT INTO Recevoir (Id_User, id_notif)
+SELECT 106, n.id_notif
+FROM Notification n
+WHERE n.id_notif IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
+ON CONFLICT (Id_User, id_notif) DO NOTHING;
