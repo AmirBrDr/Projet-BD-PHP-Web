@@ -1,5 +1,4 @@
 # Configuration files with secrets
-config.local.php
 .env
 .env.local
 .env.*.local
