@@ -94,8 +94,10 @@ void main() {
 
   float height = snoise(vec2(uv.x * 2.0 + uTime * 0.1, uTime * 0.25)) * 0.5 * uAmplitude;
   height = exp(height);
-  height = (uv.y * 2.0 - height + 0.2);
-  float intensity = 0.6 * height;
+
+  float heightBottom = (uv.y * 2.0 - height + 0.2);
+  float heightTop = ((1.0 - uv.y) * 2.0 - height + 0.2);
+  float intensity = 0.6 * max(heightBottom, heightTop);
 
   float midPoint = 0.20;
   float auroraAlpha = smoothstep(midPoint - uBlend * 0.5, midPoint + uBlend * 0.5, intensity);
@@ -107,9 +109,9 @@ void main() {
 `;
 
 const defaultOptions = {
-  colorStops: ["#0f3b2a", "#0a1830", "#0f3b2a"],
-  blend: 0.5,
-  amplitude: 1.0,
+  colorStops: ["#1ea565", "#0f2a5a", "#1ea565"],
+  blend: 0.55,
+  amplitude: 1.1,
   speed: 1.6,
 };
 
