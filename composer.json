@@ -1,0 +1,24 @@
+{
+    "name": "greenpulse/backend",
+    "description": "GreenPulse PHP backend with PHPUnit tests",
+    "type": "project",
+    "require": {
+        "php": ">=8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "scripts": {
+        "test": "phpunit --colors=always",
+        "test-coverage": "phpunit --coverage-html coverage/php"
+    },
+    "autoload": {
+        "files": [
+            "api/lib/http.php",
+            "api/lib/db.php",
+            "api/lib/jwt.php",
+            "api/lib/auth.php",
+            "api/lib/mail.php"
+        ]
+    }
+}

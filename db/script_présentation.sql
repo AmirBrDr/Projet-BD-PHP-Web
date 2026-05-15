@@ -1,3 +1,6 @@
+-- Script presentation : validations exemples pour demo
+-- Donnees ciblees sur les defis alimentation (mois courant)
+
 -- Défi 10 (Repas Veggie)
 INSERT INTO Valider (Id_defi, Id_actions, Id_Employe, date_validation, mois, preuve) VALUES
 (10, 30, 6,  '2026-05-10', '2026-05-01', 'Plat partagé avec l''équipe'),

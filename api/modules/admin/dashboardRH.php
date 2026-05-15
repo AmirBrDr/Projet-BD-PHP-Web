@@ -9,10 +9,12 @@ header('Content-Type: application/json');
 $pdo = gp_pdo($config);
 
 
+// KPI CO2 total cumule sur les actions validees
 $sql_co2 = "SELECT SUM(nbCo2defi) FROM 
 Valider v, Defi d 
 WHERE v.id_defi = d.id_defi;";
 
+// Taux de participation global (employes ayant valide au moins une action)
 $sql_participation = "SELECT 
     ROUND(
         COUNT(DISTINCT v.id_employe) * 100.0 / (SELECT COUNT(*) FROM Employe),
@@ -22,8 +24,10 @@ FROM Valider v
 
 ";
 
+// Nombre d'actions validees (toutes periodes)
 $sql_actions_Validees = "SELECT COUNT(*) AS actionsValides FROM Valider";
 
+// Engagement par departement: ratio employes actifs ayant valide
 $sql_engagementParDept = "SELECT
     e.departementEmploye                                AS departement,
     ROUND(
@@ -39,6 +43,7 @@ WHERE u.statutUser = 'actif'
 GROUP BY e.departementEmploye
 ORDER BY engagementParDept DESC";
 
+// Repartition CO2 par thematique
 $sql_co2ParCategorie = "SELECT 
     t.nomTheme AS categorie,
     SUM(d.nbCo2defi) AS co2,

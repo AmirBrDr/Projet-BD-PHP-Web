@@ -1,3 +1,6 @@
+-- Migration 004 : Lier Reponse_Defi a une action du defi
+-- Ajoute Id_actions et la contrainte composite vers Faire_partie
+
 ALTER TABLE Reponse_Defi ADD COLUMN IF NOT EXISTS Id_actions INT;
 
 DO $$

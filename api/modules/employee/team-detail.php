@@ -38,7 +38,7 @@ if (!$team) {
     gp_send_json(404, ['message' => 'Équipe introuvable']);
 }
 
-// Team rank
+// Team rank (position relative aux autres equipes)
 $stmt = $pdo->prepare("
     SELECT COUNT(*) + 1 AS rang FROM Equipe
     WHERE nbPointsEquipe > (SELECT nbPointsEquipe FROM Equipe WHERE Id_equipe = :id)
@@ -122,6 +122,7 @@ if ($themeRow) {
     $stmt->execute([':theme_id' => $themeId]);
     $defiRows = $stmt->fetchAll();
 
+    // Regle d'avancement: defis debloques dans l'ordre
     $unlocked = true;
     foreach ($defiRows as $row) {
         $did       = (int) $row['id_defi'];

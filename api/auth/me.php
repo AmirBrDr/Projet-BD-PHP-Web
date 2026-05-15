@@ -32,6 +32,7 @@ try {
         gp_send_json(404, ['message' => 'Utilisateur introuvable']);
     }
 
+    // Déduire le rôle depuis les tables spécialisées
     $role = gp_resolve_user_role($pdo, $idUser);
     if ($role === null) {
         gp_send_json(403, ['message' => 'Compte sans rôle associé']);

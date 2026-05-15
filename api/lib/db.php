@@ -4,6 +4,9 @@
 
 declare(strict_types=1);
 
+/**
+ * Cree une connexion PDO Postgres avec options de securite par defaut.
+ */
 function gp_pdo(array $config): PDO
 {
     $db = $config['db'];
@@ -17,6 +20,9 @@ function gp_pdo(array $config): PDO
     return $pdo;
 }
 
+/**
+ * Garantit l'existence de la table de blocage des defis employes.
+ */
 function gp_ensure_defi_block_table(PDO $pdo): void
 {
     $pdo->exec(
@@ -31,6 +37,10 @@ function gp_ensure_defi_block_table(PDO $pdo): void
     );
 }
 
+/**
+ * Garantit l'existence de la table des reponses aux defis.
+ * Ajoute la contrainte composite si elle manque.
+ */
 function gp_ensure_replies_table(PDO $pdo): void
 {
     $pdo->exec(
@@ -48,6 +58,7 @@ function gp_ensure_replies_table(PDO $pdo): void
         )'
     );
 
+    // Migration defensive: colonne ajoutee si absente
     $pdo->exec('ALTER TABLE Reponse_Defi ADD COLUMN IF NOT EXISTS Id_actions INT');
 
     $pdo->exec(

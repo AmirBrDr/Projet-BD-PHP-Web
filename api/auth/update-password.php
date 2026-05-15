@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../bootstrap.php';
 
+// Endpoint protégé: modification du mot de passe utilisateur
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     gp_send_json(405, ['message' => 'Méthode non autorisée']);
 }
@@ -48,6 +49,7 @@ if (!$user) {
 $storedHash = (string) $user['mdp'];
 $verified = password_verify($currentPassword, $storedHash);
 
+// Compatibilité: accepte les anciens hashes en clair si présents
 if (!$verified) {
     $info = password_get_info($storedHash);
     if (($info['algo'] ?? 0) === 0 && hash_equals($storedHash, $currentPassword)) {
@@ -59,6 +61,7 @@ if (!$verified) {
     gp_send_json(401, ['message' => 'Mot de passe actuel incorrect']);
 }
 
+// Hash moderne pour le stockage en base
 $hashed = password_hash($newPassword, PASSWORD_BCRYPT);
 
 $stmt = $pdo->prepare("UPDATE Utilisateur SET mdp = :mdp WHERE Id_User = :id");

@@ -35,10 +35,20 @@
         emojiPreview: document.querySelector("[data-emoji-preview]"),
     };
 
+    /**
+     * Récupère le token JWT d'authentification depuis le localStorage.
+     * @returns {string} Le token ou une chaîne vide
+     */
     function getToken() {
         return localStorage.getItem("gp_token") || "";
     }
 
+    /**
+     * Effectue une requête API avec le token d'authentification.
+     * @param {string} url - L'URL de la requête
+     * @param {Object} options - Les options de la requête fetch
+     * @returns {Promise<any>} Les données JSON retournées
+     */
     async function apiRequest(url, options = {}) {
         const token = getToken();
         const headers = {
@@ -84,6 +94,11 @@
         showFeedback(message, type);
     }
 
+    /**
+     * Affiche une bannière de feedback classique (succès ou erreur).
+     * @param {string} message - Le message à afficher
+     * @param {string} type - Le type (ex: "success" ou "error")
+     */
     function showFeedback(message, type = "success") {
         if (!els.feedback) return;
         clearTimeout(feedbackTimeout);
@@ -111,6 +126,10 @@
         return "Points Totaux (Global)";
     }
 
+    /**
+     * Construit et insère les options (<option>) pour le menu déroulant des conditions d'obtention de badge.
+     * @param {string} selectedValue - La valeur pré-sélectionnée par défaut
+     */
     function buildConditionOptions(selectedValue = "") {
         if (!els.badgeConditionType) return;
 
@@ -144,6 +163,12 @@
         }
     }
 
+    /**
+     * Parse une condition brute issue de la base de données (ex: "Points Totaux >= 100") 
+     * en objet avec un type et une valeur.
+     * @param {string} text - La condition brute
+     * @returns {Object} Objet contenant conditionType et conditionValue
+     */
     function parseConditionText(text) {
         const match = String(text || "").match(/^(.*)\s*>=\s*(\d+)$/);
         if (match) {
@@ -152,6 +177,9 @@
         return { conditionType: getDefaultConditionType(), conditionValue: 1 };
     }
 
+    /**
+     * Génère et met à jour l'affichage HTML de la liste des badges configurés.
+     */
     function renderBadges() {
         if (!els.badgeList) return;
         els.badgeList.innerHTML = "";
@@ -223,6 +251,10 @@
         }
     }
 
+    /**
+     * Ouvre la modale pour créer ou éditer un badge.
+     * @param {number|null} badgeId - L'ID du badge à éditer (null pour une création)
+     */
     function openBadgeModal(badgeId = null) {
         state.editingBadgeId = badgeId;
         const badge = badgeId ? state.badges.find((b) => b.id === badgeId) : null;
@@ -260,6 +292,10 @@
         state.editingBadgeId = null;
     }
 
+    /**
+     * Valide et sauvegarde les modifications d'un badge à partir de la modale dans l'état local, 
+     * puis appelle la sauvegarde API.
+     */
     function saveBadgeFromModal() {
         const name = els.badgeName.value.trim();
         const icon = els.badgeIcon.value.trim();
@@ -309,6 +345,10 @@
         });
     }
 
+    /**
+     * Charge les badges existants depuis l'API et met à jour l'affichage.
+     * @returns {Promise<void>}
+     */
     async function loadBadges() {
         try {
             clearFeedback();
@@ -340,6 +380,11 @@
         buildConditionOptions(getDefaultConditionType());
     }
 
+    /**
+     * Sauvegarde la configuration entière des badges vers l'API.
+     * Gère l'ajout, la modification et la suppression.
+     * @returns {Promise<void>}
+     */
     async function saveBadges() {
         try {
             const payload = {

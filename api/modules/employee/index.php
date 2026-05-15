@@ -16,6 +16,7 @@ $action = trim((string)($_GET['action'] ?? ''));
 
 try {
     if ($method === 'GET' && $action === 'dashboard_summary') {
+        // Resume de moderation personnelle (reponses)
         $stmt = $pdo->prepare(
             'SELECT
                 COUNT(*) AS total_replies,
@@ -62,6 +63,7 @@ try {
     }
 
     if ($method === 'GET' && $action === 'challenges') {
+        // Liste des defis du mois + derniere reponse
         $stmt = $pdo->prepare(
             'SELECT
                 d.Id_defi,
@@ -108,6 +110,7 @@ try {
     }
 
     if ($method === 'GET' && $action === 'my_replies') {
+        // Historique des reponses filtre par statut
         $status = strtolower(trim((string)($_GET['status'] ?? 'all')));
         $params = [':employe_id' => $employeId];
 
@@ -155,6 +158,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'reply_create') {
+        // Creer une reponse a moderer par l'animateur
         $body = gp_read_json_body();
         $challengeId = (int)($body['idDefi'] ?? $body['id_defi'] ?? 0);
         $replyText = trim((string)($body['reponse'] ?? $body['reponse_text'] ?? ''));
@@ -215,6 +219,9 @@ try {
     gp_send_json(500, ['message' => $message]);
 }
 
+/**
+ * Exige un utilisateur authentifie avec un role precis.
+ */
 function gp_require_authenticated_user(array $config, string $requiredRole): array
 {
     $token = gp_get_bearer_token();
@@ -246,6 +253,9 @@ function gp_require_authenticated_user(array $config, string $requiredRole): arr
     ];
 }
 
+/**
+ * Verifie l'existence de l'employe en base.
+ */
 function gp_assert_employe_exists(PDO $pdo, int $employeId): void
 {
     $stmt = $pdo->prepare(

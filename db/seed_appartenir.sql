@@ -1,7 +1,5 @@
--- 1 mobilité
--- 2 Energie
--- 3 Déchets
--- 4 Alimentation
+-- Seed Appartenir : association catalogue defi <-> thematique
+-- 1 Mobilite, 2 Energie, 3 Dechets, 4 Alimentation
 
 
 

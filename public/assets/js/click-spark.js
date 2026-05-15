@@ -35,6 +35,10 @@
     }
   }
 
+  /**
+   * Initialise l'effet de particules au clic sur l'ensemble du document.
+   * @param {Object} options - Configuration des particules (couleur, taille, durée, etc.)
+   */
   function init(options = {}) {
     if (state) {
       return;
@@ -145,6 +149,9 @@
     };
   }
 
+  /**
+   * Nettoie et supprime l'effet de particules du document.
+   */
   function destroy() {
     if (!state) {
       return;

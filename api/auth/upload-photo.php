@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 
+// Endpoint protégé: upload de photo de profil
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     gp_send_json(405, ['message' => 'Méthode non autorisée']);
 }
@@ -24,6 +25,7 @@ if (!$file || !isset($file['tmp_name']) || $file['error'] !== UPLOAD_ERR_OK || $
     gp_send_json(400, ['message' => 'Aucun fichier reçu']);
 }
 
+// Validation stricte du format et de la taille pour sécurité
 $allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
 $detectedMime = mime_content_type($file['tmp_name']);
 if (!in_array($detectedMime, $allowedMime, true)) {
@@ -38,6 +40,7 @@ $ext      = $extMap[$detectedMime] ?? 'jpg';
 $userId   = (int) $claims['sub'];
 $filename = 'pdp_' . $userId . '_' . uniqid('', true) . '.' . $ext;
 
+// Stockage public des photos de profil
 $uploadDir = __DIR__ . '/../../public/image/pdp/';
 if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);
@@ -60,6 +63,7 @@ if (!move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
     gp_send_json(500, ['message' => "Impossible d'enregistrer la photo"]);
 }
 
+// Enregistrer le chemin relatif pour le frontend
 $photoPath = '/image/pdp/' . $filename;
 $stmt = $pdo->prepare("UPDATE Utilisateur SET pdpUser = :photo WHERE Id_User = :id");
 $stmt->execute([':photo' => $photoPath, ':id' => $userId]);

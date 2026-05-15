@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+// Surcharge locale des secrets (ne pas committer en production)
+
 return [
     'ai' => [
         'endpoint' => 'https://api.mistral.ai/v1/chat/completions',

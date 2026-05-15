@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../bootstrap.php';
 
+// Endpoint reserve aux animateurs (gestion des badges)
 $token = gp_get_bearer_token();
 if ($token === '') {
     gp_send_json(401, ['message' => 'Token manquant']);
@@ -25,6 +26,7 @@ $method = $_SERVER['REQUEST_METHOD'] ?? '';
 
 try {
     if ($method === 'GET') {
+        // Liste des badges pour le catalogue
         $stmt = $pdo->prepare(
             'SELECT id_badge, nombadge, descriptionbadge, iconebadge
              FROM badge
@@ -44,6 +46,7 @@ try {
     }
 
     if ($method === 'POST') {
+        // Mise a jour batch: creation, edition, suppression
         $body   = gp_read_json_body();
         $badges = $body['badges'] ?? [];
 

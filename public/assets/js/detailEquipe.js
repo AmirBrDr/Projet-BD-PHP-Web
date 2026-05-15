@@ -3,6 +3,11 @@
     const API_BASE = '/api';
     const token = () => localStorage.getItem('gp_token');
 
+    /**
+     * Effectue une requête GET authentifiée vers l'API.
+     * @param {string} path - Le chemin de l'API
+     * @returns {Promise<Object>} Les données JSON retournées
+     */
     async function apiGet(path) {
         const res = await fetch(API_BASE + path, {
             headers: { 'Authorization': 'Bearer ' + token() }
@@ -11,11 +16,21 @@
         return res.json();
     }
 
+    /**
+     * Met à jour le texte brut d'un élément sélectionné par son sélecteur.
+     * @param {string} selector - Le sélecteur CSS
+     * @param {string} value - La valeur textuelle à insérer
+     */
     function setText(selector, value) {
         const el = document.querySelector(selector);
         if (el) el.textContent = value;
     }
 
+    /**
+     * Affiche les statistiques globales de l'équipe.
+     * @param {Object} equipe - Les données de l'équipe
+     * @param {number} nbMembres - Le nombre total de membres
+     */
     function renderStats(equipe, nbMembres) {
         const host = document.querySelector('[data-team-stats]');
         if (!host) return;
@@ -31,6 +46,10 @@
             </article>`).join('');
     }
 
+    /**
+     * Affiche la liste des membres de l'équipe avec leurs points.
+     * @param {Array<Object>} membres - La liste des membres
+     */
     function renderMembers(membres) {
         const host = document.querySelector('[data-members-list]');
         if (!host) return;
@@ -48,6 +67,10 @@
             </li>`).join('');
     }
 
+    /**
+     * Affiche la progression des défis mensuels de l'équipe sous forme de barres.
+     * @param {Array<Object>} progression - Les données de progression
+     */
     function renderProgression(progression) {
         const host = document.querySelector('[data-challenge-progress]');
         if (!host) return;
@@ -84,6 +107,10 @@
         }).join('');
     }
 
+    /**
+     * Affiche les derniers succès remportés par les membres de l'équipe.
+     * @param {Array<Object>} succes - La liste des succès récents
+     */
     function renderAchievements(succes) {
         const host = document.querySelector('[data-achievements-list]');
         if (!host) return;

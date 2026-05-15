@@ -4,12 +4,18 @@
 
 declare(strict_types=1);
 
-// TEST COMMENT
+// Helpers JWT avec encodage Base64URL conforme RFC 7515
+/**
+ * Encode en Base64URL sans padding.
+ */
 function gp_b64url_encode(string $data): string
 {
     return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
 }
 
+/**
+ * Decode Base64URL en ajoutant le padding manquant.
+ */
 function gp_b64url_decode(string $data): string
 {
     $remainder = strlen($data) % 4;
@@ -19,6 +25,9 @@ function gp_b64url_decode(string $data): string
     return base64_decode(strtr($data, '-_', '+/')) ?: '';
 }
 
+/**
+ * Signe un JWT HS256 avec claims standards et personnalisables.
+ */
 function gp_jwt_sign(array $claims, array $jwtConfig): string
 {
     $now = time();
@@ -40,6 +49,11 @@ function gp_jwt_sign(array $claims, array $jwtConfig): string
     return $h . '.' . $p . '.' . $s;
 }
 
+/**
+ * Verifie un JWT HS256 (signature + expiration).
+ *
+ * @throws RuntimeException Si le token est invalide.
+ */
 function gp_jwt_verify(string $token, array $jwtConfig): array
 {
     $parts = explode('.', $token);
@@ -68,6 +82,9 @@ function gp_jwt_verify(string $token, array $jwtConfig): array
     return $payload;
 }
 
+/**
+ * Extrait le token Bearer depuis l'en-tete Authorization.
+ */
 function gp_get_bearer_token(): string
 {
     $hdr = $_SERVER['HTTP_AUTHORIZATION'] ?? '';

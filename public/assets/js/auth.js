@@ -6,7 +6,10 @@
   const tabs = Array.from(document.querySelectorAll(".tab"));
   const panels = Array.from(document.querySelectorAll(".panel"));
 
-  // Bascule l'onglet actif et affiche le panneau associé
+  /**
+   * Bascule l'onglet actif et affiche le panneau associe.
+   * @param {string} name
+   */
   function setTab(name) {
     tabs.forEach((t) => {
       const active = t.dataset.tab === name;
@@ -37,7 +40,12 @@
   const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
   const ALLOWED_ROLES = new Set(["employe", "admin", "animateur"]);
 
-  // Affiche un message d'alerte avec le type spécifié
+  /**
+   * Affiche un message d'alerte avec un style associe.
+   * @param {HTMLElement} el
+   * @param {string} msg
+   * @param {string} type
+   */
   function setAlert(el, msg, type) {
     if (!msg) {
       el.className = "alert";
@@ -48,6 +56,11 @@
     el.textContent = msg;
   }
 
+  /**
+   * Affiche un message d'aide/erreur sous un champ.
+   * @param {string} inputId
+   * @param {string} msg
+   */
   function setHint(inputId, msg) {
     const hint = document.querySelector(`[data-hint-for=\"${inputId}\"]`);
     if (!hint) return;
@@ -55,7 +68,10 @@
     hint.classList.toggle("is-error", Boolean(msg));
   }
 
-  // Sauvegarde le token et les données utilisateur en localStorage
+  /**
+   * Sauvegarde le token et les donnees utilisateur en localStorage.
+   * @param {object} data
+   */
   function storeSession(data) {
     if (data && data.token) {
       localStorage.setItem("gp_token", data.token);
@@ -65,14 +81,22 @@
     }
   }
 
-  // Normalise les variantes possibles d'un role vers les roles applicatifs
+  /**
+   * Normalise les variantes de role vers les roles applicatifs.
+   * @param {string} role
+   * @returns {string}
+   */
   function normalizeRole(role) {
     const normalized = String(role || "").trim().toLowerCase();
     if (normalized === "rh" || normalized === "administrateur") return "admin";
     return normalized;
   }
 
-  // Lit le payload JWT sans verifier la signature (usage frontend uniquement)
+  /**
+   * Lit le payload JWT sans verifier la signature (usage frontend uniquement).
+   * @param {string} token
+   * @returns {object|null}
+   */
   function decodeJwtPayload(token) {
     if (!token || typeof token !== "string") return null;
     const parts = token.split(".");
@@ -92,7 +116,10 @@
     }
   }
 
-  // Redirige l'utilisateur vers sa page en fonction de son rôle
+  /**
+   * Redirige l'utilisateur selon son role.
+   * @param {string} role
+   */
   function redirectByRole(role) {
     const routes = {
       employe: "/pages/dashboardE.html",
@@ -107,6 +134,10 @@
     }
   }
 
+  /**
+   * Ouvre le panneau de reset en pre-remplissant l'email.
+   * @param {string} email
+   */
   function openResetPanel(email) {
     setTab("reset");
     const resetEmail = document.getElementById("resetEmail");
@@ -115,6 +146,10 @@
     }
   }
 
+  /**
+   * Efface les messages d'aide d'un formulaire.
+   * @param {HTMLFormElement} form
+   */
   function clearHints(form) {
     form.querySelectorAll(".hint").forEach((h) => {
       h.textContent = "";
@@ -122,17 +157,30 @@
     });
   }
 
+  /**
+   * Normalise les espaces et supprime les bords.
+   * @param {string} value
+   * @returns {string}
+   */
   function normalizeSpaces(value) {
     return value.replace(/\s+/g, " ").trim();
   }
 
+  /**
+   * Recupere la valeur d'un champ par ID.
+   * @param {string} inputId
+   * @returns {string}
+   */
   function getValue(inputId) {
     const el = document.getElementById(inputId);
     if (!el) return "";
     return typeof el.value === "string" ? el.value : "";
   }
 
-  // Retourne les règles de validation pour chaque champ
+  /**
+   * Retourne les regles de validation pour chaque champ.
+   * @returns {Record<string, Function>}
+   */
   function validators() {
     return {
       loginEmail: () => {
@@ -197,7 +245,11 @@
     };
   }
 
-  // Valide un champ individuel et affiche l'erreur si nécessaire
+  /**
+   * Valide un champ individuel et retourne son statut.
+   * @param {string} inputId
+   * @returns {boolean}
+   */
   function validateField(inputId) {
     const rule = validators()[inputId];
     if (!rule) return true;
@@ -206,7 +258,11 @@
     return message === "";
   }
 
-  // Valide plusieurs champs à la fois
+  /**
+   * Valide plusieurs champs a la fois.
+   * @param {string[]} inputIds
+   * @returns {boolean}
+   */
   function validateFields(inputIds) {
     let valid = true;
     inputIds.forEach((inputId) => {
@@ -217,7 +273,10 @@
     return valid;
   }
 
-  // Attache les événements de validation aux champs spécifiés
+  /**
+   * Attache les evenements de validation aux champs specifies.
+   * @param {string[]} inputIds
+   */
   function bindFieldValidation(inputIds) {
     inputIds.forEach((inputId) => {
       const el = document.getElementById(inputId);
@@ -232,7 +291,12 @@
     });
   }
 
-  // Effectue une requête POST vers l'API avec gestion des erreurs
+  /**
+   * Effectue une requete POST vers l'API avec gestion des erreurs.
+   * @param {string} path
+   * @param {object} payload
+   * @returns {Promise<any>}
+   */
   async function apiPost(path, payload) {
     const res = await fetch(`${API_BASE}${path}`, {
       method: "POST",

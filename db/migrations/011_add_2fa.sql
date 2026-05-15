@@ -1,3 +1,5 @@
+-- Migration 011 : Ajout des colonnes 2FA
+-- Deja integrees dans schema.sql, garder en commentaire si la prod est a jour.
 --ALTER TABLE utilisateur ADD COLUMN two_factor_enabled BOOLEAN DEFAULT FALSE;
 --ALTER TABLE utilisateur ADD COLUMN two_factor_code VARCHAR(255);
 --ALTER TABLE utilisateur ADD COLUMN two_factor_expires_at TIMESTAMP;

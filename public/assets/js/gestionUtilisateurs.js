@@ -65,6 +65,10 @@
     };
 
     // Décode le JWT pour obtenir l'ID de l'utilisateur courant
+    /**
+     * Décode le JWT pour obtenir l'ID de l'utilisateur courant.
+     * @returns {string|null} L'ID de l'utilisateur ou null si introuvable
+     */
     function getCurrentUserId() {
         const t = localStorage.getItem("gp_token");
         if (!t) return null;
@@ -73,11 +77,21 @@
     const currentUserId = getCurrentUserId();
 
     // Récupère le token JWT de la session locale
+    /**
+     * Récupère le token JWT de la session locale.
+     * @returns {string} Le token JWT ou une chaîne vide
+     */
     function getToken() {
         return localStorage.getItem("gp_token") || "";
     }
 
     // Effectue une requête API avec authentification
+    /**
+     * Effectue une requête API avec authentification.
+     * @param {string} url - L'URL cible
+     * @param {Object} options - Les options de fetch
+     * @returns {Promise<any>} La réponse de l'API parsée
+     */
     async function apiRequest(url, options = {}) {
         const token = getToken();
         const headers = {
@@ -115,6 +129,11 @@
     }
 
     // Affiche un message de rétroaction à l'utilisateur
+    /**
+     * Affiche un message de rétroaction à l'utilisateur.
+     * @param {string} message - Le message à afficher
+     * @param {string} [type="success"] - Le type de feedback ("success", "error", "warning")
+     */
     function showFeedback(message, type = "success") {
         if (!els.feedback) {
             return;
@@ -166,6 +185,10 @@
     }
 
     // Filtre les utilisateurs selon la recherche et les sélecteurs
+    /**
+     * Filtre les utilisateurs selon la recherche et les sélecteurs de rôle et d'équipe.
+     * @returns {Array} La liste filtrée des utilisateurs
+     */
     function getFilteredUsers() {
         const q = (els.searchInput.value || "").trim().toLowerCase();
         const role = (els.roleFilter.value || "all").toLowerCase();
@@ -191,6 +214,9 @@
     }
 
     // Affiche le tableau des utilisateurs avec pagination
+    /**
+     * Affiche le tableau des utilisateurs avec la pagination et la gestion des droits.
+     */
     function renderTable() {
         state.filteredUsers = getFilteredUsers();
 
@@ -298,6 +324,10 @@
     }
 
     // Charge les utilisateurs depuis l'API
+    /**
+     * Charge la liste complète des utilisateurs depuis l'API et met à jour le tableau.
+     * @returns {Promise<void>}
+     */
     async function loadUsers() {
         const response = await apiRequest(API_USERS);
         state.users = Array.isArray(response.items) ? response.items : [];
@@ -305,6 +335,10 @@
     }
 
     // Charge les équipes depuis l'API
+    /**
+     * Charge les équipes depuis l'API et met à jour les listes déroulantes de filtres et formulaires.
+     * @returns {Promise<void>}
+     */
     async function loadTeams() {
         const response = await apiRequest(API_TEAMS);
         state.teams = Array.isArray(response.items) ? response.items : [];
@@ -356,6 +390,10 @@
     }
 
     // Enregistre ou met à jour un utilisateur
+    /**
+     * Enregistre ou met à jour un utilisateur en validant ses informations.
+     * @param {Event} event - L'événement de soumission
+     */
     async function saveUser(event) {
         event.preventDefault();
         showFeedback("");
@@ -388,6 +426,10 @@
     }
 
     // Supprime un utilisateur après confirmation
+    /**
+     * Demande confirmation puis supprime un utilisateur.
+     * @param {number|string} userId - L'ID de l'utilisateur
+     */
     async function deleteUser(userId) {
         const confirmed = await askConfirm("Supprimer cet utilisateur ? Cette action est irreversible.", {
             title: "Suppression utilisateur",
@@ -436,6 +478,12 @@
     }
 
     // Parse un fichier CSV en tableau d'objets
+    /**
+     * Parse un fichier CSV et convertit ses lignes en tableau d'objets.
+     * @param {string} csvText - Le contenu textuel du fichier CSV
+     * @returns {Array<Object>} Le tableau d'objets (un par ligne)
+     * @throws {Error} Si le format du CSV est invalide
+     */
     function parseCsvText(csvText) {
         const lines = csvText.split(/\r?\n/).filter((line) => line.trim() !== "");
         if (lines.length < 2) {
@@ -465,6 +513,9 @@
     }
 
     // Lance l'import des utilisateurs depuis le fichier CSV
+    /**
+     * Envoie la requête d'import des utilisateurs massifs à partir du CSV.
+     */
     async function triggerImport() {
         if (!Array.isArray(state.importRows) || state.importRows.length === 0) {
             showFeedback("Sélectionnez un fichier CSV valide avant de lancer l'import.", "error");

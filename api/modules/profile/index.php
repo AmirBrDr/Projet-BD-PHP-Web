@@ -53,6 +53,7 @@ function profile_get(PDO $pdo, int $userId): array
         gp_send_json(404, ['message' => 'Utilisateur non trouvé']);
     }
 
+    // Le role est derive des tables employe/admin/animateur
     $role = gp_resolve_user_role($pdo, $userId);
 
     return [
@@ -172,7 +173,7 @@ function profile_handle_avatar_upload(PDO $pdo, int $userId): string
         }
     }
 
-    // Générer nom de fichier unique
+    // Générer nom de fichier unique pour éviter les collisions
     $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
     $filename = 'avatar_' . $userId . '_' . time() . '.' . $ext;
     $filepath = $upload_dir . '/' . $filename;
@@ -196,7 +197,7 @@ function profile_handle_avatar_upload(PDO $pdo, int $userId): string
         }
     }
 
-    // Mettre à jour la base de données
+    // Mettre à jour la base de données avec le chemin public
     $stmt = $pdo->prepare('UPDATE utilisateur SET pdpuser = :pdp WHERE id_user = :id');
     $stmt->execute([':pdp' => $relative_path, ':id' => $userId]);
 

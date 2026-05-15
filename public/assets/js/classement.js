@@ -3,6 +3,12 @@
     const API_BASE = '/api';
     const token = () => localStorage.getItem('gp_token');
 
+    /**
+     * Effectue une requête GET vers l'API avec authentification.
+     * @param {string} path - Le chemin de l'endpoint API
+     * @returns {Promise<Object>} La réponse JSON parsée
+     * @throws {Error} Si la requête échoue
+     */
     async function apiGet(path) {
         const res = await fetch(API_BASE + path, {
             headers: { 'Authorization': 'Bearer ' + token() }
@@ -14,6 +20,10 @@
     let allTeams = [];
     let myTeamId = 0;
 
+    /**
+     * Trie la liste des équipes par points décroissants, puis par empreinte CO2 croissante.
+     * @returns {Array} Un tableau trié des équipes
+     */
     function sorted() {
             return [...allTeams].sort((a, b) => {
                 if (b.points !== a.points) return b.points - a.points;
@@ -21,10 +31,19 @@
             });
     }
 
-        function formatScore(team) {
+    /**
+     * Formate le score d'une équipe pour l'affichage.
+     * @param {Object} team - L'objet équipe
+     * @returns {string} Le score formaté (ex: 1 000 pts · 50 kg CO₂)
+     */
+    function formatScore(team) {
             return `${team.points.toLocaleString('fr-FR')} pts · ${team.co2.toLocaleString('fr-FR')} kg CO₂`;
     }
 
+    /**
+     * Gère l'affichage du podium (Top 3 des équipes).
+     * Manipule le DOM pour injecter les cartes du podium.
+     */
     function renderPodium() {
         const host = document.querySelector('[data-podium]');
         if (!host) return;
@@ -46,6 +65,10 @@
         }).join('');
     }
 
+    /**
+     * Affiche la liste complète des équipes classées.
+     * Met également à jour le compteur d'équipes dans l'interface.
+     */
     function renderTeamList() {
         const host = document.querySelector('[data-team-list]');
         const count = document.querySelector('[data-teams-count]');

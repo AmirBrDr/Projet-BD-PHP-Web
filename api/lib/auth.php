@@ -4,16 +4,27 @@
 
 declare(strict_types=1);
 
+/**
+ * Normalise un role utilisateur (casse, espaces).
+ */
 function gp_normalize_role(string $role): string
 {
     return strtolower(trim($role));
 }
 
+/**
+ * Valide qu'un role appartient a l'ensemble autorise.
+ */
 function gp_is_valid_role(string $role): bool
 {
     return in_array(gp_normalize_role($role), ['employe', 'admin', 'animateur'], true);
 }
 
+/**
+ * Insere l'utilisateur dans la table de role correspondante.
+ *
+ * @throws InvalidArgumentException Si le role est invalide.
+ */
 function gp_insert_user_role(PDO $pdo, int $userId, string $role): void
 {
     $normalizedRole = gp_normalize_role($role);
@@ -35,6 +46,9 @@ function gp_insert_user_role(PDO $pdo, int $userId, string $role): void
     $stmt->execute([':id' => $userId]);
 }
 
+/**
+ * Determine le role d'un utilisateur a partir des tables de roles.
+ */
 function gp_resolve_user_role(PDO $pdo, int $userId): ?string
 {
     $checks = [
@@ -55,6 +69,9 @@ function gp_resolve_user_role(PDO $pdo, int $userId): ?string
     return null;
 }
 
+/**
+ * Signe un JWT de reinitialisation avec un claim purpose explicite.
+ */
 function gp_password_reset_sign(array $claims, array $jwtConfig): string
 {
     return gp_jwt_sign(array_merge([
@@ -62,6 +79,11 @@ function gp_password_reset_sign(array $claims, array $jwtConfig): string
     ], $claims), $jwtConfig);
 }
 
+/**
+ * Verifie un token de reinitialisation et son claim purpose.
+ *
+ * @throws RuntimeException Si le token est invalide.
+ */
 function gp_password_reset_verify(string $token, array $jwtConfig): array
 {
     $payload = gp_jwt_verify($token, $jwtConfig);

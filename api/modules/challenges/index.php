@@ -42,6 +42,7 @@ try {
     $action = trim((string)($_GET['action'] ?? ''));
     switch ($action) {
         case 'list_month':
+            // Liste des defis du mois courant avec participants
             $stmt = $pdo->prepare(
                 'SELECT
                     d.Id_defi,
@@ -68,6 +69,7 @@ try {
             gp_send_json(200, ['status' => 'success', 'data' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
 
         case 'detail':
+            // Detail d'un defi + actions + forum + messages
             $id = (int)($_GET['id'] ?? 0);
             if ($id <= 0) {
                 gp_send_json(400, ['error' => 'ID manquant']);
@@ -119,6 +121,7 @@ try {
             $messages = [];
             $forumId = $forum['idforum'] ?? $forum['idForum'] ?? $forum['id_forum'] ?? null;
             if ($forum && $forumId) {
+                // Role detecte via presence dans tables Admin/Animateur
                 $stmt4 = $pdo->prepare(
                     "SELECT m.Id_Employe AS idEmploye,
                             m.contenuMessage, m.dateMessage,

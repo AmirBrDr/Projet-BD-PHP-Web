@@ -5,6 +5,9 @@
     refs: null,
   };
 
+  /**
+   * Injecte les styles du dialog une seule fois.
+   */
   function ensureDialogStyles() {
     if (document.getElementById("gp-dialog-styles")) {
       return;
@@ -123,6 +126,10 @@
     document.head.appendChild(style);
   }
 
+  /**
+   * Cree le markup du dialog et conserve les references DOM.
+   * @returns {{overlay: HTMLElement, title: HTMLElement, message: HTMLElement, inputWrap: HTMLElement, input: HTMLTextAreaElement, cancelBtn: HTMLButtonElement, confirmBtn: HTMLButtonElement}}
+   */
   function ensureDialogRefs() {
     if (dialogState.refs) {
       return dialogState.refs;
@@ -169,6 +176,7 @@
       finalizeDialog(cancelValue);
     };
 
+    // Ferme le dialog si clic en dehors de la carte
     overlay.addEventListener("click", (event) => {
       if (event.target === overlay) {
         closeWithCancelResult();
@@ -190,6 +198,7 @@
       finalizeDialog(true);
     });
 
+    // Ferme le dialog via Echap
     document.addEventListener("keydown", (event) => {
       if (!dialogState.active || refs.overlay.hidden) {
         return;
@@ -205,6 +214,10 @@
     return refs;
   }
 
+  /**
+   * Termine le dialog et resolve la promesse.
+   * @param {any} value
+   */
   function finalizeDialog(value) {
     if (!dialogState.active || !dialogState.refs) {
       return;
@@ -222,6 +235,12 @@
     resolve(value);
   }
 
+  /**
+   * Ouvre un dialog de type confirm ou prompt.
+   * @param {"confirm"|"prompt"} type
+   * @param {object} options
+   * @returns {Promise<any>}
+   */
   function openDialog(type, options = {}) {
     const refs = ensureDialogRefs();
 

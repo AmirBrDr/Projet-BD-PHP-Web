@@ -4,6 +4,9 @@
 
 declare(strict_types=1);
 
+/**
+ * Lit une reponse SMTP complete (multi-lignes possibles).
+ */
 function gp_mail_read_response($stream): string
 {
     $lines = [];
@@ -23,6 +26,9 @@ function gp_mail_read_response($stream): string
     return trim(implode("\n", $lines));
 }
 
+/**
+ * Envoie une commande SMTP et valide les prefixes de reponse attendus.
+ */
 function gp_mail_send_command($stream, string $command, array $expectedPrefixes): string
 {
     fwrite($stream, $command . "\r\n");
@@ -37,6 +43,9 @@ function gp_mail_send_command($stream, string $command, array $expectedPrefixes)
     throw new RuntimeException('SMTP error: ' . $response);
 }
 
+/**
+ * Envoie un email via SMTP avec option TLS.
+ */
 function gp_send_via_smtp(array $config, string $to, string $subject, string $htmlBody): void
 {
     $mailConfig = $config['mail'] ?? [];
@@ -98,6 +107,7 @@ function gp_send_via_smtp(array $config, string $to, string $subject, string $ht
             'Content-Transfer-Encoding: 8bit',
         ];
 
+        // SMTP dot-stuffing pour les lignes qui commencent par un point
         $payload = implode("\r\n", $headers) . "\r\n\r\n" . $htmlBody;
         $payload = preg_replace('/\r?\n\./', "\r\n..", $payload) ?? $payload;
         fwrite($stream, $payload . "\r\n.\r\n");
@@ -113,6 +123,9 @@ function gp_send_via_smtp(array $config, string $to, string $subject, string $ht
     }
 }
 
+/**
+ * Envoie un email via SMTP ou mail() selon la configuration.
+ */
 function gp_send_email(array $config, string $to, string $subject, string $htmlBody, string $textBody = ''): void
 {
     $mailConfig = $config['mail'] ?? [];

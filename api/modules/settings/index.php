@@ -156,6 +156,9 @@ function settings_update(PDO $pdo, array $data): void
     // TODO: Créer table config avec clé-valeur pour gamification et system settings
 }
 
+/**
+ * Envoie des rappels d'inactivite selon la frequence demandee.
+ */
 function settings_send_inactivity_notifications(PDO $pdo, array $notifications, array $config): array
 {
     $active = !empty($notifications['active']);
@@ -168,6 +171,7 @@ function settings_send_inactivity_notifications(PDO $pdo, array $notifications, 
         $frequency = 'biweekly';
     }
 
+    // Seuil fixe: utilisateurs inactifs depuis plus de 3 jours
     $stmt = $pdo->prepare(
         "SELECT nomuser, prenomuser, email FROM utilisateur "
         . "WHERE statutuser = 'actif' "

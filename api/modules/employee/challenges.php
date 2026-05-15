@@ -39,7 +39,7 @@ $validatedNames = [];   // defi_id -> ['Prénom N.', ...]
 $allMemberNames = [];   // 'Employe Id' -> 'Prénom N.'
 
 if ($teamId > 0) {
-    // Count active team members
+    // Compter les membres actifs de l'equipe
     $stmt = $pdo->prepare("
         SELECT e.Id_Employe, u.prenomUser, u.nomUser
         FROM Employe e
@@ -53,7 +53,7 @@ if ($teamId > 0) {
         $allMemberNames[(int) $m['id_employe']] = $m['prenomuser'] . ' ' . substr($m['nomuser'], 0, 1) . '.';
     }
 
-    // Who validated which defi (at least one action) — current month only
+    // Qui a valide quel defi (mois courant uniquement)
     $stmt = $pdo->prepare("
         SELECT DISTINCT v.Id_defi, v.Id_Employe
         FROM Valider v
@@ -70,7 +70,7 @@ if ($teamId > 0) {
         $validatedNames[$did][] = $allMemberNames[$eid] ?? 'Membre';
     }
 } else {
-    // Solo (no team) — count self, current month only
+    // Solo (pas d'equipe) — compter l'employe uniquement
     $stmt = $pdo->prepare("
         SELECT DISTINCT v.Id_defi FROM Valider v
         WHERE v.Id_Employe = :user
@@ -82,7 +82,7 @@ if ($teamId > 0) {
     }
 }
 
-// Current month themes
+// Thematique(s) du mois courant
 $stmt = $pdo->query("
     SELECT DISTINCT t.Id_thematique, t.nomTheme, t.descriptionTheme
     FROM Thematique t
@@ -121,6 +121,7 @@ $completedCount  = 0;
 $defis           = [];
 
 foreach ($rows as $row) {
+    // Regle d'avancement: verrouillage par thematique
     $defiId   = (int) $row['id_defi'];
     $themeId  = (int) $row['id_thematique'];
     if (!array_key_exists($themeId, $unlockedByTheme)) {

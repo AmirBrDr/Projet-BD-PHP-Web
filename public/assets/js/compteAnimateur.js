@@ -16,6 +16,11 @@
         }
     }
 
+    /**
+     * Effectue une requête GET vers l'API.
+     * @param {string} path - Le chemin de l'endpoint
+     * @returns {Promise<Object>} La réponse JSON
+     */
     async function apiGet(path) {
         const res = await fetch(API_BASE + path, {
             headers: {
@@ -27,6 +32,12 @@
         return data;
     }
 
+    /**
+     * Effectue une requête POST vers l'API avec un payload.
+     * @param {string} path - Le chemin de l'endpoint
+     * @param {Object} payload - Les données à envoyer
+     * @returns {Promise<Object>} La réponse JSON
+     */
     async function apiPost(path, payload) {
         const res = await fetch(API_BASE + path, {
             method: "POST",
@@ -47,6 +58,11 @@
         });
     }
 
+    /**
+     * Affiche un message de retour (succès ou erreur) dans l'interface.
+     * @param {string} message - Le message à afficher
+     * @param {string} type - "success" ou "error"
+     */
     function setFeedback(message, type) {
         const el = document.querySelector("[data-profile-feedback]");
         if (!el) return;
@@ -61,6 +77,12 @@
         el.textContent = ((prenom || "G").charAt(0) + (nom || "P").charAt(0)).toUpperCase();
     }
 
+    /**
+     * Affiche l'avatar de l'utilisateur ou ses initiales s'il n'a pas de photo.
+     * @param {string|null} photoPath - Le chemin vers la photo
+     * @param {string} prenom - Le prénom de l'utilisateur
+     * @param {string} nom - Le nom de l'utilisateur
+     */
     function renderAvatar(photoPath, prenom, nom) {
         const photoEl = document.querySelector("[data-avatar-photo]");
         const initialsEl = document.querySelector("[data-user-initials]");
@@ -113,6 +135,10 @@
         return role ? role.toUpperCase() : "Utilisateur";
     }
 
+    /**
+     * Synchronise les informations de l'utilisateur avec le localStorage.
+     * @param {Object} user - Les données de l'utilisateur
+     */
     function syncStoredUser(user) {
         let current = {};
         try {

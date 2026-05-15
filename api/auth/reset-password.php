@@ -47,6 +47,7 @@ try {
         gp_send_json(404, ['message' => 'Utilisateur introuvable']);
     }
 
+    // Hash sécurisé du nouveau mot de passe
     $hash = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $pdo->prepare('UPDATE utilisateur SET mdp = :mdp WHERE id_user = :id');
     $stmt->execute([

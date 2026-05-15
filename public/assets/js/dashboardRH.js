@@ -3,15 +3,30 @@
 (() => {
     const API_BASE = "/api";
 
+    /**
+     * Effectue une requête GET vers l'API.
+     * @param {string} path - Le chemin de l'endpoint API
+     * @returns {Promise<Object>} La réponse JSON de l'API
+     */
     async function apiGet(path) {
         const res = await fetch(`${API_BASE}${path}`);
         return await res.json();
     }
 
+    /**
+     * Récupère les données du tableau de bord depuis l'API.
+     * @returns {Promise<Object>} Les données du tableau de bord
+     */
     async function getDashboardData() {
         return await apiGet("/modules/admin/dashboardRH.php");
     }
 
+    /**
+     * Exporte les données du tableau de bord au format CSV.
+     * @param {Object} data - Données globales (CO2 total, participation, actions)
+     * @param {Array} co2ParCategorie - Répartition du CO2 par catégorie
+     * @param {Array} engagementParDept - Taux d'engagement par département
+     */
     function exportCSV(data, co2ParCategorie, engagementParDept) {
         const rows = [];
 
@@ -105,6 +120,11 @@ function generateGroupedPalette(baseColors, count) {
     return colors;
 }
 
+    /**
+     * Génère et affiche les graphiques (Doughnut et Bar) en utilisant Chart.js.
+     * @param {Array} co2ParCategorie - Données de CO2 par catégorie pour le graphique circulaire
+     * @param {Array} engagementParDept - Données d'engagement par département pour le graphique en barres
+     */
     function renderCharts(co2ParCategorie, engagementParDept) {
          const colors = generateGroupedPalette( ["#94BB39", "#2A997F", "#298E77"] ,co2ParCategorie.length);
         if (typeof window.Chart !== "function") {
@@ -173,6 +193,10 @@ function generateGroupedPalette(baseColors, count) {
     }
 
     // Fonction à appeler sur votre bouton "Rapport PDF"
+    /**
+     * Génère un rapport PDF à partir du contenu HTML de la page entière en utilisant html2canvas et jsPDF.
+     * Gère la capture en plusieurs pages si nécessaire.
+     */
     async function genererRapportPDF() {
         const { jsPDF } = window.jspdf;
 
@@ -210,6 +234,9 @@ function generateGroupedPalette(baseColors, count) {
         pdf.save('rapport.pdf');
     }
     
+    /**
+     * Attache les écouteurs d'événements pour les boutons d'export PDF et CSV.
+     */
     function bindActions() {
         const pdfBtn = document.getElementById("btn-export-pdf");
         if (pdfBtn) {

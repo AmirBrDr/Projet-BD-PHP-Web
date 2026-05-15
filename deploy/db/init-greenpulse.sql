@@ -3,6 +3,7 @@
 --   psql -f init-greenpulse.sql
 -- IMPORTANT: replace CHANGE_ME_STRONG_DB_PASSWORD before first use.
 
+-- Creation du role postgres si absent (environnements educatifs)
 DO
 $$
 BEGIN
@@ -12,6 +13,7 @@ BEGIN
 END
 $$;
 
+-- Creation de la base greenpulse si absente
 DO
 $$
 BEGIN
@@ -21,6 +23,7 @@ BEGIN
 END
 $$;
 
+-- Appliquer les droits sur la base cible
 \connect greenpulse
 
 GRANT CONNECT ON DATABASE greenpulse TO postgres;

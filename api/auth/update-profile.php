@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../bootstrap.php';
 
+// Endpoint protégé: mise à jour des infos de profil
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     gp_send_json(405, ['message' => 'Méthode non autorisée']);
 }
@@ -42,6 +43,7 @@ if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
 $pdo = gp_pdo($config);
 
+// Vérifier l'unicité de l'email si fourni
 if ($email !== '') {
     $stmt = $pdo->prepare("SELECT 1 FROM Utilisateur WHERE email = :email AND Id_User != :id LIMIT 1");
     $stmt->execute([':email' => $email, ':id' => $userId]);
@@ -65,6 +67,7 @@ if (!$stmt->fetch()) {
     gp_send_json(404, ['message' => 'Utilisateur introuvable']);
 }
 
+// Retourner l'utilisateur avec son role resolu
 $stmt = $pdo->prepare("\n    SELECT u.Id_User, u.nomUser, u.prenomUser, u.email, u.pdpUser, u.statutUser,\n           COALESCE(r.role, 'employe') AS role\n    FROM Utilisateur u\n    LEFT JOIN LATERAL (\n        SELECT 'employe' AS role FROM Employe e WHERE e.Id_Employe = u.Id_User\n        UNION ALL\n        SELECT 'admin' AS role FROM Admin a WHERE a.Id_Admin = u.Id_User\n        UNION ALL\n        SELECT 'animateur' AS role FROM Animateur an WHERE an.Id_Animateur = u.Id_User\n        LIMIT 1\n    ) r ON TRUE\n    WHERE u.Id_User = :id\n    LIMIT 1\n");
 $stmt->execute([':id' => $userId]);
 $user = $stmt->fetch();

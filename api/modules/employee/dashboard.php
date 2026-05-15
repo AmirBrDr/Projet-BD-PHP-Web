@@ -36,6 +36,7 @@ $teamRow = $stmt->fetch();
 
 $teamRang = 0;
 if ($teamRow) {
+    // Classement equipe calcule par points décroissants
     $stmt = $pdo->prepare("\n        SELECT COUNT(*) + 1 AS rang\n        FROM Equipe\n        WHERE nbPointsEquipe > (\n            SELECT eq2.nbPointsEquipe FROM Equipe eq2\n            JOIN Employe emp2 ON emp2.Id_equipe = eq2.Id_equipe\n            WHERE emp2.Id_Employe = :id\n            LIMIT 1\n        )\n    ");
     $stmt->execute([':id' => $userId]);
     $rangRow = $stmt->fetch();
@@ -46,11 +47,13 @@ $teamId = $teamRow ? (int) $teamRow['equipe_id'] : 0;
 $memberCount = 1;
 $validationMap = [];
 if ($teamId > 0) {
+    // Nombre de membres actifs pour le calcul de progression
     $stmt = $pdo->prepare("\n        SELECT COUNT(*) AS nb\n        FROM Employe e\n        JOIN Utilisateur u ON u.Id_User = e.Id_Employe\n        WHERE e.Id_equipe = :team\n          AND u.statutUser = 'actif'\n    ");
     $stmt->execute([':team' => $teamId]);
     $memberCountRow = $stmt->fetch();
     $memberCount = max(1, (int) ($memberCountRow['nb'] ?? 0));
 
+    // Progression par defi: nombre de membres ayant valide
     $stmt = $pdo->prepare("\n        SELECT v.Id_defi, COUNT(DISTINCT v.Id_Employe) AS validated_members\n        FROM Valider v\n        JOIN Employe e ON e.Id_Employe = v.Id_Employe\n        JOIN Utilisateur u ON u.Id_User = e.Id_Employe\n        WHERE e.Id_equipe = :team\n          AND u.statutUser = 'actif'\n        GROUP BY v.Id_defi\n    ");
     $stmt->execute([':team' => $teamId]);
     foreach ($stmt->fetchAll() as $row) {
@@ -64,6 +67,7 @@ $defis = $stmt->fetchAll();
 
 $themeState = [];
 foreach ($defis as &$defi) {
+    // Regle de deblocage: un seul defi actif par thematique
     $themeId = (int) $defi['id_thematique'];
     if (!array_key_exists($themeId, $themeState)) {
         $themeState[$themeId] = true;

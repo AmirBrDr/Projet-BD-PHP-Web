@@ -11,7 +11,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     gp_send_json(405, ['message' => 'Méthode non autorisée']);
 }
 
-// Récupérer les données d'enregistrement
+// Récupérer les données d'enregistrement (noms multiples acceptés)
 $body = gp_read_json_body();
 
 $nomUser = trim((string)($body['nomUser'] ?? $body['nom_user'] ?? ''));
@@ -120,6 +120,7 @@ try {
         $dateValue = substr($inscriptionUser, 0, 10);
     }
 
+    // Transaction pour garantir la cohérence utilisateur + rôle
     $pdo->beginTransaction();
 
     try {
@@ -146,6 +147,7 @@ try {
             throw new RuntimeException('Impossible de créer l\'utilisateur');
         }
 
+        // Inscription dans la table de rôle correspondante
         gp_insert_user_role($pdo, $idUser, $role);
 
         if ($role === 'employe' && $departementEmploye !== '') {
@@ -161,6 +163,7 @@ try {
         throw $inner;
     }
 
+    // Générer le token d'authentification initial
     $token = gp_jwt_sign([
         'sub' => (string)$idUser,
         'email' => $email,

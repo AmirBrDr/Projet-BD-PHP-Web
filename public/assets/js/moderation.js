@@ -47,6 +47,12 @@
         elements.pageAlert.textContent = message;
     }
 
+    /**
+     * Exécute une requête vers l'API d'animation.
+     * @param {string} action - L'action (ex: 'challenges', 'replies', 'reply_decision')
+     * @param {Object} options - Les options additionnelles
+     * @returns {Promise<any>} Le JSON parsé de la réponse
+     */
     async function apiRequest(action, options = {}) {
         const params = new URLSearchParams({ action, ...(options.params || {}) });
         const url = `/api/modules/animator/?${params.toString()}`;
@@ -112,6 +118,11 @@
         return /^\/image\//.test(text) || /\.(png|jpe?g|webp)$/i.test(text);
     }
 
+    /**
+     * Génère le markup HTML pour afficher la preuve (image ou texte simple).
+     * @param {string} value - La chaîne de texte de la preuve (ou de l'URL de l'image)
+     * @returns {string} Le code HTML formaté
+     */
     function proofMarkup(value) {
         const text = String(value || "").trim();
         if (!text) {
@@ -124,6 +135,9 @@
         return `<p class="reply-text">${escapeHtml(text)}</p>`;
     }
 
+    /**
+     * Met à jour le menu déroulant de filtre avec la liste des défis récupérés de l'API.
+     */
     function renderChallengeFilters() {
         if (!elements.replyChallengeFilter) {
             return;
@@ -144,12 +158,21 @@
         }
     }
 
+    /**
+     * Charge la liste complète des défis depuis l'API et met à jour les filtres.
+     * @returns {Promise<void>}
+     */
     async function loadChallenges() {
         const response = await apiRequest("challenges");
         state.challenges = response?.data || [];
         renderChallengeFilters();
     }
 
+    /**
+     * Charge les réponses à modérer en appliquant les filtres sélectionnés (statut, défi).
+     * Met à jour l'affichage de la liste des réponses.
+     * @returns {Promise<void>}
+     */
     async function loadReplies() {
         const status = elements.replyStatusFilter?.value || "all";
         const challengeFilter = elements.replyChallengeFilter?.value || "all";
@@ -207,6 +230,13 @@
             .join("");
     }
 
+    /**
+     * Traite la décision de l'animateur (approbation ou refus) pour une réponse spécifique, 
+     * en incluant une demande de commentaire avec une boîte de dialogue modale.
+     * @param {number} replyId - L'ID de la réponse
+     * @param {string} decision - 'approve' ou 'reject'
+     * @returns {Promise<void>}
+     */
     async function decideReply(replyId, decision) {
         const isReject = decision === "reject";
         const defaultComment = decision === "approve" ? "Validation acceptee." : "";
@@ -247,6 +277,10 @@
         await Promise.all([loadChallenges(), loadReplies()]);
     }
 
+    /**
+     * Gère les clics sur les boutons d'action (Approuver, Refuser) dans la liste des réponses.
+     * @param {Event} event - L'événement de clic
+     */
     async function handleReplyListClick(event) {
         const target = event.target;
         if (!(target instanceof HTMLElement)) {

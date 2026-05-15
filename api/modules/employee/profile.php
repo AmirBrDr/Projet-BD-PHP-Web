@@ -40,6 +40,7 @@ if (!$user) {
     gp_send_json(404, ['message' => 'Profil introuvable']);
 }
 
+// Rang personnel calcule par points
 $stmt = $pdo->prepare("
     SELECT rang_perso
     FROM (
@@ -51,6 +52,7 @@ $stmt = $pdo->prepare("
 $stmt->execute([':id' => $userId]);
 $rankRow = $stmt->fetch();
 
+// Badges obtenus par l'employe
 $stmt = $pdo->prepare("
     SELECT b.nomBadge, b.descriptionBadge, b.iconeBadge, oe.dateObtention
     FROM Obtenir_Em oe
@@ -61,6 +63,7 @@ $stmt = $pdo->prepare("
 $stmt->execute([':id' => $userId]);
 $badges = $stmt->fetchAll();
 
+// Historique des defis completes
 $stmt = $pdo->prepare("
     SELECT d.nomDefi, MIN(v.date_validation) AS date_completion
     FROM Valider v

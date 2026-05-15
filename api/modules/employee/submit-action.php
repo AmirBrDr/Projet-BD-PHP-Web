@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../../bootstrap.php';
 
+// Soumission d'une preuve d'action par un employe
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     gp_send_json(405, ['message' => 'Méthode non autorisée']);
 }
@@ -23,6 +24,9 @@ if (gp_normalize_role($claims['role'] ?? '') !== 'employe') {
     gp_send_json(403, ['message' => 'Accès refusé']);
 }
 
+/**
+ * Parse la reponse texte de l'IA et normalise la decision.
+ */
 function gp_ai_parse_decision(string $text): array
 {
     $clean = trim($text);
@@ -50,12 +54,16 @@ function gp_ai_parse_decision(string $text): array
     return ['decision' => 'needs_review', 'reason' => ''];
 }
 
+/**
+ * Appelle l'IA de verification de preuves (commentaire + image optionnelle).
+ */
 function gp_ai_verify_submission(array $config, string $comment, ?string $imagePath, ?string $imageMime): array
 {
     $endpoint = (string)($config['ai']['endpoint'] ?? '');
     $apiKey = (string)($config['ai']['key'] ?? '');
     $model = (string)($config['ai']['model'] ?? '');
 
+    // Si l'IA n'est pas configuree, fallback vers validation humaine
     if ($endpoint === '' || $apiKey === '' || $model === '') {
         return ['decision' => 'needs_review', 'reason' => "IA non configuree"]; 
     }
@@ -67,6 +75,7 @@ function gp_ai_verify_submission(array $config, string $comment, ?string $imageP
         ['type' => 'text', 'text' => $commentText],
     ];
 
+    // Ajout optionnel de la preuve photo en base64
     if ($imagePath && is_file($imagePath)) {
         $binary = file_get_contents($imagePath);
         if ($binary !== false) {
@@ -135,7 +144,7 @@ if ($defiId <= 0 || $actionId <= 0) {
     gp_send_json(400, ['message' => 'defi_id et action_id requis']);
 }
 
-// Gérer la photo de preuve
+// Gérer la photo de preuve ou un commentaire texte
 $preuve = '';
 $file   = $_FILES['preuvePhoto'] ?? null;
 $hasPhoto = $file && isset($file['tmp_name']) && $file['error'] === UPLOAD_ERR_OK && $file['size'] > 0;
@@ -143,6 +152,7 @@ $detectedMime = '';
 $photoPathForAi = null;
 
 if ($hasPhoto) {
+    // Validation stricte du format et du poids
     $allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
     $detectedMime = mime_content_type($file['tmp_name']);
     if (!in_array($detectedMime, $allowedMime, true)) {
@@ -202,6 +212,7 @@ $stmt = $pdo->prepare("
     WHERE Id_defi = :defi AND Id_actions = :action
 ");
 $stmt->execute([':defi' => $defiId, ':action' => $actionId]);
+// Verifier que l'action appartient bien au defi
 if (!$stmt->fetch()) {
     gp_send_json(400, ['message' => "Cette action n'appartient pas à ce défi"]);
 }
@@ -220,6 +231,7 @@ if (!$challengeRow) {
 }
 
 if ($teamId > 0) {
+    // Regle equipe: validation du defi precedent avant de continuer
     $stmt = $pdo->prepare("
         SELECT COUNT(*) AS nb
         FROM Employe e
@@ -285,6 +297,7 @@ $stmt->execute([
     ':emp'  => $userId,
     ':mois' => $challengeRow['mois'],
 ]);
+// Interdire une double validation pour le mois courant
 if ($stmt->fetch()) {
     gp_send_json(409, ['message' => 'Vous avez déjà validé ce défi ce mois-ci']);
 }
@@ -301,15 +314,18 @@ $stmt->execute([
     ':defi' => $defiId,
     ':emp'  => $userId,
 ]);
+// Interdire les soumissions multiples en attente
 if ($stmt->fetch()) {
     gp_send_json(409, ['message' => 'Une soumission est déjà en attente pour ce défi']);
 }
 
+// Verifier la preuve via IA (sinon file vers moderation)
 $aiResult = gp_ai_verify_submission($config, $proofText, $photoPathForAi, $detectedMime);
 $aiDecision = $aiResult['decision'] ?? 'needs_review';
 $aiReason = trim((string)($aiResult['reason'] ?? ''));
 
 if ($aiDecision === 'approved') {
+    // Auto-validation: creer une reponse approuvee + ligne Valider
     $commentaireAi = $aiReason !== '' ? ('IA: ' . $aiReason) : 'Approuve par IA';
 
     $stmt = $pdo->prepare("
@@ -350,6 +366,7 @@ if ($aiDecision === 'approved') {
     ]);
 }
 
+// Fallback moderation humaine
 $stmt = $pdo->prepare("
     INSERT INTO Reponse_Defi (Id_defi, Id_actions, Id_Employe, reponse_text)
     VALUES (:defi, :action, :emp, :reponse)

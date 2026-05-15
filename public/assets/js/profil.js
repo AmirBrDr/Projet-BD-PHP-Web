@@ -17,6 +17,11 @@
         }
     }
 
+    /**
+     * Effectue une requête GET vers l'API.
+     * @param {string} path - Le chemin de l'endpoint
+     * @returns {Promise<Object>} La réponse JSON
+     */
     async function apiGet(path) {
         const res = await fetch(API_BASE + path, {
             headers: { 'Authorization': 'Bearer ' + token() }
@@ -26,6 +31,12 @@
         return data;
     }
 
+    /**
+     * Effectue une requête POST vers l'API.
+     * @param {string} path - Le chemin de l'endpoint
+     * @param {Object} payload - Données à envoyer
+     * @returns {Promise<Object>} La réponse JSON
+     */
     async function apiPost(path, payload) {
         const res = await fetch(API_BASE + path, {
             method: 'POST',
@@ -45,6 +56,12 @@
         el.textContent = ((prenom || 'G').charAt(0) + (nom || 'P').charAt(0)).toUpperCase();
     }
 
+    /**
+     * Affiche l'avatar (ou les initiales par défaut) de l'utilisateur.
+     * @param {string|null} photoPath - Le chemin de la photo de profil
+     * @param {string} prenom - Le prénom de l'utilisateur
+     * @param {string} nom - Le nom de l'utilisateur
+     */
     function renderAvatar(photoPath, prenom, nom) {
         // Avatar principal (page)
         const photoEl = document.querySelector('[data-avatar-photo]');
@@ -68,6 +85,9 @@
         }
     }
 
+    /**
+     * Gère l'upload d'une nouvelle photo de profil (clic, sélection de fichier, requête API).
+     */
     function bindPhotoUpload() {
         const wrap = document.querySelector('[data-modal-avatar-wrap]');
         const input = document.querySelector('[data-modal-photo-input]');
@@ -101,6 +121,10 @@
         });
     }
 
+    /**
+     * Affiche les statistiques du profil de l'employé (points, CO2 évité, classement).
+     * @param {Object} stats - Les statistiques à afficher
+     */
     function renderStats(stats) {
         const host = document.querySelector('[data-profile-stats]');
         if (!host) return;
@@ -116,6 +140,10 @@
             </article>`).join('');
     }
 
+    /**
+     * Affiche la liste des badges remportés par l'employé.
+     * @param {Array} badges - Les données des badges
+     */
     function renderBadges(badges) {
         const host = document.querySelector('[data-badge-list]');
         if (!host) return;
@@ -131,6 +159,10 @@
             </li>`).join('');
     }
 
+    /**
+     * Affiche l'historique récent des défis terminés par l'employé.
+     * @param {Array} history - L'historique des défis
+     */
     function renderHistory(history) {
         const host = document.querySelector('[data-history-list]');
         if (!host) return;
@@ -145,6 +177,10 @@
             </li>`).join('');
     }
 
+    /**
+     * Met à jour les données de l'utilisateur dans le stockage local.
+     * @param {Object} user - Les informations de l'utilisateur
+     */
     function syncStoredUser(user) {
         let current = {};
         try { current = JSON.parse(localStorage.getItem('gp_user') || '{}'); } catch (_) { }
@@ -245,6 +281,10 @@
 
     // ── Edit profile modal ──
 
+    /**
+     * Gère la modale de modification de profil (pré-remplissage et soumission du formulaire).
+     * @param {Object} initialUser - Les données actuelles de l'utilisateur
+     */
     function bindEditModal(initialUser) {
         const form = document.querySelector('[data-edit-profile-form]');
         const feedback = document.querySelector('[data-edit-profile-feedback]');
@@ -310,6 +350,9 @@
 
     // ── Change password modal ──
 
+    /**
+     * Gère la modale de modification de mot de passe (validation et soumission API).
+     */
     function bindPasswordModal() {
         const form = document.querySelector('[data-pwd-form]');
         const feedback = document.querySelector('[data-pwd-feedback]');

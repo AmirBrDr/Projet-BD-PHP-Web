@@ -34,6 +34,7 @@ try {
     $action = trim((string)($body['action'] ?? ''));
 
     if ($action === 'request-enable') {
+        // Phase 1: generer et envoyer un code OTP par email
         if (!empty($user['two_factor_enabled'])) {
             gp_send_json(400, ['message' => 'La 2FA est déjà activée']);
         }
@@ -65,6 +66,7 @@ try {
         gp_send_json(200, ['message' => 'Code d\'activation envoyé par email']);
 
     } elseif ($action === 'confirm-enable') {
+        // Phase 2: verifier le code et activer la 2FA
         $otp = trim((string)($body['otp'] ?? ''));
         if ($otp === '') {
             gp_send_json(400, ['message' => 'Code OTP manquant']);
@@ -80,12 +82,14 @@ try {
         gp_send_json(200, ['message' => '2FA activée avec succès']);
 
     } elseif ($action === 'disable') {
+        // Desactivation immediate de la 2FA
         $stmt = $pdo->prepare('UPDATE utilisateur SET two_factor_enabled = FALSE, two_factor_code = NULL, two_factor_expires_at = NULL WHERE id_user = :id');
         $stmt->execute([':id' => $idUser]);
         
         gp_send_json(200, ['message' => '2FA désactivée avec succès']);
 
     } elseif ($action === 'status') {
+        // Retourne l'etat d'activation
         gp_send_json(200, ['two_factor_enabled' => !empty($user['two_factor_enabled'])]);
     } else {
         gp_send_json(400, ['message' => 'Action invalide']);

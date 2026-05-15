@@ -8,6 +8,12 @@
         return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
+    /**
+     * Exécute une requête vers l'API avec le token d'authentification.
+     * @param {string} action - L'endpoint ciblé ou paramètre 'action'
+     * @param {Object} options - Les options additionnelles (method, body, headers, params)
+     * @returns {Promise<Object>} Le JSON de la réponse parsé
+     */
     async function apiReq(action, options = {}) {
         const method = options.method || 'GET';
         const params = new URLSearchParams({ action, ...(options.params || {}) });
@@ -43,6 +49,10 @@
 
     // ── Accordion ──────────────────────────────────────────────────────────────
 
+    /**
+     * Construit et affiche l'accordéon contenant la liste des thématiques.
+     * @param {Array} themes - La liste des thématiques
+     */
     function renderCatalogue(themes) {
         const container = document.getElementById('catalogue-list');
         if (!container) return;
@@ -97,6 +107,11 @@
         });
     }
 
+    /**
+     * Charge les défis rattachés à une thématique spécifique au moment de l'ouverture de l'accordéon.
+     * @param {number} themeId - L'ID de la thématique
+     * @param {HTMLElement} wrapper - L'élément DOM dans lequel injecter les défis
+     */
     async function loadDefisForTheme(themeId, wrapper) {
         if (!wrapper || wrapper.dataset.loaded === 'true') return;
         try {
@@ -122,6 +137,9 @@
         }
     }
 
+    /**
+     * Charge la liste complète des thématiques pour alimenter le catalogue principal.
+     */
     async function loadCatalogue() {
         try {
             const res = await apiReq('catalogue_themes');
@@ -143,6 +161,10 @@
         if (el) { el.classList.add('hidden'); el.setAttribute('aria-hidden', 'true'); }
     }
 
+    /**
+     * Soumet le formulaire de création d'une nouvelle thématique et met à jour la liste.
+     * @param {Event} e - L'événement du formulaire
+     */
     async function submitThemeForm(e) {
         e.preventDefault();
         setFormAlert('theme-form-alert', '');
@@ -186,6 +208,11 @@
         document.getElementById('defi-actions-container')?.appendChild(row);
     }
 
+    /**
+     * Ouvre la fenêtre modale de création d'un nouveau défi.
+     * Coche par défaut les thématiques fournies en paramètres.
+     * @param {Array<number>} preselectedThemeIds - Les ID des thématiques à préselectionner
+     */
     function openDefiModal(preselectedThemeIds = []) {
         const container = document.getElementById('defi-themes-checkboxes');
         if (container) {
@@ -202,6 +229,11 @@
         openOverlay('defi-modal-overlay');
     }
 
+    /**
+     * Traite la soumission du formulaire de création d'un défi
+     * avec ses actions associées et ses thématiques.
+     * @param {Event} e - L'événement de soumission
+     */
     async function submitDefiForm(e) {
         e.preventDefault();
         setFormAlert('defi-form-alert', '');

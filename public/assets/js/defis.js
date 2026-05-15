@@ -3,6 +3,11 @@
     const API_BASE = '/api';
     const token = () => localStorage.getItem('gp_token');
 
+    /**
+     * Requete GET securisee vers l'API employe.
+     * @param {string} path
+     * @returns {Promise<any>}
+     */
     async function apiGet(path) {
         const res = await fetch(API_BASE + path, {
             headers: { 'Authorization': 'Bearer ' + token() }
@@ -14,17 +19,29 @@
     let allDefis = [];
     let currentFilter = 'all';
 
+    /**
+     * Applique le filtre de statut sur la liste des defis.
+     * @returns {any[]}
+     */
     function filtered() {
         if (currentFilter === 'all') return allDefis;
         return allDefis.filter(d => d.statut === currentFilter);
     }
 
+    /**
+     * Retourne le badge visuel selon le statut.
+     * @param {object} defi
+     */
     function bulletLabel(defi) {
         if (defi.statut === 'completed') return '✓';
         if (defi.statut === 'locked') return '🔒';
         return String(defi.ordre);
     }
 
+    /**
+     * Genere le bouton d'action selon le statut du defi.
+     * @param {object} defi
+     */
     function actionButton(defi) {
         if (defi.statut === 'locked') {
             return '<button class="step-button" type="button" disabled>Bloqué par l\'équipe</button>';
@@ -33,6 +50,10 @@
         return `<a class="step-link" href="detailDefi.html?id=${defi.id}">${label}</a>`;
     }
 
+    /**
+     * Rend le resume de progression d'equipe.
+     * @param {object} data
+     */
     function renderTeamProgress(data) {
         const host = document.querySelector('[data-team-progress]');
         if (!host) return;
@@ -55,6 +76,10 @@
             </div>`;
     }
 
+    /**
+     * Rend les pastilles des membres valides/en attente.
+     * @param {object} progress
+     */
     function renderMemberChips(progress) {
         const validated = progress.validated_names || [];
         const pending = progress.pending_names || [];
@@ -65,6 +90,9 @@
         </div>`;
     }
 
+    /**
+     * Rend la timeline des defis selon le filtre courant.
+     */
     function renderTimeline() {
         const host = document.querySelector('[data-timeline-list]');
         if (!host) return;
@@ -93,6 +121,9 @@
             </article>`).join('');
     }
 
+    /**
+     * Attache les evenements aux filtres de statut.
+     */
     function bindFilters() {
         document.querySelectorAll('[data-filter]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -107,6 +138,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
         bindFilters();
         try {
+            // API: defis du mois + progression
             const data = await apiGet('/modules/employee/challenges.php');
 
             if (data.theme) {

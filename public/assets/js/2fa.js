@@ -13,6 +13,10 @@
 
     let isEnabled = false;
 
+    /**
+     * Recupere l'etat 2FA depuis l'API securisee.
+     * @returns {Promise<void>}
+     */
     async function fetchStatus() {
         try {
             const token = localStorage.getItem("gp_token");
@@ -36,6 +40,9 @@
         }
     }
 
+    /**
+     * Met a jour l'interface selon l'etat 2FA.
+     */
     function updateUI() {
         statusEl.textContent = "Statut : " + (isEnabled ? "Activé" : "Désactivé");
         statusEl.style.color = isEnabled ? "var(--gp-success, #2bd47c)" : "inherit";
@@ -55,6 +62,7 @@
             // Disable
             if (!confirm("Voulez-vous vraiment désactiver la 2FA ?")) return;
             try {
+            // Appel API: desactivation 2FA
                 const res = await fetch("/api/modules/profile/2fa.php", {
                     method: "POST",
                     headers: {
@@ -76,6 +84,7 @@
             // Enable flow
             btnToggle.disabled = true;
             try {
+            // Appel API: demande d'OTP par email
                 const res = await fetch("/api/modules/profile/2fa.php", {
                     method: "POST",
                     headers: {
@@ -116,6 +125,7 @@
         const token = localStorage.getItem("gp_token");
         btnConfirm.disabled = true;
         try {
+            // Appel API: confirmation d'activation 2FA
             const res = await fetch("/api/modules/profile/2fa.php", {
                 method: "POST",
                 headers: {

@@ -17,6 +17,7 @@ $action = trim((string)($_GET['action'] ?? ''));
 
 try {
     if ($method === 'GET' && $action === 'dashboard_summary') {
+        // KPIs animateur (defis, thematiques, points potentiels)
         $stmt = $pdo->prepare(
             'SELECT
                 COUNT(DISTINCT d.Id_defi) AS total_defis,
@@ -51,6 +52,7 @@ try {
     }
 
     if ($method === 'GET' && $action === 'themes') {
+        // Thematique + prochain ordre disponible pour un mois donne
         $mois = trim((string)($_GET['mois'] ?? ''));
         if ($mois === '') {
             $mois = date('Y-m');
@@ -79,6 +81,7 @@ try {
     }
 
     if ($method === 'GET' && $action === 'challenges') {
+        // Liste des defis du mois avec stats de moderation
         $stmt = $pdo->prepare(
             'SELECT
                 d.Id_defi,
@@ -125,6 +128,7 @@ try {
     }
 
     if ($method === 'GET' && $action === 'challenge_detail') {
+        // Detail d'un defi + actions associees
         $challengeId = (int)($_GET['id'] ?? 0);
         if ($challengeId <= 0) {
             gp_send_json(400, ['message' => 'Identifiant du defis invalide']);
@@ -185,6 +189,7 @@ try {
     }
 
     if ($method === 'GET' && $action === 'blocked_employees') {
+        // Liste des employes bloques pour un defi
         $defiId = (int)($_GET['defi_id'] ?? 0);
         if ($defiId <= 0) {
             gp_send_json(400, ['message' => 'defi_id requis']);
@@ -217,6 +222,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'block_employee') {
+        // Blocage d'un employe pour un defi donne
         $body = gp_read_json_body();
         $defiId = (int)($body['defi_id'] ?? 0);
         $employeId = (int)($body['employe_id'] ?? 0);
@@ -262,6 +268,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'unblock_employee') {
+        // Deblocage d'un employe
         $body = gp_read_json_body();
         $defiId = (int)($body['defi_id'] ?? 0);
         $employeId = (int)($body['employe_id'] ?? 0);
@@ -291,10 +298,12 @@ try {
     }
 
     if ($method === 'POST' && $action === 'challenge_create') {
+        // Creation complete d'un defi (defi + regroupe + forum + actions)
         $body = gp_read_json_body();
         $payload = gp_validate_challenge_payload($body);
 
         try {
+            // Transaction pour garantir l'insertion coherente
             $pdo->beginTransaction();
 
             $stmt = $pdo->prepare(
@@ -380,6 +389,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'challenge_update') {
+        // Mise a jour d'un defi existant (avec reprogrammation)
         $challengeId = (int)($_GET['id'] ?? 0);
         if ($challengeId <= 0) {
             gp_send_json(400, ['message' => 'Identifiant du defis invalide']);
@@ -500,6 +510,7 @@ try {
                 ]);
             }
 
+            // Reinitialiser les validations et actions liees
             $stmtDeleteValider = $pdo->prepare(
                 'DELETE FROM Valider
                  WHERE Id_defi = :challenge_id'
@@ -555,6 +566,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'challenge_delete') {
+        // Suppression complete d'un defi et de ses dependances
         $challengeId = (int)($_GET['id'] ?? 0);
         if ($challengeId <= 0) {
             gp_send_json(400, ['message' => 'Identifiant du defis invalide']);
@@ -634,6 +646,7 @@ try {
     }
 
     if ($method === 'GET' && $action === 'replies') {
+        // Liste des reponses employes a moderer
         $status = strtolower(trim((string)($_GET['status'] ?? 'all')));
         $challengeFilter = (int)($_GET['challenge_id'] ?? 0);
         $limit = (int)($_GET['limit'] ?? 0);
@@ -717,6 +730,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'reply_decision') {
+        // Approuver ou refuser une reponse d'employe
         $replyId = (int)($_GET['id'] ?? 0);
         if ($replyId <= 0) {
             gp_send_json(400, ['message' => 'Identifiant de la reponse invalide']);
@@ -763,6 +777,7 @@ try {
             gp_send_json(404, ['message' => 'Reponse introuvable']);
         }
 
+        // Si approuve, enregistrer la validation officielle
         if ($newStatus === 'approved' && !empty($reply['id_actions'])) {
             $stmtMois = $pdo->prepare(
                 'SELECT r.mois FROM Regroupe r
@@ -800,6 +815,7 @@ try {
     // ─── CATALOGUE : thematiques ───────────────────────────────────────────────
 
     if ($method === 'GET' && $action === 'catalogue_themes') {
+        // Catalogue: liste des thematiques et nombre de defis
         $stmt = $pdo->query(
             'SELECT t.Id_thematique, t.nomTheme, t.descriptionTheme,
                     COUNT(a.Id_defi) AS nb_defis
@@ -812,6 +828,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'catalogue_theme_create') {
+        // Catalogue: creation d'une nouvelle thematique
         $body = gp_read_json_body();
         $nomTheme = trim((string)($body['nomTheme'] ?? ''));
         $descriptionTheme = trim((string)($body['descriptionTheme'] ?? ''));
@@ -829,6 +846,7 @@ try {
     // ─── CATALOGUE : défis ─────────────────────────────────────────────────────
 
     if ($method === 'GET' && $action === 'catalogue_defis_by_theme') {
+        // Catalogue: defis d'une thematique + statut de programmation
         $themeId = (int)($_GET['theme_id'] ?? 0);
         if ($themeId <= 0) {
             gp_send_json(400, ['message' => 'theme_id requis']);
@@ -846,6 +864,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'catalogue_defi_create') {
+        // Catalogue: creation d'un defi avec actions et thematiques
         $body = gp_read_json_body();
         $nomDefi = trim((string)($body['nomDefi'] ?? ''));
         $descriptionDefi = trim((string)($body['descriptionDefi'] ?? ''));
@@ -901,7 +920,7 @@ try {
         }
     }
 
-    // Permet de lister les défis d'une thématique qui ne sont pas encore programmés pour le mois en cours ou les mois suivants
+    // Permet de lister les defis d'une thematique non programmes ce mois-ci
     if ($method === 'GET' && $action === 'catalogue_defis_available') {
         $themeId = (int)($_GET['theme_id'] ?? 0);
         if ($themeId <= 0) gp_send_json(400, ['message' => 'theme_id requis']);
@@ -925,6 +944,7 @@ try {
     // ─── PLANNING MENSUEL ──────────────────────────────────────────────────────
 
     if ($method === 'POST' && $action === 'defis_month_save') {
+        // Sauvegarde du planning mensuel d'une thematique
         $body = gp_read_json_body();
         $themeId = (int)($body['thematique_id'] ?? 0);
         $defiIds = array_values(array_unique(array_filter(array_map('intval', (array)($body['defi_ids'] ?? [])))));
@@ -961,6 +981,7 @@ try {
     }
 
     if ($method === 'POST' && $action === 'defi_month_remove') {
+        // Retire un defi du planning du mois courant
         $challengeId = (int)($_GET['id'] ?? 0);
         if ($challengeId <= 0) {
             gp_send_json(400, ['message' => 'Identifiant invalide']);
@@ -988,6 +1009,9 @@ try {
     gp_send_json(500, ['message' => $message]);
 }
 
+/**
+ * Exige un utilisateur authentifie avec un role precise.
+ */
 function gp_require_authenticated_user(array $config, string $requiredRole): array
 {
     $token = gp_get_bearer_token();
@@ -1019,6 +1043,9 @@ function gp_require_authenticated_user(array $config, string $requiredRole): arr
     ];
 }
 
+/**
+ * Verifie l'existence de l'animateur en base.
+ */
 function gp_assert_animateur_exists(PDO $pdo, int $animateurId): void
 {
     $stmt = $pdo->prepare(
@@ -1034,6 +1061,9 @@ function gp_assert_animateur_exists(PDO $pdo, int $animateurId): void
     }
 }
 
+/**
+ * Verifie que l'animateur est proprietaire du defi.
+ */
 function gp_assert_animateur_owns_challenge(PDO $pdo, int $animateurId, int $challengeId): void
 {
     $stmt = $pdo->prepare(
@@ -1052,6 +1082,9 @@ function gp_assert_animateur_owns_challenge(PDO $pdo, int $animateurId, int $cha
     }
 }
 
+/**
+ * Valide et normalise la charge utile d'un defi.
+ */
 function gp_validate_challenge_payload(array $body): array
 {
     $nomDefi = trim((string)($body['nomDefi'] ?? ''));
@@ -1124,6 +1157,9 @@ function gp_validate_challenge_payload(array $body): array
     ];
 }
 
+/**
+ * Nettoie un message d'erreur DB pour l'exposition client.
+ */
 function gp_clean_db_message(string $message): string
 {
     $trimmed = trim($message);

@@ -8,6 +8,9 @@
         refs: null,
     };
 
+    /**
+     * Injecte les styles runtime du dialog.
+     */
     function ensureStyles() {
         if (document.getElementById("gp-runtime-dialog-style")) {
             return;
@@ -126,6 +129,10 @@
         document.head.appendChild(style);
     }
 
+    /**
+     * Termine le dialog et renvoie la valeur a l'appelant.
+     * @param {any} value
+     */
     function finalize(value) {
         if (!state.active || !state.refs) {
             return;
@@ -143,6 +150,9 @@
         resolve(value);
     }
 
+    /**
+     * Cree le markup du dialog runtime et garde les refs DOM.
+     */
     function ensureRefs() {
         if (state.refs) {
             return state.refs;
@@ -187,6 +197,7 @@
             finalize(state.active.type === "confirm" ? false : null);
         };
 
+        // Fermeture si clic hors de la carte
         overlay.addEventListener("click", (event) => {
             if (event.target === overlay) {
                 cancelActiveDialog();
@@ -208,6 +219,7 @@
             finalize(true);
         });
 
+        // Fermeture via Echap
         document.addEventListener("keydown", (event) => {
             if (!state.active || refs.overlay.hidden) {
                 return;
@@ -223,6 +235,12 @@
         return refs;
     }
 
+    /**
+     * Ouvre un dialog de confirmation ou saisie.
+     * @param {"confirm"|"prompt"} type
+     * @param {object} options
+     * @returns {Promise<any>}
+     */
     function open(type, options = {}) {
         const refs = ensureRefs();
 

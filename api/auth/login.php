@@ -42,6 +42,7 @@ try {
     if (!empty($user['two_factor_enabled'])) {
         $otp = trim((string)($body['otp'] ?? ''));
         if ($otp === '') {
+            // Mode challenge: générer et envoyer un code temporaire
             $code = sprintf('%06d', mt_rand(0, 999999));
             $expires = date('Y-m-d H:i:s', time() + 600);
             
@@ -68,6 +69,7 @@ try {
             
             gp_send_json(202, ['message' => 'Code 2FA envoyé par email', 'requires_2fa' => true]);
         } else {
+            // Mode validation: vérifier le code reçu et sa date d'expiration
             if (empty($user['two_factor_expires_at']) || strtotime((string)$user['two_factor_expires_at']) < time() || empty($user['two_factor_code']) || !password_verify($otp, (string)$user['two_factor_code'])) {
                 gp_send_json(401, ['message' => 'Code 2FA invalide ou expiré']);
             }

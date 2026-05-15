@@ -83,7 +83,7 @@ function security_change_password(PDO $pdo, int $userId, string $currentPassword
         gp_send_json(400, ['message' => 'Le mot de passe doit contenir au moins une majuscule et un chiffre']);
     }
 
-    // Hasher et mettre à jour
+    // Hash fort (Argon2id) et mise a jour atomique
     $hashedPassword = password_hash($newPassword, PASSWORD_ARGON2ID);
     
     // Update password
@@ -103,6 +103,9 @@ function security_change_password(PDO $pdo, int $userId, string $currentPassword
     }
 }
 
+/**
+ * Encode une chaine en Base32 (pour secret TOTP).
+ */
 function base32_encode(string $data): string
 {
     $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
@@ -127,7 +130,7 @@ function base32_encode(string $data): string
 }
 
 /**
- * Active ou désactive l'authentification à deux facteurs (placeholder)
+ * Active ou desactive la 2FA et retourne le secret TOTP.
  */
 function security_toggle_2fa(PDO $pdo, int $userId, bool $enable): array
 {
@@ -140,6 +143,7 @@ function security_toggle_2fa(PDO $pdo, int $userId, bool $enable): array
     }
 
     if ($enable) {
+        // Generation d'un secret TOTP compatible Google Authenticator
         $secret = base32_encode(random_bytes(20));
         $email = $user['email'];
         $issuer = 'GreenPulse';
@@ -186,6 +190,9 @@ function security_get_sessions(PDO $pdo, int $userId): array
     }, $sessions);
 }
 
+/**
+ * Invalide une session active pour l'utilisateur.
+ */
 function security_logout_session(PDO $pdo, int $userId, int $sessionId): void
 {
     // Vérifier que la session appartient à l'utilisateur

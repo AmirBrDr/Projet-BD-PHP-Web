@@ -6,6 +6,9 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../bootstrap.php';
 
+/**
+ * Exige un administrateur via JWT.
+ */
 function teams_require_admin(array $config): void
 {
     // Récupère et valide le token Bearer
@@ -27,6 +30,9 @@ function teams_require_admin(array $config): void
     }
 }
 
+/**
+ * Liste les equipes avec effectifs.
+ */
 function teams_list(PDO $pdo): void
 {
     // Récupère la liste des équipes avec leur statut et nombre de membres
@@ -48,6 +54,9 @@ function teams_list(PDO $pdo): void
     gp_send_json(200, ['items' => $rows]);
 }
 
+/**
+ * Cree une equipe si le nom est unique.
+ */
 function teams_create(PDO $pdo): void
 {
     // Lit le corps JSON et extrait le nom d'équipe
@@ -59,7 +68,7 @@ function teams_create(PDO $pdo): void
         gp_send_json(400, ['message' => 'Nom d\'équipe requis']);
     }
 
-    // Vérifie que l'équipe n'existe pas déjà (búsqueda insensible à la casse)
+    // Verifie que l'equipe n'existe pas deja (insensible a la casse)
     $stmt = $pdo->prepare('SELECT id_equipe FROM equipe WHERE LOWER(nomequipe) = LOWER(:nom) LIMIT 1');
     $stmt->execute([':nom' => $name]);
     if ($stmt->fetch()) {

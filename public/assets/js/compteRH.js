@@ -34,6 +34,9 @@ class CompteRHManager {
         this.renderSessions();
     }
 
+    /**
+     * Charge les données stockées localement (profil, sécurité, sessions).
+     */
     loadStoredData() {
         const profileRaw = localStorage.getItem(this.storageKeys.profile);
         if (profileRaw) {
@@ -65,12 +68,19 @@ class CompteRHManager {
 
     }
 
+    /**
+     * Sauvegarde toutes les informations de l'utilisateur, sécurité et sessions dans le localStorage.
+     */
     saveAll() {
         localStorage.setItem(this.storageKeys.profile, JSON.stringify(this.user));
         localStorage.setItem(this.storageKeys.security, JSON.stringify(this.securityInfo));
         localStorage.setItem(this.storageKeys.sessions, JSON.stringify(this.sessions));
     }
 
+    /**
+     * Charge le profil de l'utilisateur depuis l'API.
+     * @returns {Promise<void>}
+     */
     async loadProfile() {
         try {
             const token = localStorage.getItem('gp_token') || '';
@@ -100,6 +110,10 @@ class CompteRHManager {
         }
     }
 
+    /**
+     * Charge les informations de sécurité et les sessions actives depuis l'API.
+     * @returns {Promise<void>}
+     */
     async loadSecurityInfo() {
         try {
             const token = localStorage.getItem('gp_token') || '';
@@ -153,6 +167,10 @@ class CompteRHManager {
         }
     }
 
+    /**
+     * Rafraîchit toutes les données (profil et sécurité) et met à jour l'affichage.
+     * @returns {Promise<void>}
+     */
     async refreshData() {
         await this.loadProfile();
         await this.loadSecurityInfo();
@@ -162,6 +180,9 @@ class CompteRHManager {
         this.renderSessions();
     }
 
+    /**
+     * S'assure qu'au moins la session courante existe dans la liste des sessions.
+     */
     ensureSessions() {
         if (this.sessions.length > 0) {
             return;
@@ -178,6 +199,9 @@ class CompteRHManager {
         ];
     }
 
+    /**
+     * Configure les écouteurs d'événements pour les formulaires, inputs et boutons.
+     */
     setupEventListeners() {
         const securityForm = document.getElementById('security-params-form');
         if (securityForm) {
@@ -212,6 +236,9 @@ class CompteRHManager {
         });
     }
 
+    /**
+     * Met à jour l'affichage du profil dans le DOM (noms, emails, rôle, avatar).
+     */
     updateProfileDisplay() {
         const fullName = `${this.user.prenom} ${this.user.nom}`.trim();
 
@@ -268,6 +295,9 @@ class CompteRHManager {
         }
     }
 
+    /**
+     * Met à jour l'affichage de l'onglet sécurité (mot de passe, 2FA, dernière connexion).
+     */
     updateSecurityDisplay() {
         this.clearTwoFAQr();
 
@@ -359,6 +389,10 @@ class CompteRHManager {
         }).join('');
     }
 
+    /**
+     * Gère le téléversement de la photo de profil vers l'API.
+     * @param {Event} e - L'événement de changement d'input de fichier
+     */
     async handleProfilePictureUpload(e) {
         const file = e.target.files[0];
         if (!file) {
@@ -458,6 +492,10 @@ class CompteRHManager {
         e.target.setCustomValidity('');
     }
 
+    /**
+     * Gère la soumission du formulaire des paramètres de sécurité (changement de mot de passe, email de récupération).
+     * @param {Event} e - L'événement de soumission du formulaire
+     */
     async handleSecurityParamsSubmit(e) {
         e.preventDefault();
 

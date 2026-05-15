@@ -4,6 +4,7 @@
 
 declare(strict_types=1);
 
+// Charger les variables d'environnement depuis .env si disponible
 $envPath = dirname(__DIR__) . '/.env';
 if (is_file($envPath) && is_readable($envPath)) {
     $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
@@ -37,6 +38,7 @@ if (is_file($envPath) && is_readable($envPath)) {
     }
 }
 
+// Configuration par défaut (surchargée par env puis config.local.php)
 $config = [
     'debug' => (getenv('GP_DEBUG') === '1' || strtolower((string)getenv('GP_DEBUG')) === 'true'),
     'app' => [
@@ -78,6 +80,7 @@ $config = [
     ],
 ];
 
+// Surcharge locale optionnelle (ex: secrets de dev)
 $localPath = __DIR__ . '/config.local.php';
 if (is_file($localPath)) {
     $local = require $localPath;

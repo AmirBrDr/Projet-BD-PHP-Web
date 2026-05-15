@@ -53,6 +53,12 @@
         el.modalAlert.textContent = msg;
     }
 
+    /**
+     * Exécute une requête API avec le token d'authentification.
+     * @param {string} action - L'action ou l'endpoint cible
+     * @param {Object} options - Méthode, paramètres d'URL, corps de la requête, etc.
+     * @returns {Promise<Object>} Les données JSON de la réponse
+     */
     async function apiReq(action, options = {}) {
         const method = options.method || 'GET';
         const params = new URLSearchParams({ action, ...(options.params || {}) });
@@ -82,6 +88,10 @@
 
     // ── Affichage de la liste des défis ────────────────────────────────────────
 
+    /**
+     * Affiche la liste des défis sélectionnés pour le mois en cours, 
+     * en tenant compte du filtre par thématique.
+     */
     function renderChallenges() {
         const selectedTheme = el.filtreTheme?.value || 'all';
         const visible = selectedTheme === 'all'
@@ -125,6 +135,10 @@
             </article>`).join('');
     }
 
+    /**
+     * Charge les défis programmés pour le mois en cours depuis l'API.
+     * @returns {Promise<Array>} La liste des défis
+     */
     async function loadCurrentMonthChallenges() {
         const res = await apiReq('challenges');
         const allChallenges = res?.data || [];
@@ -177,6 +191,10 @@
         syncSaveBtn();
     }
 
+    /**
+     * Ajoute dynamiquement un champ "slot" (menu déroulant) pour sélectionner un défi
+     * à planifier dans le mois.
+     */
     function addDefiSlot() {
         if (!el.modalSlots) return;
         const orderNum = state.baseOrder + getSlotCount();
@@ -213,11 +231,19 @@
         syncSaveBtn();
     }
 
+    /**
+     * Charge les défis d'une thématique depuis l'API pour remplir les "slots" de planification.
+     * @param {number|string} themeId - L'ID de la thématique
+     */
     async function loadAvailableDefis(themeId) {
         const res = await apiReq('catalogue_defis_available', { params: { theme_id: themeId } });
         state.availableDefis = res?.data || [];
     }
 
+    /**
+     * Ouvre la fenêtre modale permettant d'ajouter ou planifier des défis pour le mois.
+     * Initialise l'interface en fonction du thème déjà sélectionné ou non.
+     */
     async function openMonthModal() {
         setModalAlert('');
         if (el.modalSlots) el.modalSlots.innerHTML = '';
@@ -295,6 +321,10 @@
         }
     }
 
+    /**
+     * Sauvegarde la planification des défis choisis pour le mois courant vers l'API.
+     * Vérifie la validité de la sélection (pas de doublons, etc.).
+     */
     async function saveMonthDefis() {
         setModalAlert('');
         if (!state.selectedThemeId) { setModalAlert('Choisissez une thematique.'); return; }
@@ -339,6 +369,10 @@
 
     // ── Suppression ────────────────────────────────────────────────────────────
 
+    /**
+     * Demande confirmation puis retire un défi de la planification du mois en cours.
+     * @param {number|string} challengeId - L'ID du défi à supprimer
+     */
     async function deleteChallenge(challengeId) {
         const confirmed = await askConfirm('Retirer ce defi du mois en cours ?', {
             title: 'Retirer du mois', confirmText: 'Retirer', cancelText: 'Annuler', tone: 'danger',
@@ -355,6 +389,9 @@
 
     // ── Init ───────────────────────────────────────────────────────────────────
 
+    /**
+     * Initialise la page en chargeant les défis du mois et en mettant à jour l'affichage.
+     */
     async function init() {
         try {
             await loadCurrentMonthChallenges();

@@ -22,6 +22,7 @@ if (gp_normalize_role($claims['role'] ?? '') !== 'employe') {
 $pdo    = gp_pdo($config);
 $userId = (int) $claims['sub'];
 
+// Recuperer l'equipe de l'employe pour surlignage cote frontend
 $stmt = $pdo->prepare("
     SELECT eq.Id_equipe AS equipe_id
     FROM Equipe eq
@@ -33,6 +34,7 @@ $stmt->execute([':id' => $userId]);
 $myTeamRow = $stmt->fetch();
 $myTeamId  = $myTeamRow ? (int) $myTeamRow['equipe_id'] : 0;
 
+// Classement global des equipes par points
 $stmt = $pdo->query("
     SELECT eq.Id_equipe AS equipe_id,
            eq.nomEquipe,

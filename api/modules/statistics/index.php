@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../bootstrap.php';
 header('Content-Type: application/json');
 $pdo = gp_pdo($config);
 
-// --- 1. Stats globales ---
+// --- 1. Stats globales (mois courant uniquement) ---
 $stmt = $pdo->query("
     SELECT 
         COUNT(DISTINCT d.Id_defi) AS total_defis,
@@ -22,7 +22,7 @@ $stmt = $pdo->query("
 ");
 $globales = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// --- 2. Participants par défi ---
+// --- 2. Participants par défi (mois courant) ---
 $stmt2 = $pdo->query("
     SELECT 
         d.nomDefi,
@@ -40,7 +40,7 @@ $stmt2 = $pdo->query("
 ");
 $parDefi = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
-// --- 3. Stats par thématique ---
+// --- 3. Stats par thématique (mois courant) ---
 $stmt3 = $pdo->query("
     SELECT 
         t.nomTheme,

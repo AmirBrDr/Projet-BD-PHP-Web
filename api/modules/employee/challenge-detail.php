@@ -29,7 +29,7 @@ gp_ensure_defi_block_table($pdo);
 gp_ensure_replies_table($pdo);
 $userId = (int) $claims['sub'];
 
-// Info défi + thématique
+// Info defi + thematique (mois courant)
 $stmt = $pdo->prepare("
     SELECT d.Id_defi, d.nomDefi, d.descriptionDefi, d.nbPointsDefi, d.nbCO2Defi, d.niveauDefi,
            t.nomTheme
@@ -47,7 +47,7 @@ if (!$defi) {
     gp_send_json(404, ['message' => 'Défi introuvable']);
 }
 
-// Actions du défi avec statut validé par l'employé — mois courant uniquement
+// Actions du defi avec statut valide par l'employe — mois courant uniquement
 $stmt = $pdo->prepare("
     SELECT a.Id_actions, a.nomAction, a.descriptionAction,
            EXISTS(
@@ -62,7 +62,7 @@ $stmt = $pdo->prepare("
 $stmt->execute([':defi_id' => $defiId, ':emp_id' => $userId, ':defi_id2' => $defiId]);
 $actions = $stmt->fetchAll();
 
-// Messages du forum
+// Messages du forum (derniers echanges)
 $stmt = $pdo->prepare("
     SELECT m.contenuMessage, m.dateMessage, u.prenomUser, u.nomUser
     FROM Message m
@@ -75,7 +75,7 @@ $stmt = $pdo->prepare("
 $stmt->execute([':id' => $defiId]);
 $messages = $stmt->fetchAll();
 
-// Statut blocage du défi pour cet employé
+// Statut blocage du defi pour cet employe
 $stmt = $pdo->prepare("\n    SELECT motif, date_blocage\n    FROM Defi_Employe_Block\n    WHERE Id_defi = :defi_id AND Id_Employe = :emp_id\n    LIMIT 1\n");
 $stmt->execute([':defi_id' => $defiId, ':emp_id' => $userId]);
 $blockRow = $stmt->fetch();
@@ -83,7 +83,7 @@ $isBlocked = (bool) $blockRow;
 $blockReason = $blockRow ? (string) ($blockRow['motif'] ?? '') : '';
 $blockDate = $blockRow ? ($blockRow['date_blocage'] ?? null) : null;
 
-// Historique des validations de l'employé pour ce défi
+// Historique des validations de l'employe pour ce defi
 $stmt = $pdo->prepare("
     SELECT a.nomAction, v.date_validation, v.preuve
     FROM Valider v

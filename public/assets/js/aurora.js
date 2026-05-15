@@ -115,6 +115,11 @@ const defaultOptions = {
   speed: 1.6,
 };
 
+/**
+ * Initialise l'animation WebGL d'aurore boréale en arrière-plan.
+ * @param {Object} userOptions - Options personnalisées (couleurs, vitesse, etc.)
+ * @returns {Function} Une fonction pour nettoyer et détruire l'animation
+ */
 function initAurora(userOptions = {}) {
   const options = { ...defaultOptions, ...userOptions };
   const container = options.container || document.querySelector(".aurora-bg");

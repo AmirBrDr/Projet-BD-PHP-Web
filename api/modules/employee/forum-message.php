@@ -30,6 +30,7 @@ $message = trim((string) ($body['message'] ?? ''));
 if ($defiId <= 0) {
     gp_send_json(400, ['message' => 'defi_id requis']);
 }
+// Validation simple de contenu (anti-spam basique)
 if ($message === '') {
     gp_send_json(400, ['message' => 'Le message ne peut pas être vide']);
 }
@@ -52,7 +53,7 @@ if ($stmt->fetch()) {
     gp_send_json(403, ['message' => 'Vous etes bloque pour ce defi']);
 }
 
-// Trouver ou créer le forum du défi pour le mois courant
+// Trouver ou creer le forum du defi pour le mois courant
 $stmt = $pdo->prepare("
     SELECT Id_forum FROM Forum
     WHERE Id_defi = :id AND date_trunc('month', mois) = date_trunc('month', CURRENT_DATE)
@@ -62,7 +63,7 @@ $stmt->execute([':id' => $defiId]);
 $forumRow = $stmt->fetch();
 
 if (!$forumRow) {
-    // Récupérer le nom du défi pour nommer le forum
+    // Recuperer le nom du defi pour nommer le forum
     $stmt = $pdo->prepare("SELECT nomDefi FROM Defi WHERE Id_defi = :id");
     $stmt->execute([':id' => $defiId]);
     $defiRow = $stmt->fetch();
@@ -81,6 +82,7 @@ if (!$forumRow) {
     $forumId = (int) $forumRow['id_forum'];
 }
 
+// Enregistrer le message dans le forum courant
 $stmt = $pdo->prepare("
     INSERT INTO Message (contenuMessage, Id_Employe, Id_forum, dateMessage) VALUES (:msg, :emp, :forum, :date)
 ");

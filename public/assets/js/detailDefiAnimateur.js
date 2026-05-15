@@ -27,6 +27,11 @@
     let lastMessages = [];
     let blockedEmployees = new Set();
 
+    /**
+     * Effectue une requête GET vers l'API.
+     * @param {string} path - Le chemin de l'endpoint
+     * @returns {Promise<Object>} La réponse de l'API au format JSON
+     */
     async function apiGet(path) {
         const response = await fetch(`${API_BASE}${path}`, {
             headers: token() ? { Authorization: `Bearer ${token()}` } : {},
@@ -38,6 +43,12 @@
         return json;
     }
 
+    /**
+     * Effectue une requête POST vers l'API.
+     * @param {string} path - Le chemin de l'endpoint
+     * @param {Object} body - Les données à envoyer dans le corps de la requête
+     * @returns {Promise<Object>} La réponse de l'API au format JSON
+     */
     async function apiPost(path, body) {
         const response = await fetch(`${API_BASE}${path}`, {
             method: "POST",
@@ -71,6 +82,10 @@
         element.classList.toggle("hidden", hidden);
     }
 
+    /**
+     * Affiche un message d'erreur et cache le contenu principal.
+     * @param {string} message - Le message d'erreur à afficher
+     */
     function afficherErreur(message) {
         setHidden(loadingEl, true);
         setHidden(contenuEl, true);
@@ -81,6 +96,10 @@
         }
     }
 
+    /**
+     * Met à jour les éléments HTML de la bannière (Hero) avec les informations du défi.
+     * @param {Object} defi - Les données du défi
+     */
     function renderHero(defi) {
         if (heroThemeEl) {
             heroThemeEl.innerHTML = `<i class="fas fa-tag"></i> ${escapeHtml(defi.nomTheme || defi.nomtheme || "Thématique")}`;
@@ -113,6 +132,10 @@
         document.title = `GreenPulse - ${defi.nomDefi || defi.nomdefi || "Détail du défi"}`;
     }
 
+    /**
+     * Affiche la liste des actions requises pour valider le défi.
+     * @param {Array<Object>} actions - La liste des actions
+     */
     function renderActions(actions) {
         if (!actionsListEl) {
             return;
@@ -145,6 +168,10 @@
         });
     }
 
+    /**
+     * Affiche les messages du forum liés à ce défi, en incluant les actions de modération (bloquer/débloquer).
+     * @param {Array<Object>} messages - La liste des messages
+     */
     function renderForum(messages) {
         if (!forumMessagesEl || !forumVideEl) {
             return;
@@ -213,6 +240,9 @@
         });
     }
 
+    /**
+     * Charge la liste des employés bloqués pour ce défi depuis l'API.
+     */
     async function loadBlockedEmployees() {
         if (!defiId) {
             return;
@@ -227,6 +257,10 @@
         );
     }
 
+    /**
+     * Bloque un employé pour l'empêcher de publier sur ce défi.
+     * @param {number} employeId - L'identifiant de l'employé
+     */
     async function blockEmployee(employeId) {
         await apiPost("/modules/animator/?action=block_employee", {
             defi_id: defiId,
@@ -236,6 +270,10 @@
         renderForum(lastMessages);
     }
 
+    /**
+     * Débloque un employé précédemment bloqué sur ce défi.
+     * @param {number} employeId - L'identifiant de l'employé
+     */
     async function unblockEmployee(employeId) {
         await apiPost("/modules/animator/?action=unblock_employee", {
             defi_id: defiId,
@@ -245,6 +283,9 @@
         renderForum(lastMessages);
     }
 
+    /**
+     * Attache les écouteurs d'événements pour les boutons de modération dans le forum.
+     */
     function bindForumActions() {
         if (!forumMessagesEl) {
             return;
@@ -283,6 +324,9 @@
         });
     }
 
+    /**
+     * Charge l'ensemble des détails du défi (informations, actions, forum) depuis l'API.
+     */
     async function chargerDetail() {
         if (!defiId) {
             afficherErreur("Aucun identifiant de défi fourni.");

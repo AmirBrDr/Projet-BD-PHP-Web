@@ -31,10 +31,12 @@ try {
     $stmt->execute([':email' => $email]);
     $user = $stmt->fetch();
 
+    // Ne jamais révéler l'existence du compte (anti-énumération)
     if (!$user) {
         gp_send_json(200, ['message' => 'Si ce compte existe, un email de réinitialisation a été envoyé.']);
     }
 
+    // Token de reset à durée limitée, signé avec la clé JWT
     $resetToken = gp_password_reset_sign([
         'sub' => (string)$user['id_user'],
         'email' => (string)$user['email'],
@@ -45,6 +47,7 @@ try {
         'ttl_seconds' => (int)($config['mail']['reset_ttl_seconds'] ?? 1800),
     ]);
 
+    // Construire l'URL de reset côté frontend
     $baseUrl = rtrim((string)($config['app']['base_url'] ?? 'http://localhost:8000'), '/');
     $resetUrl = $baseUrl . '/reset-password.html?token=' . rawurlencode($resetToken);
     $displayName = trim((string)($user['prenomuser'] ?? '') . ' ' . (string)($user['nomuser'] ?? ''));

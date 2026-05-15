@@ -15,6 +15,9 @@ const erreurMsgEl = document.getElementById('erreur-msg');
 const moisLabelEl = document.getElementById('mois-label');
 
 // --- Affiche le mois courant ---
+/**
+ * Affiche le mois en cours dans l'en-tête de la page des statistiques.
+ */
 function afficherMois() {
     const now = new Date();
     const label = now.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
@@ -24,6 +27,10 @@ function afficherMois() {
 }
 
 // --- Remplit les KPIs globaux ---
+/**
+ * Remplit les cartes KPI (Key Performance Indicators) avec les données globales.
+ * @param {Object} globales - Les métriques globales (défis, participants, co2, thèmes)
+ */
 function remplirKpis(globales) {
     document.getElementById('kpi-defis').textContent        = globales.total_defis ?? 0;
     document.getElementById('kpi-participants').textContent = globales.total_participants ?? 0;
@@ -32,6 +39,10 @@ function remplirKpis(globales) {
 }
 
 // --- Construit le bar chart participants par défi ---
+/**
+ * Génère un graphique en barres HTML représentant le nombre de participants par défi.
+ * @param {Array} parDefi - Les données de participation groupées par défi
+ */
 function afficherBarChart(parDefi) {
     const el = document.getElementById('chart-defis');
     el.innerHTML = '';
@@ -64,6 +75,10 @@ function afficherBarChart(parDefi) {
 }
 
 // --- Construit la liste par thématique ---
+/**
+ * Génère la liste détaillée des statistiques groupées par thématique (défis, participants, CO2).
+ * @param {Array} parTheme - Les données statistiques groupées par thématique
+ */
 function afficherThemes(parTheme) {
     const el = document.getElementById('chart-themes');
     el.innerHTML = '';
@@ -92,6 +107,11 @@ function afficherThemes(parTheme) {
 }
 
 // --- Construit le graphique Chart.js de validation des défis du mois ---
+/**
+ * Initialise et affiche le graphique Chart.js montrant le taux de validation des défis du mois.
+ * Détruit le graphique précédent s'il existe avant d'en créer un nouveau.
+ * @param {Array} validationMonth - Les données de validation des défis pour le mois en cours
+ */
 function afficherValidation(validationMonth) {
     const canvas = document.getElementById('chart-validation');
 
@@ -170,6 +190,10 @@ function afficherValidation(validationMonth) {
 }
 
 // --- Affiche une erreur ---
+/**
+ * Gère l'affichage d'un message d'erreur et masque les autres conteneurs.
+ * @param {string} msg - Le message d'erreur à afficher
+ */
 function afficherErreur(msg) {
     loadingEl.classList.add('hidden');
     contenuEl.classList.add('hidden');
@@ -178,6 +202,11 @@ function afficherErreur(msg) {
 }
 
 // --- Charge les stats ---
+/**
+ * Fonction principale qui récupère les statistiques depuis l'API
+ * et déclenche l'affichage de tous les composants de la page.
+ * @returns {Promise<void>}
+ */
 async function chargerStats() {
     try {
         const res = await fetch(API_URL);

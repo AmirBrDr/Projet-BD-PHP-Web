@@ -19,6 +19,12 @@
         return localStorage.getItem("gp_token") || "";
     }
 
+    /**
+     * Effectue une requête API avec authentification.
+     * @param {string} url - L'URL cible
+     * @param {Object} options - Les options fetch (method, body, etc.)
+     * @returns {Promise<any>} Le JSON parsé de la réponse
+     */
     async function apiRequest(url, options = {}) {
         const token = getToken();
         const headers = {
@@ -71,6 +77,11 @@
         showFeedback(message, type);
     }
 
+    /**
+     * Affiche un message de retour (succès ou erreur) dans l'interface.
+     * @param {string} message - Le message à afficher
+     * @param {string} type - 'success' ou 'error'
+     */
     function showFeedback(message, type = "success") {
         if (!els.feedback) return;
         clearTimeout(feedbackTimeout);
@@ -89,6 +100,10 @@
         els.feedback.className = "feedback";
     }
 
+    /**
+     * Récupère les paramètres actuels depuis l'API et met à jour les champs du formulaire.
+     * @returns {Promise<void>}
+     */
     async function loadSettings() {
         try {
             clearFeedback();
@@ -109,6 +124,10 @@
         }
     }
 
+    /**
+     * Envoie la nouvelle configuration des paramètres vers l'API pour sauvegarde.
+     * @returns {Promise<void>}
+     */
     async function saveSettings() {
         try {
             clearFeedback();

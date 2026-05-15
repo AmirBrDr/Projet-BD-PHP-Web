@@ -3,6 +3,11 @@
     const API_BASE = '/api';
     const token = () => localStorage.getItem('gp_token');
 
+    /**
+     * Requete GET securisee vers l'API employe.
+     * @param {string} path
+     * @returns {Promise<any>}
+     */
     async function apiGet(path) {
         const res = await fetch(API_BASE + path, {
             headers: { 'Authorization': 'Bearer ' + token() }
@@ -11,6 +16,12 @@
         return res.json();
     }
 
+    /**
+     * Requete POST securisee vers l'API employe.
+     * @param {string} path
+     * @param {object} body
+     * @returns {Promise<any>}
+     */
     async function apiPost(path, body) {
         const res = await fetch(API_BASE + path, {
             method: 'POST',
@@ -22,11 +33,20 @@
         return json;
     }
 
+    /**
+     * Injecte du texte dans un selecteur si present.
+     * @param {string} selector
+     * @param {string} value
+     */
     function setText(selector, value) {
         const el = document.querySelector(selector);
         if (el) el.textContent = value;
     }
 
+    /**
+     * Libelle lisible pour un statut de moderation.
+     * @param {string} status
+     */
     function statusLabel(status) {
         const map = {
             pending: 'En attente',
@@ -36,11 +56,20 @@
         return map[status] || status || '';
     }
 
+    /**
+     * Detecte si la preuve est une image.
+     * @param {string} value
+     * @returns {boolean}
+     */
     function isImageProof(value) {
         const text = String(value || '').trim();
         return /^\/image\//.test(text) || /\.(png|jpe?g|webp)$/i.test(text);
     }
 
+    /**
+     * Rend la preuve sous forme d'image ou de texte.
+     * @param {string} value
+     */
     function renderProof(value) {
         const text = String(value || '').trim();
         if (!text) {
@@ -60,6 +89,12 @@
     let forumPollTimer = null;
     let lastForumSignature = '';
 
+    /**
+     * Applique l'etat de blocage du defi (UI + desactivation formulaires).
+     * @param {boolean} blocked
+     * @param {string} reason
+     * @param {string} date
+     */
     function setBlockedState(blocked, reason, date) {
         isBlocked = Boolean(blocked);
         if (!isBlocked) {
@@ -93,6 +128,10 @@
         });
     }
 
+    /**
+     * Desactive le formulaire si une soumission est en attente.
+     * @param {boolean} pending
+     */
     function setPendingState(pending) {
         hasPendingSubmission = Boolean(pending);
         if (isBlocked) {
@@ -115,6 +154,10 @@
         }
     }
 
+    /**
+     * Rend l'entete du defi.
+     * @param {object} defi
+     */
     function renderHead(defi) {
         setText('[data-challenge-theme]', 'Thématique : ' + defi.theme);
         setText('[data-challenge-title]', defi.nom);
@@ -124,6 +167,11 @@
         document.title = 'GreenPulse - ' + defi.nom;
     }
 
+    /**
+     * Rend la liste des actions et gere la selection.
+     * @param {object[]} actions
+     * @param {boolean} alreadyDone
+     */
     function renderActions(actions, alreadyDone) {
         const host = document.querySelector('[data-action-options]');
         if (!host) return;
@@ -178,6 +226,10 @@
         }
     }
 
+    /**
+     * Formate une date ISO pour l'affichage.
+     * @param {string} dateStr
+     */
     function formatDateTime(dateStr) {
         const d = new Date(dateStr);
         const date = d.toLocaleDateString('fr-FR');
@@ -185,6 +237,10 @@
         return `${date} à ${time}`;
     }
 
+    /**
+     * Rend la liste des messages du forum.
+     * @param {object[]} messages
+     */
     function renderForum(messages) {
         const host = document.querySelector('[data-forum-list]');
         if (!host) return;
@@ -200,12 +256,20 @@
             </li>`).join('');
     }
 
+    /**
+     * Calcule une signature simple pour detecter les changements.
+     * @param {object[]} messages
+     */
     function getForumSignature(messages) {
         return (messages || [])
             .map((m) => `${m.date || ''}|${m.auteur || ''}|${m.texte || ''}`)
             .join('||');
     }
 
+    /**
+     * Recharge le forum sans recharger toute la page.
+     * @returns {Promise<void>}
+     */
     async function refreshForum() {
         try {
             const data = await apiGet('/modules/employee/challenge-detail.php?id=' + defiId);
@@ -219,6 +283,9 @@
         }
     }
 
+    /**
+     * Démarre un polling leger du forum (1s).
+     */
     function startForumPolling() {
         if (forumPollTimer) {
             clearInterval(forumPollTimer);
@@ -229,6 +296,11 @@
         }, 1000);
     }
 
+    /**
+     * Rend l'historique des reponses/validations.
+     * @param {object[]} reponses
+     * @param {object[]} historique
+     */
     function renderHistory(reponses, historique = []) {
         const host = document.querySelector('[data-history-list]');
         if (!host) return;
@@ -280,6 +352,10 @@
         }).join('');
     }
 
+    /**
+     * Applique les donnees du defi a l'UI.
+     * @param {object} data
+     */
     function applyChallengeData(data) {
         renderHead(data.defi);
         setBlockedState(Boolean(data.blocked), data.blocked_reason, data.blocked_at);
@@ -298,6 +374,9 @@
         }
     }
 
+    /**
+     * Gere la soumission de preuve (photo ou texte).
+     */
     function bindSubmissionForm() {
         const form = document.querySelector('[data-submission-form]');
         const feedback = document.querySelector('[data-form-feedback]');
@@ -345,6 +424,7 @@
                 return;
             }
 
+            // Validation minimale: action + preuve
             if (!selectedActionId) {
                 feedback.textContent = 'Sélectionnez une action.';
                 return;
@@ -387,6 +467,7 @@
                     aiCheck.classList.add('is-active');
                 }
 
+                // API: soumission preuve employe
                 const res = await fetch(API_BASE + '/modules/employee/submit-action.php', {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + token() },
@@ -417,6 +498,9 @@
         });
     }
 
+    /**
+     * Gere la publication de messages forum.
+     */
     function bindForumForm() {
         const form = document.querySelector('[data-forum-form]');
         const feedback = document.querySelector('[data-forum-feedback]');
@@ -436,6 +520,7 @@
             const btn = form.querySelector('[type=submit]');
             btn.disabled = true;
             try {
+                // API: publier un message de forum
                 await apiPost('/modules/employee/forum-message.php', { defi_id: defiId, message });
                 form.reset();
                 feedback.className = 'feedback-msg is-success';

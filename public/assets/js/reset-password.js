@@ -6,6 +6,11 @@
   const form = document.getElementById("newPasswordForm");
   const alertEl = document.getElementById("newPasswordAlert");
 
+  /**
+   * Affiche un message d'alerte contextualise.
+   * @param {string} msg
+   * @param {string} type
+   */
   function setAlert(msg, type) {
     if (!msg) {
       alertEl.className = "alert";
@@ -16,6 +21,11 @@
     alertEl.textContent = msg;
   }
 
+  /**
+   * Affiche une aide de validation sous un champ.
+   * @param {string} inputId
+   * @param {string} msg
+   */
   function setHint(inputId, msg) {
     const hint = document.querySelector(`[data-hint-for="${inputId}"]`);
     if (!hint) return;
@@ -23,6 +33,12 @@
     hint.classList.toggle("is-error", Boolean(msg));
   }
 
+  /**
+   * Envoie une requete POST vers l'API.
+   * @param {string} path
+   * @param {object} payload
+   * @returns {Promise<any>}
+   */
   async function apiPost(path, payload) {
     const res = await fetch(`${API_BASE}${path}`, {
       method: "POST",
@@ -41,6 +57,7 @@
     return data;
   }
 
+  // Token requis dans l'URL pour securiser la reinitialisation
   if (!token) {
     setAlert("Lien de réinitialisation manquant ou invalide.", "error");
     form.querySelectorAll("input, button").forEach((el) => {
@@ -72,6 +89,7 @@
     }
 
     try {
+      // Appel API: /auth/reset-password.php
       const data = await apiPost("/auth/reset-password.php", { token, password });
       setAlert(data?.message || "Mot de passe mis à jour.", "success");
       setTimeout(() => window.location.replace("/auth.html"), 1500);

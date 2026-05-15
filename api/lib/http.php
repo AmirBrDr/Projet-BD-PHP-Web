@@ -4,6 +4,9 @@
 
 declare(strict_types=1);
 
+/**
+ * Envoie une reponse JSON et termine l'execution.
+ */
 function gp_send_json(int $status, array $payload): void
 {
     http_response_code($status);
@@ -12,6 +15,9 @@ function gp_send_json(int $status, array $payload): void
     exit;
 }
 
+/**
+ * Lit le corps JSON et retourne un tableau associe.
+ */
 function gp_read_json_body(): array
 {
     $raw = file_get_contents('php://input');
@@ -27,6 +33,9 @@ function gp_read_json_body(): array
     return $data;
 }
 
+/**
+ * Applique les en-tetes CORS et repond aux preflight OPTIONS.
+ */
 function gp_apply_cors(array $config): void
 {
     $origin = $config['cors']['allow_origin'] ?? '*';

@@ -3,6 +3,11 @@
     const API_BASE = '/api';
     const token = () => localStorage.getItem('gp_token');
 
+    /**
+     * Requete GET securisee vers l'API employe.
+     * @param {string} path
+     * @returns {Promise<any>}
+     */
     async function apiGet(path) {
         const res = await fetch(API_BASE + path, {
             headers: { 'Authorization': 'Bearer ' + token() }
@@ -11,11 +16,22 @@
         return res.json();
     }
 
+    /**
+     * Injecte du texte dans un selecteur si present.
+     * @param {string} selector
+     * @param {string} value
+     */
     function setText(selector, value) {
         const el = document.querySelector(selector);
         if (el) el.textContent = value;
     }
 
+    /**
+     * Rend une liste HTML a partir d'un tableau.
+     * @param {string} selector
+     * @param {any[]} items
+     * @param {Function} formatter
+     */
     function renderList(selector, items, formatter) {
         const host = document.querySelector(selector);
         if (!host) return;
@@ -23,11 +39,16 @@
             '<li style="color:var(--shell-muted);font-style:italic">Aucun élément.</li>';
     }
 
+    /**
+     * Initialise le graphique CO2 (Chart.js).
+     * @param {{mois:string, co2:number}[]} co2Mensuel
+     * @param {boolean} hasData
+     */
     function initChart(co2Mensuel, hasData) {
         const canvas = document.getElementById('co2Chart');
         if (!canvas || !window.Chart) return;
 
-        // Afficher un badge discret si aucune donnée réelle
+        // Afficher un badge discret si aucune donnee reelle
         if (!hasData) {
             const wrap = canvas.closest('.chart-container') || canvas.parentElement;
             const badge = document.createElement('div');
@@ -78,6 +99,7 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
         try {
+            // API: resume dashboard employe
             const data = await apiGet('/modules/employee/dashboard.php');
 
             setText('[data-stat-points]', data.stats.points.toLocaleString('fr-FR'));
